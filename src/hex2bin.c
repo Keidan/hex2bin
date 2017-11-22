@@ -143,7 +143,7 @@ static void hex2bin_extract_only(FILE *output, FILE *input, int limit) {
  */
 static void hex2bin_extract_no_print(FILE *output, FILE *input, int limit) {
   size_t length;
-  int n;
+  int n = 0;
   char *buffer = NULL, *token, *sep, *copy;
   while (getline(&buffer, &length, input) != -1) {
     token = strdup((char*)buffer);
