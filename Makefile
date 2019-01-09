@@ -17,3 +17,6 @@ $(obj_dir)/%.o:$(src_dir)/%.c
 	@mkdir -p $(obj_dir)
 	@echo 'Building target: $@'
 	$(CC) $(CFLAG) -c $< -o $@
+
+test: all
+	@bash test

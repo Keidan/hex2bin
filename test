@@ -1,0 +1,28 @@
+#!/bin/bash
+
+tn=1
+
+t() {
+    echo Test $tn $@
+}
+
+pass() {
+    echo Test $tn OK
+    tn=$(($tn+1))
+}
+
+fail() {
+    echo Test $tn FAILED
+    exit 1
+}
+
+t program should run
+./hex2bin -i sample.txt -o sample.txt.temp >/dev/null 2>&1
+ret=${?}
+rm -f sample.txt.temp
+if [ ${ret} -eq 0 ]; then
+  pass
+else
+  fail
+fi
+echo TEST PASSED
