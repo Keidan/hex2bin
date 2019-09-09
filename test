@@ -1,5 +1,12 @@
 #!/bin/bash
 
+APP=hex2bin
+SAMPLE1=sample1.txt
+SAMPLE2=sample2.txt
+SAMPLE_TEMP=sample.txt.temp
+RESULT1="00000000004030000000000000203000"
+RESULT2="00000000005030000000000000603000"
+
 tn=1
 
 t() {
@@ -17,12 +24,38 @@ fail() {
 }
 
 t program should run
-./hex2bin -i sample.txt -o sample.txt.temp >/dev/null 2>&1
+
+./${APP} -i ${SAMPLE1} -o ${SAMPLE_TEMP} -s 6 -l 47 >/dev/null 2>&1
 ret=${?}
-rm -f sample.txt.temp
 if [ ${ret} -eq 0 ]; then
   pass
+  t program should run
+  result=$(cat ${SAMPLE_TEMP})
+  rm -f ${SAMPLE_TEMP}
+  if [ "${result}" == "${RESULT1}" ]; then
+    pass
+    t program should run
+    ./${APP} -i ${SAMPLE2} -o ${SAMPLE_TEMP} -l 47 >/dev/null 2>&1
+    ret=${?}
+    if [ ${ret} -eq 0 ]; then
+      pass
+      t program should run
+      result=$(cat ${SAMPLE_TEMP})
+      rm -f ${SAMPLE_TEMP}
+      if [ "${result}" == "${RESULT2}" ]; then
+        pass
+      else
+        fail
+      fi
+    else
+      rm -f ${SAMPLE_TEMP}
+      fail
+    fi
+  else
+    fail
+  fi
 else
+  rm -f ${SAMPLE_TEMP}
   fail
 fi
 echo TEST PASSED

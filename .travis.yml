@@ -1,7 +1,7 @@
 sudo: false		
 language: cpp
 compiler:
-    - gcc
+    - g++
 dist: xenial
 
 before_install:
@@ -9,9 +9,9 @@ before_install:
   - sudo apt-get update -qq
 
 install: 
-  - sudo apt-get install -qq gcc-7
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 90
-  - "[ $CC = gcc ] && export CC=gcc-7 || true"
+  - sudo apt-get install -qq g++-7
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90
+  - "[ $CXX = g++ ] && export CXX=g++-7 || true"
 script:
   - make
   - make test
