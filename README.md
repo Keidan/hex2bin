@@ -29,6 +29,7 @@ download the software :
 ## Example
 
 `./hex2bin -i sample1.txt -o sample1.txt.new -s 6 -l 47`
+
 `./hex2bin -i sample2.txt -o sample2.txt.new -l 47`
 
 
