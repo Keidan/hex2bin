@@ -17,14 +17,14 @@ download the software :
 	cd hex2bin
 	make
 	./hex2bin -h 
-        `usage: hex2bin [options]
+        usage: hex2bin [options]
                 --help, -h: Print this help.
                 --input, -i: The input file to use (containing the hexadecimal characters).
                 --output, -o: The output file to use.
                 --limit, -l: Character limit per line (the value of the "start" option is not included).
                 --start, -s: Adding a start offset per line.
                 --printable, -p: Extracts and converts all printable characters.
-                --extract_only, -e: Only extracts words from "start" to "limit".`
+                --extract_only, -e: Only extracts words from "start" to "limit".
 
 ## Example
 
