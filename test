@@ -9,53 +9,44 @@ RESULT2="00000000005030000000000000603000"
 
 tn=1
 
-t() {
-    echo Test $tn $@
-}
-
-pass() {
-    echo Test $tn OK
+test_pass() {
+    echo -e "Test $tn \e[32mOK\e[0m"
     tn=$(($tn+1))
 }
 
-fail() {
-    echo Test $tn FAILED
+test_fail() {
+    echo -e "Test $tn \e[31mFAILED\e[0m"
     exit 1
 }
-
-t program should run
 
 ./${APP} -i ${SAMPLE1} -o ${SAMPLE_TEMP} -s 6 -l 47 >/dev/null 2>&1
 ret=${?}
 if [ ${ret} -eq 0 ]; then
-  pass
-  t program should run
+  test_pass
   result=$(cat ${SAMPLE_TEMP})
   rm -f ${SAMPLE_TEMP}
   if [ "${result}" == "${RESULT1}" ]; then
-    pass
-    t program should run
+    test_pass
     ./${APP} -i ${SAMPLE2} -o ${SAMPLE_TEMP} -l 47 >/dev/null 2>&1
     ret=${?}
     if [ ${ret} -eq 0 ]; then
-      pass
-      t program should run
+      test_pass
       result=$(cat ${SAMPLE_TEMP})
       rm -f ${SAMPLE_TEMP}
       if [ "${result}" == "${RESULT2}" ]; then
-        pass
+        test_pass
       else
-        fail
+        test_fail
       fi
     else
       rm -f ${SAMPLE_TEMP}
-      fail
+      test_fail
     fi
   else
-    fail
+    test_fail
   fi
 else
   rm -f ${SAMPLE_TEMP}
-  fail
+  test_fail
 fi
-echo TEST PASSED
+echo -e "TEST \e[32mPASSED\e[0m"

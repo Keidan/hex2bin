@@ -9,9 +9,14 @@ before_install:
   - sudo apt-get update -qq
 
 install: 
-  - sudo apt-get install -qq g++-7
+  - sudo apt-get install -qq g++-7 cmake git
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90
   - "[ $CXX = g++ ] && export CXX=g++-7 || true"
 script:
+  - cmake .
   - make
-  - make test
+  - chmod +x ./hex2bin ./hex2bin_gtest
+  - echo "Testing of subroutines using google-testing"
+  - ./hex2bin_gtest
+  - echo "Test of the whole application"
+  - bash ./test

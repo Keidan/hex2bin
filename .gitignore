@@ -1,6 +1,14 @@
+Makefile
+CMakeFiles
+CMakeCache*
+cmake_*
 *.o
 *~
 *#
 #*
 obj
 hex2bin
+hex2bin_gtest
+googletest*
+lib
+bin
