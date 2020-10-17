@@ -1,6 +1,5 @@
 # hex2bin
-[![Build Status](https://img.shields.io/travis/Keidan/hex2bin/master.svg?style=plastic)](https://travis-ci.org/Keidan/hex2bin)
-[![GitHub license](https://img.shields.io/github/license/Keidan/hex2bin.svg?style=plastic)](https://github.com/Keidan/hex2bin/blob/master/LICENSE)
+[![Build Status](https://travis-ci.com/Keidan/hex2bin.svg?branch=master)](https://travis-ci.com/Keidan/hex2bin)
 
 (GPL) Hex to binary converter.
 
