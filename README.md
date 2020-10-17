@@ -14,6 +14,7 @@ download the software :
 	cd devel
 	git clone git://github.com/Keidan/hex2bin.git
 	cd hex2bin
+	cmake .
 	make
 	./hex2bin -h 
         usage: hex2bin [options]
