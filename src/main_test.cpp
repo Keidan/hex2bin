@@ -12,10 +12,6 @@
 #define SAMPLE2     "sample2.txt"
 #define SAMPLE_TEMP "sample.txt.temp"
 
-
-/* Private variables --------------------------------------------------------*/
-Hex2Bin hex2bin;
-
 /* Tests --------------------------------------------------------------------*/
 TEST(Hex2BinTest, TestOpenInput)
 {
