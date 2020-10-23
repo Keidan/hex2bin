@@ -15,8 +15,8 @@ install:
 script:
   - cmake .
   - make
-  - chmod +x ./hex2bin ./hex2bin_gtest
+  - chmod +x ./bin/hex2bin ./bin/hex2bin_gtest
   - echo "Testing of subroutines using google-testing"
-  - ./hex2bin_gtest
+  - ./bin/hex2bin_gtest
   - echo "Test of the whole application"
   - bash ./test

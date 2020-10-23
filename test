@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP=hex2bin
+APP=bin/hex2bin
 SAMPLE1=sample1.txt
 SAMPLE2=sample2.txt
 SAMPLE_TEMP=sample.txt.temp
