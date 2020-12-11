@@ -14,7 +14,7 @@ download the software :
 	cd devel
 	git clone git://github.com/Keidan/hex2bin.git
 	cd hex2bin
-	cmake .
+	cmake -DDISTRIBUTION=[debug|release] .
 	make
 	./hex2bin -h 
         usage: hex2bin [options]
@@ -26,8 +26,12 @@ download the software :
                 --printable, -p: Extracts and converts all printable characters.
                 --extract_only, -e: Only extracts words from "start" to "limit".
 
-## Example
 
+
+	Supported cmake options:
+		* Supported distrib.: -DDISTRIBUTION=[debug|release]
+
+## Example
 
 `./hex2bin -i sample1.txt -o sample1.txt.new -s 6 -l 47`
 
