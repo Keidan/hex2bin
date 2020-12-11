@@ -10,6 +10,7 @@
 /* Private defines ----------------------------------------------------------*/
 #define SAMPLE1     "sample1.txt"
 #define SAMPLE2     "sample2.txt"
+#define SAMPLE3     "sample3.txt"
 #define SAMPLE_TEMP "sample.txt.temp"
 
 /* Tests --------------------------------------------------------------------*/
@@ -70,6 +71,83 @@ TEST(Hex2BinTest, TestLimit)
   EXPECT_EQ(1, what.empty() == true);
   EXPECT_EQ(1, hex2bin.isValidLimit() == true);
   EXPECT_EQ(1, hex2bin.getLimit() == value);
+}
+
+TEST(Hex2BinTest, TestExtractNoPrint1)
+{
+  Hex2Bin hex2bin;
+  auto sstart = "6";
+  auto slimit = "47";
+  auto file_in = SAMPLE1;
+  auto file_out = SAMPLE_TEMP;
+  std::string what = "";
+  
+  EXPECT_EQ(1, hex2bin.setLimit(slimit, what) == true);
+  EXPECT_EQ(1, what.empty() == true);
+  EXPECT_EQ(1, hex2bin.isValidLimit() == true);
+  EXPECT_EQ(1, hex2bin.setStart(sstart, what) == true);
+  EXPECT_EQ(1, what.empty() == true);
+  EXPECT_EQ(1, hex2bin.isValidStart() == true);
+
+  auto ret_in = hex2bin.openInput(file_in);
+  auto ret_out = hex2bin.openOutput(file_out);
+  auto oret = hex2bin.isFilesOpen(); 
+  
+  EXPECT_EQ(1, ret_in == Hex2BinOpenResult::SUCCESS);
+  EXPECT_EQ(1, ret_out == Hex2BinOpenResult::SUCCESS);
+  EXPECT_EQ(1, oret == Hex2BinIsOpen::SUCCESS);
+  EXPECT_EQ(1, hex2bin.extractNoPrint());
+
+  std::remove(file_out); 
+}
+
+TEST(Hex2BinTest, TestExtractNoPrint2)
+{
+  Hex2Bin hex2bin;
+  auto slimit = "47";
+  auto file_in = SAMPLE2;
+  auto file_out = SAMPLE_TEMP;
+  std::string what = "";
+  
+  EXPECT_EQ(1, hex2bin.setLimit(slimit, what) == true);
+  EXPECT_EQ(1, what.empty() == true);
+  EXPECT_EQ(1, hex2bin.isValidLimit() == true);
+
+  auto ret_in = hex2bin.openInput(file_in);
+  auto ret_out = hex2bin.openOutput(file_out);
+  auto oret = hex2bin.isFilesOpen(); 
+  
+  EXPECT_EQ(1, ret_in == Hex2BinOpenResult::SUCCESS);
+  EXPECT_EQ(1, ret_out == Hex2BinOpenResult::SUCCESS);
+  EXPECT_EQ(1, oret == Hex2BinIsOpen::SUCCESS);
+  EXPECT_EQ(1, hex2bin.extractNoPrint());
+
+  std::remove(file_out); 
+}
+
+TEST(Hex2BinTest, TestExtractNoPrint3)
+{
+  Hex2Bin hex2bin;
+  auto sstart = "1";
+  auto file_in = SAMPLE3;
+  auto file_out = SAMPLE_TEMP;
+  std::string what = "";
+  
+  EXPECT_EQ(1, hex2bin.setStart(sstart, what) == true);
+  EXPECT_EQ(1, what.empty() == true);
+  EXPECT_EQ(1, hex2bin.isValidStart() == true);
+
+
+  auto ret_in = hex2bin.openInput(file_in);
+  auto ret_out = hex2bin.openOutput(file_out);
+  auto oret = hex2bin.isFilesOpen(); 
+  
+  EXPECT_EQ(1, ret_in == Hex2BinOpenResult::SUCCESS);
+  EXPECT_EQ(1, ret_out == Hex2BinOpenResult::SUCCESS);
+  EXPECT_EQ(1, oret == Hex2BinIsOpen::SUCCESS);
+  EXPECT_EQ(1, hex2bin.extractNoPrint());
+
+  std::remove(file_out); 
 }
 
 /* Public function ----------------------------------------------------------*/

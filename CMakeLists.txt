@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(hex2bin)
 
 message("Supported distrib.: cmake -DDISTRIBUTION=[debug|release]")
+message("Default start value: cmake -DDEFSTART=[int value] (see the '-s, --start' option of the binary)")
+message("Default limit value: cmake -DDEFLIMIT=[int value] (see the '-l, --limit' option of the binary)")
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -17,10 +19,23 @@ else()
 endif()
 set(CMAKE_CXX_FLAGS "${CXX_OPTIONS} -std=c++11")
 
+
+if("${DEFSTART}" STREQUAL "")
+  set(DEFSTART 0)
+endif()
+if("${DEFLIMIT}" STREQUAL "")
+  set(DEFLIMIT 0)
+endif()
+
 # Information
 message("-- Distrib.: ${DISTRIBUTION}")
+message("-- Default start value: ${DEFSTART}")
+message("-- Default limit value: ${DEFLIMIT}")
 
 
+add_definitions(-DDEFAULT_START=${DEFSTART})
+add_definitions(-DDEFAULT_LIMIT=${DEFLIMIT})
+  
 # update directories
 set(APP_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
 set(APP_SRC_DIR ${CMAKE_SOURCE_DIR}/src)

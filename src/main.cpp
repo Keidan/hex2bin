@@ -41,7 +41,8 @@ auto main(int argc, char** argv) -> int
   struct sigaction sa;
   auto printable = false, extractOnly = false;
   Hex2BinOpenResult openResult;
-  string what; 
+  string what;
+  auto defaultValue = true;
   
   
   std::memset(&sa, 0, sizeof(struct sigaction));
@@ -90,6 +91,7 @@ auto main(int argc, char** argv) -> int
 	  std::cerr << "Invalid start value: " << what << std::endl;
 	  usage(EXIT_FAILURE);
 	}
+	defaultValue = false;
         break;
       case 'l': /* limit */
 	if(!hex2bin->setLimit(optarg, what))
@@ -97,6 +99,7 @@ auto main(int argc, char** argv) -> int
 	  std::cerr << "Invalid limit value: " << what << std::endl;
 	  usage(EXIT_FAILURE);
 	}
+	defaultValue = false;
         break;
       case 'p': /* printable */
         printable = true;
@@ -135,18 +138,20 @@ auto main(int argc, char** argv) -> int
   {
     if(!printable)
     {
-      hex2bin->extractNoPrint();
+      if(!hex2bin->extractNoPrint())
+      {
+        ret = EXIT_FAILURE;
+      }
     }
     else
     {
-      if(hex2bin->isValidStart() || hex2bin->isValidLimit())
+      if(!defaultValue && (hex2bin->isValidStart() || hex2bin->isValidLimit()))
       {	
         std::cout << "The start and limit options are not managed in this mode." << std::endl;
       }
       if(!hex2bin->extractPrint())
       {
         ret = EXIT_FAILURE;
-        std::cerr << "Unable to allocate a memory for the input buffer" << std::endl;
       }
     }
   }
@@ -183,8 +188,8 @@ static auto usage(int32_t xcode) -> void {
   std::cout << "\t--help, -h: Print this help" << std::endl;
   std::cout << "\t--input, -i: The input file to use (containing the hexadecimal characters)." << std::endl;
   std::cout << "\t--output, -o: The output file to use." << std::endl;
-  std::cout << "\t--limit, -l: Character limit per line (the value of the \"start\" option is not included)." << std::endl;
-  std::cout << "\t--start, -s: Adding a start offset per line." << std::endl;
+  std::cout << "\t--limit, -l: Character limit per line (the value of the \"start\" option is not included ; default value: " << DEFAULT_LIMIT << ")." << std::endl;
+  std::cout << "\t--start, -s: Adding a start offset per line (default value: " << DEFAULT_START << ")." << std::endl;
   std::cout << "\t--printable, -p: Extracts and converts all printable characters." << std::endl;
   std::cout << "\t--extract_only, -e: Only extracts words from \"start\" to \"limit\"." << std::endl;
   exit(xcode);

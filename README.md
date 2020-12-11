@@ -21,27 +21,32 @@ download the software :
                 --help, -h: Print this help.
                 --input, -i: The input file to use (containing the hexadecimal characters).
                 --output, -o: The output file to use.
-                --limit, -l: Character limit per line (the value of the "start" option is not included).
-                --start, -s: Adding a start offset per line.
+                --limit, -l: Character limit per line (the value of the "start" option is not included ; default value: [see cmake -DDEFSTART]).
+                --start, -s: Adding a start offset per line (default value: [see cmake -DDEFLIMIT].
                 --printable, -p: Extracts and converts all printable characters.
                 --extract_only, -e: Only extracts words from "start" to "limit".
 
-
-
-	Supported cmake options:
+	Supported cmake options (optional):
 		* Supported distrib.: -DDISTRIBUTION=[debug|release]
+		* Default start value: cmake -DDEFSTART=[int value] (see the '-s, --start' option of the binary)
+		* Default limit value: cmake -DDEFLIMIT=[int value] (see the '-l, --limit' option of the binary)
+		
+## Example (with cmake -DDEFSTART=0 -DDEFLIMIT=0)
 
-## Example
-
+Test 1:
 `./hex2bin -i sample1.txt -o sample1.txt.new -s 6 -l 47`
 
 `./hex2bin -i sample1.txt.new -o sample1.txt.bin -p`
 
-or
+Test 2:
 
 `./hex2bin -i sample2.txt -o sample2.txt.new -l 47`
 
 `./hex2bin -i sample2.txt.new -o sample2.txt.bin -p`
+
+Test 3:
+
+`./hex2bin -i sample3.txt -o sample3.txt.new -s 1`
 
 
 ## License

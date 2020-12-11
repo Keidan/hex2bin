@@ -20,6 +20,13 @@ using std::int32_t;
 using std::uint32_t;
 
 
+/* Public defines -----------------------------------------------------------*/
+#ifndef DEFAULT_START
+#define DEFAULT_START 0
+#endif /* DEFAULT_START */
+#ifndef DEFAULT_LIMIT
+#define DEFAULT_LIMIT 0
+#endif /* DEFAULT_LIMIT */
 
 /* Public class -------------------------------------------------------------*/
 
@@ -114,8 +121,9 @@ class Hex2Bin
      * @param[in] input The input file.
      * @param[in] start The start offset.
      * @param[in] limit The limit per lines.
+     * @retval False on error.
      */
-    auto extractNoPrint() -> void;
+    auto extractNoPrint() -> bool;
 
     /**
      * @brief Extracts and converts all printable characters.
@@ -144,6 +152,24 @@ class Hex2Bin
      * @retval The fragment of the input line.
      */
     auto getFragment(const std::string &line) -> std::string;
+
+    /**
+     * @brief Searches for a string in another.
+     * @param[in] ref The reference string.
+     * @param[in] needle The string to search.
+     * @param[in] ignoreCase True for case-insensitive.
+     * @retval bool
+     */
+    auto search(const std::string &ref, const std::string &needle, bool ignoreCase = false) -> bool;
+
+    /**
+     * @brief Validates the line and displays an error message if the validation fails.
+     * @param[in] line The reference line.
+     * @param[in] s The string to validate.
+     * @retval bool
+     */
+    auto validateHexAndLogOnError(const std::string &line, const std::string &s) -> bool;
+
 };
 
 #endif /* __HEX2BIN_HPP__ */

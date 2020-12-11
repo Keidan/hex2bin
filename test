@@ -3,50 +3,77 @@
 APP=bin/hex2bin
 SAMPLE1=sample1.txt
 SAMPLE2=sample2.txt
+SAMPLE3=sample3.txt
 SAMPLE_TEMP=sample.txt.temp
 RESULT1="00000000004030000000000000203000"
 RESULT2="00000000005030000000000000603000"
+RESULT3="00000000005030000000000000603000"
 
 tn=1
 
 test_pass() {
-    echo -e "Test $tn \e[32mOK\e[0m"
+    echo -e "Test \e[1m${tn}\e[0m \e[38;5;208m${1}\e[0m \e[32mOK\e[0m"
     tn=$(($tn+1))
 }
 
 test_fail() {
-    echo -e "Test $tn \e[31mFAILED\e[0m"
+    echo -e "Test \e[1m${tn}\e[0m \e[38;5;208m${1}\e[0m \e[31mFAILED\e[0m"
     exit 1
 }
 
 ./${APP} -i ${SAMPLE1} -o ${SAMPLE_TEMP} -s 6 -l 47 >/dev/null 2>&1
 ret=${?}
 if [ ${ret} -eq 0 ]; then
-  test_pass
-  result=$(cat ${SAMPLE_TEMP})
-  rm -f ${SAMPLE_TEMP}
-  if [ "${result}" == "${RESULT1}" ]; then
-    test_pass
-    ./${APP} -i ${SAMPLE2} -o ${SAMPLE_TEMP} -l 47 >/dev/null 2>&1
-    ret=${?}
-    if [ ${ret} -eq 0 ]; then
-      test_pass
-      result=$(cat ${SAMPLE_TEMP})
-      rm -f ${SAMPLE_TEMP}
-      if [ "${result}" == "${RESULT2}" ]; then
-        test_pass
-      else
-        test_fail
-      fi
+    test_pass "sample1 exec   "
+    result=$(cat ${SAMPLE_TEMP})
+    rm -f ${SAMPLE_TEMP}
+    if [ "${result}" == "${RESULT1}" ]; then
+	test_pass "sample1 compare"
+	./${APP} -i ${SAMPLE2} -o ${SAMPLE_TEMP} -l 47 >/dev/null 2>&1
+	ret=${?}
+	if [ ${ret} -eq 0 ]; then
+	    test_pass "sample2 exec   "
+	    result=$(cat ${SAMPLE_TEMP})
+	    rm -f ${SAMPLE_TEMP}
+	    if [ "${result}" == "${RESULT2}" ]; then
+		test_pass "sample2 compare"
+		./${APP} -i ${SAMPLE3} -o ${SAMPLE_TEMP} -s 1 >/dev/null 2>&1
+		ret=${?}
+		if [ ${ret} -eq 0 ]; then
+		    test_pass "sample3 exec   "
+		    xxd=$(which xxd)
+		    if [ ! -z "${xxd}" ] && [ -f "${xxd}" ]; then
+	        
+			result=$(${xxd} -ps ${SAMPLE_TEMP})
+			rm -f ${SAMPLE_TEMP}
+			if [ "${result}" == "${RESULT3}" ]; then
+			    test_pass "sample3 compare"
+			else
+			    rm -f ${SAMPLE_TEMP}
+			    test_fail "sample3 compare"
+			fi
+		    else
+			rm -f ${SAMPLE_TEMP}
+			test_pass "sample3 compare \e[1mNOT FOUND"
+		    fi
+		else
+		    rm -f ${SAMPLE_TEMP}
+		    test_fail "sample3 exec   "
+		fi
+	    else
+		rm -f ${SAMPLE_TEMP}
+		test_fail "sample2 compare"
+	    fi
+	else
+	    rm -f ${SAMPLE_TEMP}
+	    test_fail "sample2 exec   "
+	fi
     else
-      rm -f ${SAMPLE_TEMP}
-      test_fail
+	rm -f ${SAMPLE_TEMP}
+	test_fail "sample1 compare"
     fi
-  else
-    test_fail
-  fi
 else
-  rm -f ${SAMPLE_TEMP}
-  test_fail
+    rm -f ${SAMPLE_TEMP}
+    test_fail "sample1 exec   "
 fi
 echo -e "TEST \e[32mPASSED\e[0m"

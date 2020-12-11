@@ -14,6 +14,7 @@
 #include <cctype>
 #include <cstdio>
 #include <cstring>
+#include <algorithm>
 
 /* Usings -------------------------------------------------------------------*/
 using std::ifstream;
@@ -25,9 +26,12 @@ using std::regex;
 using std::sregex_token_iterator;
 using std::exception;
 
+/* Constants ----------------------------------------------------------------*/
+#define  HEX "0123456789abcdef\0"
+
 /* Public functions ---------------------------------------------------------*/
 
-Hex2Bin::Hex2Bin() : m_start(0), m_limit(0), m_output(), m_input()
+Hex2Bin::Hex2Bin() : m_start(DEFAULT_START), m_limit(DEFAULT_LIMIT), m_output(), m_input()
 {
 }
 
@@ -212,7 +216,8 @@ auto Hex2Bin::extractOnly() -> void
 {
   string line;
 
-  while (std::getline(m_input, line)) {
+  while (std::getline(m_input, line))
+  {
     auto fragment = getFragment(line);
     if(!fragment.empty() && fragment.at(fragment.size() - 1) != '\n') fragment += "\n";
     m_output << fragment;
@@ -226,19 +231,60 @@ auto Hex2Bin::extractOnly() -> void
  * @param[in] input The input file.
  * @param[in] start The start offset.
  * @param[in] limit The limit per lines.
+ * @retval False on error.
  */
-auto Hex2Bin::extractNoPrint() -> void
+auto Hex2Bin::extractNoPrint() -> bool
 {
   string line;
-  
-  while (std::getline(m_input, line)) {
+  auto error = false;
+  while (std::getline(m_input, line))
+  {
+    if(line.empty())
+    {
+      std::cerr << "Empty line ignored" << std::endl;
+      continue;
+    }
     auto fragment = getFragment(line);
-    auto tokens = split(fragment, "\\s+");
-    for(vector<string>::iterator it = tokens.begin(); it != tokens.end(); ++it) {
-      m_output << (char)std::stol((*it), nullptr, 16);
+
+    string::size_type idxSpace = fragment.find(' ');
+    if(idxSpace != string::npos)
+    {
+      auto tokens = split(fragment, "\\s+");
+      for(auto it = tokens.begin(); it != tokens.end(); ++it)
+      {
+	auto s = (*it);
+	if(!validateHexAndLogOnError(fragment, s))
+	{
+	  error = true;
+	  continue;
+	}
+	m_output << static_cast<char>(std::stol(s, nullptr, 16));
+      }
+    }
+    else
+    {
+      if(fragment.length() % 2)
+      {
+	std::cerr << "The following line must have an even number of characters:" << std::endl;
+	std::cerr << "Line: '" << fragment << "'" << std::endl;
+	error = true;
+	continue;
+      }
+      for (std::string::size_type i = 0; i < fragment.length(); i+=2)
+      {
+	auto s1 = string(1, fragment[i]);
+	auto s2 = string(1, fragment[i + 1]);
+	if(!validateHexAndLogOnError(fragment, s1) || !validateHexAndLogOnError(fragment, s2))
+	{
+	  error = true;
+	  break;
+	}
+	m_output << static_cast<char>(std::stol(s1 + s2, nullptr, 16));
+      }
     }
   }
   m_output.flush();
+  return !error;
 }
 
 /**
@@ -247,8 +293,8 @@ auto Hex2Bin::extractNoPrint() -> void
  */
 auto Hex2Bin::extractPrint() -> bool
 {
-  char cc[2];
-  uint8_t *buf, c;
+  char cc[2], c;
+  uint8_t *buf;
   auto offset = 0L;
   /* get the file size */
 
@@ -261,12 +307,13 @@ auto Hex2Bin::extractPrint() -> bool
   buf = new uint8_t[length];
   if(buf == nullptr)
   {
+    std::cerr << "Unable to allocate a memory for the input buffer" << std::endl;
     return false;
   }
   auto i = 0L;
   while(offset < length)
   {
-    m_input.read((char*)&c, 1);
+    m_input.read(&c, 1);
     if(!m_input)
     {
       break;
@@ -274,7 +321,7 @@ auto Hex2Bin::extractPrint() -> bool
     offset++;
     if(std::isalnum(c))
     {
-      buf[i++] = c;
+      buf[i++] = static_cast<uint8_t>(c);
     }
   }
   length = i;
@@ -282,7 +329,7 @@ auto Hex2Bin::extractPrint() -> bool
   for(i = 0; i < length; i+=2)
   {
     std::memcpy(cc, buf + i, 2);
-    m_output << (char)std::stol(cc, nullptr, 16);
+    m_output << static_cast<char>(std::stol(cc, nullptr, 16));
   }
   m_output.flush();
   delete [] buf;
@@ -315,7 +362,61 @@ auto Hex2Bin::getFragment(const string &line) -> string
   auto len = 0UL, lim = 0UL;
   len = line.size();
   if(len < m_start)
+  {
     len = 0UL;
-  lim = (m_limit > len) ? len : m_limit;
+  }
+  lim = (m_limit == 0 || m_limit > len) ? len : m_limit;
   return line.substr(m_start, lim);
+}
+
+/**
+ * @brief Searches for a string in another.
+ * @param[in] ref The reference string.
+ * @param[in] needle The string to search.
+ * @param[in] ignoreCase True for case-insensitive.
+ * @retval bool
+ */
+auto Hex2Bin::search(const string &ref, const string &needle, bool ignoreCase) -> bool
+{
+  auto it = std::search(ref.begin(), ref.end(), needle.begin(), needle.end(),
+			[ignoreCase](char c1, char c2)
+			{
+			  return ignoreCase ? (std::toupper(c1) == std::toupper(c2)) : (c1 == c2);
+			});
+  return it != ref.end();
+}
+
+/**
+ * @brief Validates the line and displays an error message if the validation fails.
+ * @param[in] line The reference line.
+ * @param[in] s The string to validate.
+ * @retval bool
+ */
+auto Hex2Bin::validateHexAndLogOnError(const string &line, const string &s) -> bool
+{
+  if(s.length() == 1)
+  {
+    if(!search(HEX, s, true))
+    {
+      std::cerr << "Character '" << s << "' is not compatible with hexadecimal conversion." << std::endl;
+      std::cerr << "Cancel line processing:" << std::endl;
+      std::cerr << "Line: '" << line << "'" << std::endl;
+      return false;
+    }
+  }
+  else
+  {
+    for(const char &c : s)
+    {
+      auto temp = string(1, c);
+      if(!search(HEX, temp, true))
+      {
+	std::cerr << "Character '" << temp << "' is not compatible with hexadecimal conversion." << std::endl;
+	std::cerr << "Cancel line processing:" << std::endl;
+	std::cerr << "Line: '" << line << "'" << std::endl;
+	return false;
+      }
+    }
+  }
+  return true;
 }
