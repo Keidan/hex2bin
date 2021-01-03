@@ -33,18 +33,19 @@ download the software :
 		
 ## Example (with cmake -DDEFSTART=0 -DDEFLIMIT=0)
 
-Test 1:
+<u>Test 1:</u>
+
 `./hex2bin -i sample1.txt -o sample1.txt.new -s 6 -l 47`
 
 `./hex2bin -i sample1.txt.new -o sample1.txt.bin -p`
 
-Test 2:
+<u>Test 2:</u>
 
 `./hex2bin -i sample2.txt -o sample2.txt.new -l 47`
 
 `./hex2bin -i sample2.txt.new -o sample2.txt.bin -p`
 
-Test 3:
+<u>Test 3:</u>
 
 `./hex2bin -i sample3.txt -o sample3.txt.new -s 1`
 
