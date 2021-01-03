@@ -8,10 +8,10 @@
 #include "gtest/gtest.h"
 
 /* Private defines ----------------------------------------------------------*/
-#define SAMPLE1     "sample1.txt"
-#define SAMPLE2     "sample2.txt"
-#define SAMPLE3     "sample3.txt"
-#define SAMPLE_TEMP "sample.txt.temp"
+#define SAMPLE1     "samples/sample1.txt"
+#define SAMPLE2     "samples/sample2.txt"
+#define SAMPLE3     "samples/sample3.txt"
+#define SAMPLE_TEMP "samples/sample.txt.temp"
 
 /* Tests --------------------------------------------------------------------*/
 TEST(Hex2BinTest, TestOpenInput)

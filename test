@@ -1,10 +1,10 @@
 #!/bin/bash
 
 APP=bin/hex2bin
-SAMPLE1=sample1.txt
-SAMPLE2=sample2.txt
-SAMPLE3=sample3.txt
-SAMPLE_TEMP=sample.txt.temp
+SAMPLE1=samples/sample1.txt
+SAMPLE2=samples/sample2.txt
+SAMPLE3=samples/sample3.txt
+SAMPLE_TEMP=samples/sample.txt.temp
 RESULT1="00000000004030000000000000203000"
 RESULT2="00000000005030000000000000603000"
 RESULT3="00000000005030000000000000603000"
