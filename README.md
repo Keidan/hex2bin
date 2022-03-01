@@ -32,7 +32,8 @@ download the software :
 		* Supported distrib.: -DDISTRIBUTION=[debug|release]
 		* Default start value: cmake -DDEFSTART=[int value] (see the '-s, --start' option of the binary)
 		* Default limit value: cmake -DDEFLIMIT=[int value] (see the '-l, --limit' option of the binary)
-	_You can also use cmake-gui to manage the options._
+		
+_You can also use cmake-gui to manage the options._
 		
 ## Example (with cmake -DDEFSTART=0 -DDEFLIMIT=0)
 
