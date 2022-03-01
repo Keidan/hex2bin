@@ -33,15 +33,15 @@ jobs:
       - name: Configure for DEBUG
         shell: bash
         run: cmake -DDISTRIBUTION=debug .
-      - name: [DEBUG] Build
+      - name: --DEBUG-- Build
         shell: bash
         run: make
-      - name: [DEBUG] Run gtest
+      - name: --DEBUG-- Run gtest
         shell: bash
         run: |
             chmod +x ./bin/hex2bin_gtest
             ./bin/hex2bin_gtest
-      - name: [DEBUG] Run test
+      - name: --DEBUG-- Run test
         shell: bash
         run: |
             chmod +x ./test
@@ -49,10 +49,10 @@ jobs:
       - name: Configure for RELEASE
         shell: bash
         run: make -DDISTRIBUTION=release .
-      - name: [RELEASE] Build
+      - name: --RELEASE-- Build
         shell: bash
         run: make
-      - name: [RELEASE] Run test
+      - name: --RELEASE-- Run test
         shell: bash
         run: |
             chmod +x ./test
