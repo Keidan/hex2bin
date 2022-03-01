@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
 project(hex2bin)
+set (VERSION_MAJOR 1)
+set (VERSION_MINOR 6)
 
 message("Supported distrib.: cmake -DDISTRIBUTION=[debug|release]")
 message("Default start value: cmake -DDEFSTART=[int value] (see the '-s, --start' option of the binary)")
@@ -8,6 +10,8 @@ message("Default limit value: cmake -DDEFLIMIT=[int value] (see the '-l, --limit
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(DISTRIBUTION "release" CACHE STRING "Distribution type (release or debug)")
 
 set(CXX_OPTIONS "")
 if("${DISTRIBUTION}" MATCHES "release")
@@ -20,21 +24,26 @@ endif()
 set(CMAKE_CXX_FLAGS "${CXX_OPTIONS} -std=c++11")
 
 
-if("${DEFSTART}" STREQUAL "")
-  set(DEFSTART 0)
+set(DEFSTART "0" CACHE STRING "Default start value (see the '-s, --start' option of the binary)")
+set(DEFLIMIT "0" CACHE STRING "Default limit value (see the '-l, --limit' option of the binary)")
+
+if(NOT DEFSTART MATCHES "^[0-9]+$")
+   message(FATAL_ERROR "DEFSTART must be a valid integer: '${DEFSTART}'")
 endif()
-if("${DEFLIMIT}" STREQUAL "")
-  set(DEFLIMIT 0)
+if(NOT DEFLIMIT MATCHES "^[0-9]+$")
+   message(FATAL_ERROR "DEFLIMIT must be a valid integer: '${DEFLIMIT}'")
 endif()
 
 # Information
+message("-- Version: ${VERSION_MAJOR}.${VERSION_MINOR}")
 message("-- Distrib.: ${DISTRIBUTION}")
 message("-- Default start value: ${DEFSTART}")
 message("-- Default limit value: ${DEFLIMIT}")
 
-
-add_definitions(-DDEFAULT_START=${DEFSTART})
-add_definitions(-DDEFAULT_LIMIT=${DEFLIMIT})
+configure_file (
+  "${PROJECT_SOURCE_DIR}/src/config.h.in"
+  "${PROJECT_SOURCE_DIR}/src/config.h"
+)
   
 # update directories
 set(APP_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)

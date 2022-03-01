@@ -7,18 +7,9 @@
 #define __HEX2BIN_HPP__
 
 /* Includes -----------------------------------------------------------------*/
-#include <iostream>
 #include <fstream>
 #include <vector>
-
-/* Usings -------------------------------------------------------------------*/
-using std::ifstream;
-using std::ofstream;
-using std::string;
-using std::vector;
-using std::int32_t;
-using std::uint32_t;
-
+#include "config.h"
 
 /* Public defines -----------------------------------------------------------*/
 #ifndef DEFAULT_START
@@ -29,147 +20,147 @@ using std::uint32_t;
 #endif /* DEFAULT_LIMIT */
 
 /* Public class -------------------------------------------------------------*/
-
-enum class Hex2BinIsOpen : std::uint8_t
+namespace h2b
 {
-  SUCCESS = 0,
-  BOTH = 1,
-  INPUT = 2,
-  OUTPUT = 3
-};
-enum class Hex2BinOpenResult : std::uint8_t
-{
-  SUCCESS = 0,
-  ERROR = 1,
-  ALREADY = 2,
-};
+  enum class Hex2BinIsOpen : std::uint8_t
+  {
+    SUCCESS = 0,
+    BOTH = 1,
+    INPUT = 2,
+    OUTPUT = 3
+  };
 
-class Hex2Bin
-{
-  public:
-    Hex2Bin();
-    virtual ~Hex2Bin();
+  enum class Hex2BinOpenResult : std::uint8_t
+  {
+    SUCCESS = 0,
+    ERROR = 1,
+    ALREADY = 2,
+  };
 
-    /**
-     * @brief Opens the input file.
-     * @param[in] path The file path.
-     * @retval Hex2BinOpenResult.
-     */
-    auto openInput(const std::string& path) -> Hex2BinOpenResult;
-    
-    /**
-     * @brief Opens the input file.
-     * @param[in] path The file path.
-     * @retval Hex2BinOpenResult.
-     */
-    auto openOutput(const std::string& path) -> Hex2BinOpenResult;
+  class Hex2Bin
+  {
+    public:
+      Hex2Bin() = default;
+      Hex2Bin(const Hex2Bin& p) = delete;
+      Hex2Bin(Hex2Bin&& p) = delete;
+      virtual ~Hex2Bin();
 
-    /**
-     * @brief Sets the starting value.
-     * @param[in] value Integer value in string format.
-     * @param[out] what The cause of the error (if the function returns false).
-     * @retval False if error, otherwise true.
-     */
-    auto setStart(const std::string& value, std::string &what) -> bool;
+      /**
+       * @brief Opens the input file.
+       * @param[in] path The file path.
+       * @retval Hex2BinOpenResult.
+       */
+      auto openInput(const std::string& path)-> Hex2BinOpenResult;
 
-    /**
-     * @brief Tests whether the start value is valid or not.
-     * @retval True if it is valid, otherwise false.
-     */
-    auto isValidStart() -> bool;
+      /**
+       * @brief Opens the input file.
+       * @param[in] path The file path.
+       * @retval Hex2BinOpenResult.
+       */
+      auto openOutput(const std::string& path)-> Hex2BinOpenResult;
 
-    /**
-     * @brief Returns the start value.
-     * @retval std::uint32_t
-     */
-    auto getStart() -> std::uint32_t;
+      /**
+       * @brief Sets the starting value.
+       * @param[in] value Integer value in string format.
+       * @param[out] what The cause of the error (if the function returns false).
+       * @retval False if error, otherwise true.
+       */
+      auto setStart(const std::string& value, std::string& what) -> bool;
 
-    /**
-     * @brief Sets the limit value.
-     * @param[in] value Integer value in string format.
-     * @param[out] what The cause of the error (if the function returns false).
-     * @retval False if error, otherwise true.
-     */
-    auto setLimit(const std::string& value, std::string &what) -> bool;
-    
-    /**
-     * @brief Tests whether the limit value is valid or not.
-     * @retval True if it is valid, otherwise false.
-     */
-    auto isValidLimit() -> bool;
+      /**
+       * @brief Tests whether the start value is valid or not.
+       * @retval True if it is valid, otherwise false.
+       */
+      auto isValidStart() const -> bool;
 
-    /**
-     * @brief Returns the limit value.
-     * @retval std::uint32_t
-     */
-    auto getLimit() -> std::uint32_t;
+      /**
+       * @brief Returns the start value.
+       * @retval std::uint32_t
+       */
+      auto getStart() const -> std::uint32_t;
 
-    /**
-     * @brief Test if the files are open.
-     * @retval Hex2BinIsOpen.
-     */
-    auto isFilesOpen() -> Hex2BinIsOpen;
+      /**
+       * @brief Sets the limit value.
+       * @param[in] value Integer value in string format.
+       * @param[out] what The cause of the error (if the function returns false).
+       * @retval False if error, otherwise true.
+       */
+      auto setLimit(const std::string& value, std::string& what) -> bool;
 
-    /**
-     * @brief Only extracts words from "start" to "limit".
-     */
-    auto extractOnly() -> void;
+      /**
+       * @brief Tests whether the limit value is valid or not.
+       * @retval True if it is valid, otherwise false.
+       */
+      auto isValidLimit() const -> bool;
 
-    /**
-     * @brief Extracts and without converting all printable characters.
-     * @param[in] output The output file.
-     * @param[in] input The input file.
-     * @param[in] start The start offset.
-     * @param[in] limit The limit per lines.
-     * @retval False on error.
-     */
-    auto extractNoPrint() -> bool;
+      /**
+       * @brief Returns the limit value.
+       * @retval std::uint32_t
+       */
+      auto getLimit() const -> std::uint32_t;
 
-    /**
-     * @brief Extracts and converts all printable characters.
-     * @retval Returns false on error, true else.
-     */
-    auto extractPrint() -> bool;
+      /**
+       * @brief Test if the files are open.
+       * @retval Hex2BinIsOpen.
+       */
+      auto isFilesOpen() const ->Hex2BinIsOpen;
+
+      /**
+       * @brief Only extracts words from "start" to "limit".
+       */
+      auto extractOnly() -> void;
+
+      /**
+       * @brief Extracts and without converting all printable characters.
+       * @retval False on error.
+       */
+      auto extractNoPrint() -> bool;
+
+      /**
+       * @brief Extracts and converts all printable characters.
+       * @retval Returns false on error, true else.
+       */
+      auto extractPrint() -> bool;
 
 
-  private:
-    std::uint32_t m_start;
-    std::uint32_t m_limit;
-    std::ofstream m_output;
-    std::ifstream m_input;
+    private:
+      std::uint32_t m_start = DEFAULT_START;
+      std::uint32_t m_limit = DEFAULT_LIMIT;
+      std::ofstream m_output{};
+      std::ifstream m_input{};
 
-    /**
-     * @brief Splits a string according to the specified regex
-     * @param[in] in The input string.
-     * @param[in] reg The regex.
-     * @retval The result in a vector.
-     */
-    auto split(const std::string& in, const std::string &reg) -> std::vector<std::string>;
-    
-    /**
-     * @brief Returns a fragment of the input line.
-     * @param[in] line The input line.
-     * @retval The fragment of the input line.
-     */
-    auto getFragment(const std::string &line) -> std::string;
+      /**
+       * @brief Splits a string according to the specified regex
+       * @param[in] in The input string.
+       * @param[in] reg The regex.
+       * @retval The result in a vector.
+       */
+      static auto split(const std::string& in, const std::string& reg)->std::vector<std::string>;
 
-    /**
-     * @brief Searches for a string in another.
-     * @param[in] ref The reference string.
-     * @param[in] needle The string to search.
-     * @param[in] ignoreCase True for case-insensitive.
-     * @retval bool
-     */
-    auto search(const std::string &ref, const std::string &needle, bool ignoreCase = false) -> bool;
+      /**
+       * @brief Returns a fragment of the input line.
+       * @param[in] line The input line.
+       * @retval The fragment of the input line.
+       */
+      auto getFragment(const std::string& line) const->std::string;
 
-    /**
-     * @brief Validates the line and displays an error message if the validation fails.
-     * @param[in] line The reference line.
-     * @param[in] s The string to validate.
-     * @retval bool
-     */
-    auto validateHexAndLogOnError(const std::string &line, const std::string &s) -> bool;
+      /**
+       * @brief Searches for a string in another.
+       * @param[in] ref The reference string.
+       * @param[in] needle The string to search.
+       * @param[in] ignoreCase True for case-insensitive.
+       * @retval bool
+       */
+      auto search(const std::string& ref, const std::string& needle, bool ignoreCase = false) const -> bool;
 
-};
+      /**
+       * @brief Validates the line and displays an error message if the validation fails.
+       * @param[in] line The reference line.
+       * @param[in] s The string to validate.
+       * @retval bool
+       */
+      auto validateHexAndLogOnError(const std::string& line, const std::string& s) const -> bool;
 
+  };
+}
 #endif /* __HEX2BIN_HPP__ */

@@ -1,5 +1,7 @@
 # hex2bin
-[![Build Status](https://travis-ci.com/Keidan/hex2bin.svg?branch=master)](https://travis-ci.com/Keidan/hex2bin)
+[![Build Status](https://github.com/Keidan/hex2bin/actions/workflows/build.yml/badge.svg)][build]
+[![Release](https://img.shields.io/github/v/release/Keidan/hex2bin.svg?logo=github)][releases]
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)][license]
 
 (GPL) Hex to binary converter.
 
@@ -21,15 +23,16 @@ download the software :
                 --help, -h: Print this help.
                 --input, -i: The input file to use (containing the hexadecimal characters).
                 --output, -o: The output file to use.
-                --limit, -l: Character limit per line (the value of the "start" option is not included ; default value: [see cmake -DDEFLIMIT]).
-                --start, -s: Adding a start offset per line (default value: [see cmake -DDEFSTART]).
-                --printable, -p: Extracts and converts all printable characters.
-                --extract_only, -e: Only extracts words from "start" to "limit".
+                --limit, -l: Limit of characters per line (the value of the "start" option is not included; default value: default value: [see cmake -DDEFLIMIT]).
+                --start, -s: Adds a start offset per line (default value: [see cmake -DDEFSTART]).
+                --printable, -p: Extract and convert all printable characters.
+                --extract_only, -e: Extract only the words from "start" to "limit".
 
 	Supported cmake options (optional):
 		* Supported distrib.: -DDISTRIBUTION=[debug|release]
 		* Default start value: cmake -DDEFSTART=[int value] (see the '-s, --start' option of the binary)
 		* Default limit value: cmake -DDEFLIMIT=[int value] (see the '-l, --limit' option of the binary)
+	_You can also use cmake-gui to manage the options._
 		
 ## Example (with cmake -DDEFSTART=0 -DDEFLIMIT=0)
 
@@ -52,4 +55,8 @@ download the software :
 
 ## License
 
-[GPLv3](https://github.com/Keidan/hex2bin/blob/master/LICENSE)
+[GPLv3](https://github.com/Keidan/hex2bin/blob/master/license.txt)
+
+[build]: https://github.com/Keidan/hex2bin/actions
+[releases]: https://github.com/Keidan/hex2bin/releases
+[license]: https://github.com/Keidan/hex2bin/blob/master/license.txt

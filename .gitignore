@@ -12,3 +12,4 @@ hex2bin_gtest
 googletest*
 lib
 bin
+src/config.h
