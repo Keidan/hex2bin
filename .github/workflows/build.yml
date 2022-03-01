@@ -48,7 +48,7 @@ jobs:
             ./test
       - name: Configure for RELEASE
         shell: bash
-        run: make -DDISTRIBUTION=release .
+        run: cmake -DDISTRIBUTION=release .
       - name: --RELEASE-- Build
         shell: bash
         run: make
