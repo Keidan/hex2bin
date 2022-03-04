@@ -9,6 +9,7 @@
 #include <csignal>
 #include <getopt.h>
 #include <cerrno>
+#include <functional>
 #include "Hex2Bin.hpp"
 
 /* Private structures--------------------------------------------------------*/
@@ -36,8 +37,10 @@ static h2b::Hex2Bin* hex2bin = nullptr;
 static auto usage(int32_t xcode) -> void;
 static auto signalHook(int s) -> void;
 static auto shutdownHook() -> void;
-static auto processArguments(const int argc, char** argv, Context& context) -> void;
 static auto processMain(const Context& context) -> int;
+static auto decodeArgStartOrLimit(const std::string& optarg, bool isLimit) -> void;
+static auto decodeArgInputOrOutput(const std::string& optarg, bool isInput) -> void;
+static auto processArguments(int argc, char** argv, Context& context) -> void;
 
 
 /* Public function ----------------------------------------------------------*/
@@ -60,77 +63,50 @@ auto main(int argc, char** argv) -> int
   return processMain(context);
 }
 
+/* Static functions ---------------------------------------------------------*/
 /**
- * @brief Processes the arguments passed as parameters to the application.
- * @note This function can call the "exit" method via the "usage" method call.
- * @param[in] argc The number of arguments.
- * @param[in] argv The list of argumentsArguments count.
- * @param[out] context The context of the application that will be filled from the arguments of the application.
+ * @brief Hook function used to capture signals.
+ * @param[in] s Signal.
  */
-static auto processArguments(const int argc, char** argv, Context& context) -> void
+static auto signalHook(const int s) -> void
 {
-  h2b::Hex2BinOpenResult openResult;
-  auto opt = -1;
-  /* parse the options */
-  while ((opt = getopt_long(argc, argv, "hi:o:s:l:pe", long_options, NULL)) != -1)
+  exit(s);
+}
+
+/**
+ * @brief Hook function called by atexit.
+ */
+static auto shutdownHook() -> void
+{
+  if (hex2bin != nullptr)
   {
-    std::string what{};
-    switch (opt)
-    {
-      case 'h': /* help */
-	usage(EXIT_SUCCESS);
-	break;
-      case 'i': /* input */
-	openResult = hex2bin->openInput(optarg);
-	if (openResult == h2b::Hex2BinOpenResult::ERROR)
-	{
-	  std::cerr << "Unable to open the file '" << optarg << "': (" << errno << ") " << strerror(errno) << std::endl;
-	  usage(EXIT_FAILURE);
-	}
-	else if (openResult == h2b::Hex2BinOpenResult::ALREADY)
-	{
-	  std::cerr << "Option 'input' already called." << std::endl;
-	}
-	break;
-      case 'o': /* output */
-	openResult = hex2bin->openOutput(optarg);
-	if (openResult == h2b::Hex2BinOpenResult::ERROR)
-	{
-	  std::cerr << "Unable to open the file '" << optarg << "': (" << errno << ") " << strerror(errno) << std::endl;
-	  usage(EXIT_FAILURE);
-	}
-	else if (openResult == h2b::Hex2BinOpenResult::ALREADY)
-	{
-	  std::cerr << "Option 'output' already called." << std::endl;
-	}
-	break;
-      case 's': /* start */
-	if (!hex2bin->setStart(optarg, what))
-	{
-	  std::cerr << "Invalid start value: " << what << std::endl;
-	  usage(EXIT_FAILURE);
-	}
-	context.defaultValue = false;
-	break;
-      case 'l': /* limit */
-	if (!hex2bin->setLimit(optarg, what))
-	{
-	  std::cerr << "Invalid limit value: " << what << std::endl;
-	  usage(EXIT_FAILURE);
-	}
-	context.defaultValue = false;
-	break;
-      case 'p': /* printable */
-	context.printable = true;
-	break;
-      case 'e': /* extract_only */
-	context.extractOnly = true;
-	break;
-      default: /* '?' */
-	std::cerr << "Unknown option '" << static_cast<char>(opt) << "'." << std::endl;
-	usage(EXIT_FAILURE);
-    }
+    delete hex2bin, hex2bin = nullptr;
   }
+}
+
+/**
+ * @brief usage function.
+ * @param[in] xcode The exit code.
+ */
+static auto usage(const int32_t xcode) -> void
+{
+  std::cout << "hex2bin version " << VERSION_MAJOR << "." << VERSION_MINOR << " (";
+#if DEBUG
+  std::cout << "debug";
+#else
+  std::cout << "release";
+#endif
+  std::cout << ")" << std::endl;
+  
+  std::cout << "usage: hex2bin [options]" << std::endl;
+  std::cout << "\t--help, -h: Print this help" << std::endl;
+  std::cout << "\t--input, -i: The input file to use (containing the hexadecimal characters)." << std::endl;
+  std::cout << "\t--output, -o: The output file to use." << std::endl;
+  std::cout << "\t--limit, -l: Limit of characters per line (the value of the \"start\" option is not included; default value: " << DEFAULT_LIMIT << ")." << std::endl;
+  std::cout << "\t--start, -s: Adds a start offset per line (default value: " << DEFAULT_START << ")." << std::endl;
+  std::cout << "\t--printable, -p: Extract and convert all printable characters." << std::endl;
+  std::cout << "\t--extract_only, -e: Extract only the words from \"start\" to \"limit\"." << std::endl;
+  exit(xcode);
 }
 
 /**
@@ -187,49 +163,85 @@ static auto processMain(const Context& context) -> int
   return ret;
 }
 
-
-/* Static functions ---------------------------------------------------------*/
+/* Arguments functions ------------------------------------------------------*/
 /**
- * @brief Hook function used to capture signals.
- * @param[in] s Signal.
+ * @brief Decodes the "start" or "limit" argument.
+ * @param[in] optarg Value of the argument.
+ * @param[in] isLimit Argument "limit" or "start" ?
  */
-static auto signalHook(const int s) -> void
+static auto decodeArgStartOrLimit(const std::string& optarg, const bool isLimit) -> void
 {
-  exit(s);
-}
-
-/**
- * @brief Hook function called by atexit.
- */
-static auto shutdownHook() -> void
-{
-  if (hex2bin != nullptr)
+  std::string what{};
+  const auto ret = isLimit ? hex2bin->setLimit(optarg, what) : hex2bin->setStart(optarg, what);
+  if (!ret)
   {
-    delete hex2bin, hex2bin = nullptr;
+    std::cerr << "Invalid " << (isLimit ? "limit" : "start") << " value: " << what << std::endl;
+    usage(EXIT_FAILURE);
   }
 }
 
 /**
- * @brief usage function.
- * @param[in] xcode The exit code.
+ * @brief Decodes the "input" or "output" argument.
+ * @note This function can call the "exit" method via the "usage" method call.
+ * @param[in] optarg Value of the argument.
+ * @param[in] isInput Argument "input" or "output" ?
  */
-static auto usage(const int32_t xcode) -> void
+static auto decodeArgInputOrOutput(const std::string& optarg, const bool isInput) -> void
 {
-  std::cout << "hex2bin version " << VERSION_MAJOR << "." << VERSION_MINOR << " (";
-#if DEBUG
-  std::cout << "debug";
-#else
-  std::cout << "release";
-#endif
-  std::cout << ")" << std::endl;
-  
-  std::cout << "usage: hex2bin [options]" << std::endl;
-  std::cout << "\t--help, -h: Print this help" << std::endl;
-  std::cout << "\t--input, -i: The input file to use (containing the hexadecimal characters)." << std::endl;
-  std::cout << "\t--output, -o: The output file to use." << std::endl;
-  std::cout << "\t--limit, -l: Limit of characters per line (the value of the \"start\" option is not included; default value: " << DEFAULT_LIMIT << ")." << std::endl;
-  std::cout << "\t--start, -s: Adds a start offset per line (default value: " << DEFAULT_START << ")." << std::endl;
-  std::cout << "\t--printable, -p: Extract and convert all printable characters." << std::endl;
-  std::cout << "\t--extract_only, -e: Extract only the words from \"start\" to \"limit\"." << std::endl;
-  exit(xcode);
+  const auto openResult  = isInput ? hex2bin->openInput(optarg) : hex2bin->openOutput(optarg);
+
+  if (openResult == h2b::Hex2BinOpenResult::ERROR)
+  {
+    std::cerr << "Unable to open the file '" << optarg << "': (" << errno << ") " << strerror(errno) << std::endl;
+    usage(EXIT_FAILURE);
+  }
+  else if (openResult == h2b::Hex2BinOpenResult::ALREADY)
+  {
+    std::cerr << "Option '" << (isInput ? "input" : "output") << "' already called." << std::endl;
+  }
+}
+
+/**
+ * @brief Processes the arguments passed as parameters to the application.
+ * @note This function can call the "exit" method via the "usage" method call.
+ * @param[in] argc The number of arguments.
+ * @param[in] argv The list of argumentsArguments count.
+ * @param[out] context The context of the application that will be filled from the arguments of the application.
+ */
+static auto processArguments(const int argc, char** argv, Context& context) -> void
+{
+  auto opt = -1;
+  /* parse the options */
+  while ((opt = getopt_long(argc, argv, "hi:o:s:l:pe", long_options, NULL)) != -1)
+  {
+    switch (opt)
+    {
+      case 'h': /* help */
+	usage(EXIT_SUCCESS);
+	break;
+      case 'i': /* input */
+	decodeArgInputOrOutput(optarg, true);
+	break;
+      case 'o': /* output */
+	decodeArgInputOrOutput(optarg, false);
+	break;
+      case 's': /* start */
+	decodeArgStartOrLimit(optarg, false);
+	context.defaultValue = false;
+	break;
+      case 'l': /* limit */
+	decodeArgStartOrLimit(optarg, true);
+	context.defaultValue = false;
+	break;
+      case 'p': /* printable */
+	context.printable = true;
+	break;
+      case 'e': /* extract_only */
+	context.extractOnly = true;
+	break;
+      default: /* '?' */
+	std::cerr << "Unknown option '" << static_cast<char>(opt) << "'." << std::endl;
+	usage(EXIT_FAILURE);
+    }
+  }
 }
