@@ -1,6 +1,6 @@
 # hex2bin
 [![Build Status](https://github.com/Keidan/hex2bin/actions/workflows/build.yml/badge.svg)][build]
-[![CodeFactor](https://www.codefactor.io/repository/github/keidan/hex2binr/badge)][codefactor]
+[![CodeFactor](https://www.codefactor.io/repository/github/keidan/hex2bin/badge)][codefactor]
 [![Release](https://img.shields.io/github/v/release/Keidan/hex2bin.svg?logo=github)][releases]
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)][license]
 
