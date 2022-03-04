@@ -160,7 +160,6 @@ namespace h2b
        * @retval bool
        */
       auto validateHexAndLogOnError(const std::string& line, const std::string& s) const -> bool;
-
   };
 }
 #endif /* __HEX2BIN_HPP__ */

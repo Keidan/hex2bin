@@ -37,7 +37,6 @@ Hex2Bin::~Hex2Bin()
   }
   catch (...)
   {
-
   }
 }
 
@@ -337,7 +336,6 @@ auto Hex2Bin::split(const std::string& in, const std::string& reg) -> std::vecto
   std::regex re(reg);
   std::sregex_token_iterator first{ in.begin(), in.end(), re, -1 }, last;
   return { first, last };
-
 }
 
 /**

@@ -11,6 +11,14 @@
 #include <cerrno>
 #include "Hex2Bin.hpp"
 
+/* Private structures--------------------------------------------------------*/
+struct Context
+{
+  bool printable = false;
+  bool extractOnly = false;
+  bool defaultValue = true;
+};
+
 /* Private variables --------------------------------------------------------*/
 static const struct option long_options[] = {
   { "help"         , 0, NULL, 'h' },
@@ -28,26 +36,41 @@ static h2b::Hex2Bin* hex2bin = nullptr;
 static auto usage(int32_t xcode) -> void;
 static auto signalHook(int s) -> void;
 static auto shutdownHook() -> void;
+static auto processArguments(const int argc, char** argv, Context& context) -> void;
+static auto processMain(const Context& context) -> int;
 
 
 /* Public function ----------------------------------------------------------*/
 auto main(int argc, char** argv) -> int
 {
-  auto opt = -1;
+  Context context{};
   struct sigaction sa;
-  auto printable = false, extractOnly = false;
-  h2b::Hex2BinOpenResult openResult;
-  auto defaultValue = true;
-
 
   std::memset(&sa, 0, sizeof(struct sigaction));
   sa.sa_handler = &signalHook;
   sigaction(SIGINT, &sa, NULL);
   sigaction(SIGTERM, &sa, NULL);
   atexit(shutdownHook);
-
+  
   hex2bin = new h2b::Hex2Bin();
 
+  processArguments(argc, argv, context);
+
+  /* The files are closed in the exit functions */
+  return processMain(context);
+}
+
+/**
+ * @brief Processes the arguments passed as parameters to the application.
+ * @note This function can call the "exit" method via the "usage" method call.
+ * @param[in] argc The number of arguments.
+ * @param[in] argv The list of argumentsArguments count.
+ * @param[out] context The context of the application that will be filled from the arguments of the application.
+ */
+static auto processArguments(const int argc, char** argv, Context& context) -> void
+{
+  h2b::Hex2BinOpenResult openResult;
+  auto opt = -1;
   /* parse the options */
   while ((opt = getopt_long(argc, argv, "hi:o:s:l:pe", long_options, NULL)) != -1)
   {
@@ -87,7 +110,7 @@ auto main(int argc, char** argv) -> int
 	  std::cerr << "Invalid start value: " << what << std::endl;
 	  usage(EXIT_FAILURE);
 	}
-	defaultValue = false;
+	context.defaultValue = false;
 	break;
       case 'l': /* limit */
 	if (!hex2bin->setLimit(optarg, what))
@@ -95,19 +118,29 @@ auto main(int argc, char** argv) -> int
 	  std::cerr << "Invalid limit value: " << what << std::endl;
 	  usage(EXIT_FAILURE);
 	}
-	defaultValue = false;
+	context.defaultValue = false;
 	break;
       case 'p': /* printable */
-	printable = true;
+	context.printable = true;
 	break;
       case 'e': /* extract_only */
-	extractOnly = true;
+	context.extractOnly = true;
 	break;
       default: /* '?' */
 	std::cerr << "Unknown option '" << static_cast<char>(opt) << "'." << std::endl;
 	usage(EXIT_FAILURE);
     }
   }
+}
+
+/**
+ * @brief Processes the application processing of the main function.
+ * @note This function can call the "exit" method via the "usage" method call.
+ * @param[in] context The context of the application which is filled from the arguments of the application.
+ * @return EXIT_SUCCESS or EXIT_FAILURE.
+ */
+static auto processMain(const Context& context) -> int
+{
   const auto isOpen = hex2bin->isFilesOpen();
   if (isOpen != h2b::Hex2BinIsOpen::SUCCESS)
   {
@@ -126,13 +159,13 @@ auto main(int argc, char** argv) -> int
     usage(EXIT_FAILURE);
   }
   auto ret = EXIT_SUCCESS;
-  if (extractOnly)
+  if (context.extractOnly)
   {
     hex2bin->extractOnly();
   }
   else
   {
-    if (!printable)
+    if (!context.printable)
     {
       if (!hex2bin->extractNoPrint())
       {
@@ -141,7 +174,7 @@ auto main(int argc, char** argv) -> int
     }
     else
     {
-      if (!defaultValue && (hex2bin->isValidStart() || hex2bin->isValidLimit()))
+      if (!context.defaultValue && (hex2bin->isValidStart() || hex2bin->isValidLimit()))
       {
 	std::cout << "The start and limit options are not managed in this mode." << std::endl;
       }
@@ -151,17 +184,16 @@ auto main(int argc, char** argv) -> int
       }
     }
   }
-
-  /* The files are closed in the exit functions */
   return ret;
 }
+
 
 /* Static functions ---------------------------------------------------------*/
 /**
  * @brief Hook function used to capture signals.
  * @param[in] s Signal.
  */
-auto signalHook(const int s) -> void
+static auto signalHook(const int s) -> void
 {
   exit(s);
 }
@@ -169,7 +201,7 @@ auto signalHook(const int s) -> void
 /**
  * @brief Hook function called by atexit.
  */
-auto shutdownHook() -> void
+static auto shutdownHook() -> void
 {
   if (hex2bin != nullptr)
   {

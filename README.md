@@ -1,5 +1,6 @@
 # hex2bin
 [![Build Status](https://github.com/Keidan/hex2bin/actions/workflows/build.yml/badge.svg)][build]
+[![CodeFactor](https://www.codefactor.io/repository/github/keidan/hexviewer/badge)][codefactor]
 [![Release](https://img.shields.io/github/v/release/Keidan/hex2bin.svg?logo=github)][releases]
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)][license]
 
@@ -59,5 +60,6 @@ _You can also use cmake-gui to manage the options._
 [GPLv3](https://github.com/Keidan/hex2bin/blob/master/license.txt)
 
 [build]: https://github.com/Keidan/hex2bin/actions
+[codefactor]: https://www.codefactor.io/repository/github/keidan/hex2bin
 [releases]: https://github.com/Keidan/hex2bin/releases
 [license]: https://github.com/Keidan/hex2bin/blob/master/license.txt
