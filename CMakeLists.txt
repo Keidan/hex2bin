@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
 project(hex2bin)
 set (VERSION_MAJOR 1)
-set (VERSION_MINOR 6)
+set (VERSION_MINOR 7)
 
 message("Supported distrib.: cmake -DDISTRIBUTION=[debug|release]")
 message("Default start value: cmake -DDEFSTART=[int value] (see the '-s, --start' option of the binary)")
