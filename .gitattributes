@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.cpp eol=lf
+*.h   eol=lf
+*.hpp eol=lf
+*.in  eol=lf
+*.md  eol=lf
+*.yml eol=lf
+test  eol=lf
