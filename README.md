@@ -15,7 +15,7 @@ download the software :
 
 	mkdir devel
 	cd devel
-	git clone git://github.com/Keidan/hex2bin.git
+	git clone https://github.com/Keidan/hex2bin.git
 	cd hex2bin
 	cmake -DDISTRIBUTION=[debug|release] .
 	make
