@@ -75,7 +75,7 @@ jobs:
             python test.py --file ${{ matrix.hex2binPathDebug }}
       - name: Configure for release on ${{ matrix.name }}
         shell: bash
-        run: cmake -S . -B build -DDISTRIBUTION=release -G "{{ matrix.generators }}"
+        run: cmake -S . -B build -DDISTRIBUTION=release -G "${{ matrix.generators }}"
       - name: Build release on ${{ matrix.name }}
         shell: bash
         run: cmake --build build
