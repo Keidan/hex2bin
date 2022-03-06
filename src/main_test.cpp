@@ -19,7 +19,7 @@ TEST(Hex2BinTest, TestOpenInput)
   h2b::Hex2Bin hex2bin;
   const auto file = SAMPLE1;
   const auto ret = hex2bin.openInput(file);
-  EXPECT_EQ(1, ret == h2b::Hex2BinOpenResult::SUCCESS);
+  EXPECT_EQ(1, ret == h2b::Hex2BinOpenResult::Success);
 }
 
 TEST(Hex2BinTest, TestOpenOutput)
@@ -27,7 +27,7 @@ TEST(Hex2BinTest, TestOpenOutput)
   h2b::Hex2Bin hex2bin{};
   const auto file = SAMPLE_TEMP;
   const auto ret = hex2bin.openOutput(file);
-  EXPECT_EQ(1, ret == h2b::Hex2BinOpenResult::SUCCESS);
+  EXPECT_EQ(1, ret == h2b::Hex2BinOpenResult::Success);
   std::remove(SAMPLE_TEMP);
 }
 
@@ -42,9 +42,9 @@ TEST(Hex2BinTest, TestOpenFiles)
 
   std::remove(fileOut);
 
-  EXPECT_EQ(1, retIn == h2b::Hex2BinOpenResult::SUCCESS);
-  EXPECT_EQ(1, retOut == h2b::Hex2BinOpenResult::SUCCESS);
-  EXPECT_EQ(1, oret == h2b::Hex2BinIsOpen::SUCCESS);
+  EXPECT_EQ(1, retIn == h2b::Hex2BinOpenResult::Success);
+  EXPECT_EQ(1, retOut == h2b::Hex2BinOpenResult::Success);
+  EXPECT_EQ(1, oret == h2b::Hex2BinIsOpen::Success);
 }
 
 TEST(Hex2BinTest, TestStart)
@@ -93,9 +93,9 @@ TEST(Hex2BinTest, TestExtractNoPrint1)
   const auto retOut = hex2bin.openOutput(fileOut);
   const auto oret = hex2bin.isFilesOpen();
 
-  EXPECT_EQ(1, retIn == h2b::Hex2BinOpenResult::SUCCESS);
-  EXPECT_EQ(1, retOut == h2b::Hex2BinOpenResult::SUCCESS);
-  EXPECT_EQ(1, oret == h2b::Hex2BinIsOpen::SUCCESS);
+  EXPECT_EQ(1, retIn == h2b::Hex2BinOpenResult::Success);
+  EXPECT_EQ(1, retOut == h2b::Hex2BinOpenResult::Success);
+  EXPECT_EQ(1, oret == h2b::Hex2BinIsOpen::Success);
   EXPECT_EQ(1, hex2bin.extractNoPrint());
 
   std::remove(fileOut);
@@ -117,9 +117,9 @@ TEST(Hex2BinTest, TestExtractNoPrint2)
   const auto retOut = hex2bin.openOutput(fileOut);
   const auto oret = hex2bin.isFilesOpen();
 
-  EXPECT_EQ(1, retIn == h2b::Hex2BinOpenResult::SUCCESS);
-  EXPECT_EQ(1, retOut == h2b::Hex2BinOpenResult::SUCCESS);
-  EXPECT_EQ(1, oret == h2b::Hex2BinIsOpen::SUCCESS);
+  EXPECT_EQ(1, retIn == h2b::Hex2BinOpenResult::Success);
+  EXPECT_EQ(1, retOut == h2b::Hex2BinOpenResult::Success);
+  EXPECT_EQ(1, oret == h2b::Hex2BinIsOpen::Success);
   EXPECT_EQ(1, hex2bin.extractNoPrint());
 
   std::remove(fileOut);
@@ -142,9 +142,9 @@ TEST(Hex2BinTest, TestExtractNoPrint3)
   const auto retOut = hex2bin.openOutput(fileOut);
   const auto oret = hex2bin.isFilesOpen();
 
-  EXPECT_EQ(1, retIn == h2b::Hex2BinOpenResult::SUCCESS);
-  EXPECT_EQ(1, retOut == h2b::Hex2BinOpenResult::SUCCESS);
-  EXPECT_EQ(1, oret == h2b::Hex2BinIsOpen::SUCCESS);
+  EXPECT_EQ(1, retIn == h2b::Hex2BinOpenResult::Success);
+  EXPECT_EQ(1, retOut == h2b::Hex2BinOpenResult::Success);
+  EXPECT_EQ(1, oret == h2b::Hex2BinIsOpen::Success);
   EXPECT_EQ(1, hex2bin.extractNoPrint());
 
   std::remove(fileOut);

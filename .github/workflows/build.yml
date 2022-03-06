@@ -17,43 +17,69 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
+    strategy:
+        fail-fast: false
+        matrix:
+            os: [ubuntu-latest, windows-latest]
+            include:
+            - os: ubuntu-latest
+              name: "Ubuntu Latest GCC"
+              generators: "Ninja"
+              gtest: ./bin/hex2bin_gtest
+              hex2binPathDebug: bin/hex2bin
+              hex2binPathRelease: bin/hex2bin
+            - os: windows-latest
+              name: "Windows Latest MSVC"
+              generators: "Visual Studio 16 2019"
+              gtest: ./bin/Debug/hex2bin_gtest.exe
+              hex2binPathDebug: bin/Debug/hex2bin.exe
+              hex2binPathRelease: bin/Release/hex2bin.exe
+              
+    name: ${{ matrix.name }}
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Checkout the code
         uses: actions/checkout@v2
-      - name: Install dependencies
+      - name: Install dependencies on ${{ matrix.name }}
+        if: startsWith(matrix.os, 'ubuntu')
         run: |
             sudo apt-get update
-            sudo apt-get install cmake
+            sudo apt-get install cmake ninja-build python3
+            ninja --version
             cmake --version
             gcc --version
-      - name: Configure for DEBUG
+            python --version
+      - name: Install dependencies on ${{ matrix.name }}
+        if: startsWith(matrix.os, 'windows')
+        run: |
+            choco install ninja cmake python3
+            ninja --version
+            cmake --version
+            python --version
+      - name: Configure for debug on ${{ matrix.name }}
         shell: bash
-        run: cmake -DDISTRIBUTION=debug .
-      - name: --DEBUG-- Build
+        run: cmake -S . -B build -DDISTRIBUTION=debug -G "{{ matrix.generators }}"
+      - name: Build debug on ${{ matrix.name }}
         shell: bash
-        run: make
-      - name: --DEBUG-- Run gtest
+        run: cmake --build build
+      - name: Run gtest on ${{ matrix.name }}
         shell: bash
         run: |
-            chmod +x ./bin/hex2bin_gtest
-            ./bin/hex2bin_gtest
-      - name: --DEBUG-- Run test
+            ${{ matrix.gtest }}
+      - name: Run test on ${{ matrix.name }}
         shell: bash
         run: |
-            chmod +x ./test
-            ./test
-      - name: Configure for RELEASE
+            python test.py --file ${{ matrix.hex2binPathDebug }}
+      - name: Configure for release on ${{ matrix.name }}
         shell: bash
-        run: cmake -DDISTRIBUTION=release .
-      - name: --RELEASE-- Build
+        run: cmake -S . -B build -DDISTRIBUTION=release -G "{{ matrix.generators }}"
+      - name: Build release on ${{ matrix.name }}
         shell: bash
-        run: make
-      - name: --RELEASE-- Run test
+        run: cmake --build build
+      - name: Run test on ${{ matrix.name }}
         shell: bash
         run: |
-            chmod +x ./test
-            ./test
+            python test.py --file ${{ matrix.hex2binPathRelease }}

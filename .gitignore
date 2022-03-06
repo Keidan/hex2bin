@@ -13,3 +13,12 @@ googletest*
 lib
 bin
 src/config.h
+.vs/
+out/
+*.vcxproj
+*.vcxproj.filters
+*.sln
+*.dir
+/win32/
+/x64/
+/build/

@@ -7,10 +7,20 @@
 #include <iostream>
 #include <cstring>
 #include <csignal>
+#ifndef WIN32
 #include <getopt.h>
+#else
+#include <Windows.h> 
+#include "win32/getopt.h"
+#endif
 #include <cerrno>
 #include <functional>
 #include "Hex2Bin.hpp"
+
+
+/* Usings--------------------------------------------------------------------*/
+using h2b::Hex2BinIsOpen;
+using h2b::Hex2BinOpenResult;
 
 /* Private structures--------------------------------------------------------*/
 struct Context
@@ -47,14 +57,19 @@ static auto processArguments(int argc, char** argv, Context& context) -> void;
 auto main(int argc, char** argv) -> int
 {
   Context context{};
+#ifndef WIN32
   struct sigaction sa;
 
   std::memset(&sa, 0, sizeof(struct sigaction));
   sa.sa_handler = &signalHook;
   sigaction(SIGINT, &sa, NULL);
   sigaction(SIGTERM, &sa, NULL);
+#else
+  signal(SIGINT, signalHook);
+  signal(SIGTERM, signalHook);
+#endif
   atexit(shutdownHook);
-  
+
   hex2bin = new h2b::Hex2Bin();
 
   processArguments(argc, argv, context);
@@ -70,7 +85,7 @@ auto main(int argc, char** argv) -> int
  */
 static auto signalHook(const int s) -> void
 {
-  exit(s);
+  exit((s == SIGINT || s == SIGTERM) ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 
 /**
@@ -78,7 +93,7 @@ static auto signalHook(const int s) -> void
  */
 static auto shutdownHook() -> void
 {
-  if (hex2bin != nullptr)
+  if(hex2bin != nullptr)
   {
     delete hex2bin, hex2bin = nullptr;
   }
@@ -97,7 +112,7 @@ static auto usage(const int32_t xcode) -> void
   std::cout << "release";
 #endif
   std::cout << ")" << std::endl;
-  
+
   std::cout << "usage: hex2bin [options]" << std::endl;
   std::cout << "\t--help, -h: Print this help" << std::endl;
   std::cout << "\t--input, -i: The input file to use (containing the hexadecimal characters)." << std::endl;
@@ -118,45 +133,45 @@ static auto usage(const int32_t xcode) -> void
 static auto processMain(const Context& context) -> int
 {
   const auto isOpen = hex2bin->isFilesOpen();
-  if (isOpen != h2b::Hex2BinIsOpen::SUCCESS)
+  if(isOpen != Hex2BinIsOpen::Success)
   {
-    if (isOpen == h2b::Hex2BinIsOpen::BOTH)
+    if(isOpen == Hex2BinIsOpen::Both)
     {
       std::cerr << "Invalid input and output values" << std::endl;
     }
-    else if (isOpen == h2b::Hex2BinIsOpen::INPUT)
+    else if(isOpen == Hex2BinIsOpen::Input)
     {
       std::cerr << "Invalid input value" << std::endl;
     }
-    else if (isOpen == h2b::Hex2BinIsOpen::OUTPUT)
+    else if(isOpen == Hex2BinIsOpen::Output)
     {
       std::cerr << "Invalid output value" << std::endl;
     }
     usage(EXIT_FAILURE);
   }
   auto ret = EXIT_SUCCESS;
-  if (context.extractOnly)
+  if(context.extractOnly)
   {
     hex2bin->extractOnly();
   }
   else
   {
-    if (!context.printable)
+    if(!context.printable)
     {
-      if (!hex2bin->extractNoPrint())
+      if(!hex2bin->extractNoPrint())
       {
-	ret = EXIT_FAILURE;
+        ret = EXIT_FAILURE;
       }
     }
     else
     {
-      if (!context.defaultValue && (hex2bin->isValidStart() || hex2bin->isValidLimit()))
+      if(!context.defaultValue && (hex2bin->isValidStart() || hex2bin->isValidLimit()))
       {
-	std::cout << "The start and limit options are not managed in this mode." << std::endl;
+        std::cout << "The start and limit options are not managed in this mode." << std::endl;
       }
-      if (!hex2bin->extractPrint())
+      if(!hex2bin->extractPrint())
       {
-	ret = EXIT_FAILURE;
+        ret = EXIT_FAILURE;
       }
     }
   }
@@ -173,7 +188,7 @@ static auto decodeArgStartOrLimit(const std::string& optarg, const bool isLimit)
 {
   std::string what{};
   const auto ret = isLimit ? hex2bin->setLimit(optarg, what) : hex2bin->setStart(optarg, what);
-  if (!ret)
+  if(!ret)
   {
     std::cerr << "Invalid " << (isLimit ? "limit" : "start") << " value: " << what << std::endl;
     usage(EXIT_FAILURE);
@@ -188,14 +203,22 @@ static auto decodeArgStartOrLimit(const std::string& optarg, const bool isLimit)
  */
 static auto decodeArgInputOrOutput(const std::string& optarg, const bool isInput) -> void
 {
-  const auto openResult  = isInput ? hex2bin->openInput(optarg) : hex2bin->openOutput(optarg);
+  const auto openResult = isInput ? hex2bin->openInput(optarg) : hex2bin->openOutput(optarg);
 
-  if (openResult == h2b::Hex2BinOpenResult::ERROR)
+  if(openResult == Hex2BinOpenResult::Error)
   {
-    std::cerr << "Unable to open the file '" << optarg << "': (" << errno << ") " << strerror(errno) << std::endl;
+#ifndef WIN32
+    const auto error = strerror(errno);
+#else
+    enum { ERROR_SIZE = 200 };
+    char error[ERROR_SIZE];
+    if(strerror_s(error, ERROR_SIZE, errno))
+      throw std::exception("strerror_s failed!");
+#endif
+    std::cerr << "Unable to open the file '" << optarg << "': (" << errno << ") " << error << std::endl;
     usage(EXIT_FAILURE);
   }
-  else if (openResult == h2b::Hex2BinOpenResult::ALREADY)
+  else if(openResult == Hex2BinOpenResult::Already)
   {
     std::cerr << "Option '" << (isInput ? "input" : "output") << "' already called." << std::endl;
   }
@@ -212,36 +235,36 @@ static auto processArguments(const int argc, char** argv, Context& context) -> v
 {
   auto opt = -1;
   /* parse the options */
-  while ((opt = getopt_long(argc, argv, "hi:o:s:l:pe", long_options, NULL)) != -1)
+  while((opt = getopt_long(argc, argv, "hi:o:s:l:pe", long_options, NULL)) != -1)
   {
-    switch (opt)
+    switch(opt)
     {
       case 'h': /* help */
-	usage(EXIT_SUCCESS);
-	break;
+        usage(EXIT_SUCCESS);
+        break;
       case 'i': /* input */
-	decodeArgInputOrOutput(optarg, true);
-	break;
+        decodeArgInputOrOutput(optarg, true);
+        break;
       case 'o': /* output */
-	decodeArgInputOrOutput(optarg, false);
-	break;
+        decodeArgInputOrOutput(optarg, false);
+        break;
       case 's': /* start */
-	decodeArgStartOrLimit(optarg, false);
-	context.defaultValue = false;
-	break;
+        decodeArgStartOrLimit(optarg, false);
+        context.defaultValue = false;
+        break;
       case 'l': /* limit */
-	decodeArgStartOrLimit(optarg, true);
-	context.defaultValue = false;
-	break;
+        decodeArgStartOrLimit(optarg, true);
+        context.defaultValue = false;
+        break;
       case 'p': /* printable */
-	context.printable = true;
-	break;
+        context.printable = true;
+        break;
       case 'e': /* extract_only */
-	context.extractOnly = true;
-	break;
+        context.extractOnly = true;
+        break;
       default: /* '?' */
-	std::cerr << "Unknown option '" << static_cast<char>(opt) << "'." << std::endl;
-	usage(EXIT_FAILURE);
+        std::cerr << "Unknown option '" << static_cast<char>(opt) << "'." << std::endl;
+        usage(EXIT_FAILURE);
     }
   }
 }

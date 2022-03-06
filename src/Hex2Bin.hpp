@@ -22,19 +22,19 @@
 /* Public class -------------------------------------------------------------*/
 namespace h2b
 {
-  enum class Hex2BinIsOpen : std::uint8_t
+  enum class Hex2BinIsOpen: std::uint8_t
   {
-    SUCCESS = 0,
-    BOTH = 1,
-    INPUT = 2,
-    OUTPUT = 3
+    Success = 0,
+    Both = 1,
+    Input = 2,
+    Output = 3
   };
 
-  enum class Hex2BinOpenResult : std::uint8_t
+  enum class Hex2BinOpenResult: std::uint8_t
   {
-    SUCCESS = 0,
-    ERROR = 1,
-    ALREADY = 2,
+    Success = 0,
+    Error = 1,
+    Already = 2,
   };
 
   class Hex2Bin
@@ -50,14 +50,14 @@ namespace h2b
        * @param[in] path The file path.
        * @retval Hex2BinOpenResult.
        */
-      auto openInput(const std::string& path)-> Hex2BinOpenResult;
+      auto openInput(const std::string& path)->Hex2BinOpenResult;
 
       /**
-       * @brief Opens the input file.
+       * @brief Opens the output file.
        * @param[in] path The file path.
        * @retval Hex2BinOpenResult.
        */
-      auto openOutput(const std::string& path)-> Hex2BinOpenResult;
+      auto openOutput(const std::string& path)->Hex2BinOpenResult;
 
       /**
        * @brief Sets the starting value.
@@ -77,7 +77,7 @@ namespace h2b
        * @brief Returns the start value.
        * @retval std::uint32_t
        */
-      auto getStart() const -> std::uint32_t;
+      auto getStart() const->std::uint32_t;
 
       /**
        * @brief Sets the limit value.
@@ -97,13 +97,13 @@ namespace h2b
        * @brief Returns the limit value.
        * @retval std::uint32_t
        */
-      auto getLimit() const -> std::uint32_t;
+      auto getLimit() const->std::uint32_t;
 
       /**
        * @brief Test if the files are open.
        * @retval Hex2BinIsOpen.
        */
-      auto isFilesOpen() const ->Hex2BinIsOpen;
+      auto isFilesOpen() const->Hex2BinIsOpen;
 
       /**
        * @brief Only extracts words from "start" to "limit".
@@ -121,7 +121,6 @@ namespace h2b
        * @retval Returns false on error, true else.
        */
       auto extractPrint() -> bool;
-
 
     private:
       std::uint32_t m_start = DEFAULT_START;
@@ -160,6 +159,26 @@ namespace h2b
        * @retval bool
        */
       auto validateHexAndLogOnError(const std::string& line, const std::string& s) const -> bool;
+
+      /**
+       * @brief Opens a file.
+       * @param[in,out] stream The file stream.
+       * @param[in] path The file path.
+       * @param[in] mode The opening mode.
+       * @retval False if error, otherwise true.
+       * @retval Hex2BinOpenResult.
+       */
+      template<class Stream>
+      auto openFile(Stream& stream, const std::string& path, std::ios_base::openmode mode)->Hex2BinOpenResult;
+
+      /**
+       * @brief Sets the value from a string.
+       * @param[out] output Output value.
+       * @param[in] value Integer value in string format.
+       * @param[out] what The cause of the error (if the function returns false).
+       * @retval False if error, otherwise true.
+       */
+      static auto setValueFromstring(std::uint32_t& output, const std::string& value, std::string& what) -> bool;
   };
 }
 #endif /* __HEX2BIN_HPP__ */

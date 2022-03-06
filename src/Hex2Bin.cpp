@@ -26,16 +26,16 @@ Hex2Bin::~Hex2Bin()
 {
   try
   {
-    if (m_input.is_open())
+    if(m_input.is_open())
     {
       m_input.close();
     }
-    if (m_output.is_open())
+    if(m_output.is_open())
     {
       m_output.close();
     }
   }
-  catch (...)
+  catch(...)
   {
   }
 }
@@ -48,50 +48,18 @@ Hex2Bin::~Hex2Bin()
  */
 auto Hex2Bin::openInput(const std::string& path) -> Hex2BinOpenResult
 {
-  if (path.empty())
-  {
-    return Hex2BinOpenResult::ERROR;
-  }
-  if (!m_input.is_open())
-  {
-    m_input.open(path, std::ios::in | std::ios::binary);
-    if (!m_input.is_open() || m_input.fail())
-    {
-      return Hex2BinOpenResult::ERROR;
-    }
-    return Hex2BinOpenResult::SUCCESS;
-  }
-  else
-  {
-    return Hex2BinOpenResult::ALREADY;
-  }
+  return openFile<std::ifstream>(m_input, path, std::ios::in | std::ios::binary);
 }
 
 /**
- * @brief Opens the input file.
+ * @brief Opens the output file.
  * @param[in] path The file path.
  * @retval False if error, otherwise true.
  * @retval Hex2BinOpenResult.
  */
 auto Hex2Bin::openOutput(const std::string& path) -> Hex2BinOpenResult
 {
-  if (path.empty())
-  {
-    return Hex2BinOpenResult::ERROR;
-  }
-  if (!m_output.is_open())
-  {
-    m_output.open(path, std::ios::out | std::ios::binary);
-    if (!m_output.is_open() || m_output.fail())
-    {
-      return Hex2BinOpenResult::ERROR;
-    }
-    return Hex2BinOpenResult::SUCCESS;
-  }
-  else
-  {
-    return Hex2BinOpenResult::ALREADY;
-  }
+  return openFile<std::ofstream>(m_output, path, std::ios::out | std::ios::binary);
 }
 
 /**
@@ -102,21 +70,7 @@ auto Hex2Bin::openOutput(const std::string& path) -> Hex2BinOpenResult
  */
 auto Hex2Bin::setStart(const std::string& value, std::string& what) -> bool
 {
-  try
-  {
-    auto val = std::stoi(value);
-    if (val < 0)
-    {
-      val = 0;
-    }
-    m_start = static_cast<std::uint32_t>(val);
-  }
-  catch (const std::exception& e)
-  {
-    what = e.what();
-    return false;
-  }
-  return true;
+  return setValueFromstring(m_start, value, what);
 }
 
 /**
@@ -145,21 +99,7 @@ auto Hex2Bin::getStart() const -> std::uint32_t
  */
 auto Hex2Bin::setLimit(const std::string& value, std::string& what) -> bool
 {
-  try
-  {
-    auto val = std::stoi(value);
-    if (val < 0)
-    {
-      val = 0;
-    }
-    m_limit = val;
-  }
-  catch (const std::exception& e)
-  {
-    what = e.what();
-    return false;
-  }
-  return true;
+  return setValueFromstring(m_limit, value, what);
 }
 
 /**
@@ -186,19 +126,19 @@ auto Hex2Bin::getLimit() const -> std::uint32_t
  */
 auto Hex2Bin::isFilesOpen() const -> Hex2BinIsOpen
 {
-  if (!m_input.is_open() || !m_output.is_open())
+  if(!m_input.is_open() || !m_output.is_open())
   {
-    if (!m_input.is_open() && !m_output.is_open())
+    if(!m_input.is_open() && !m_output.is_open())
     {
-      return Hex2BinIsOpen::BOTH;
+      return Hex2BinIsOpen::Both;
     }
-    if (!m_input.is_open())
+    if(!m_input.is_open())
     {
-      return Hex2BinIsOpen::INPUT;
+      return Hex2BinIsOpen::Input;
     }
-    return Hex2BinIsOpen::OUTPUT;
+    return Hex2BinIsOpen::Output;
   }
-  return Hex2BinIsOpen::SUCCESS;
+  return Hex2BinIsOpen::Success;
 }
 
 /**
@@ -208,10 +148,10 @@ auto Hex2Bin::extractOnly() -> void
 {
   std::string line;
 
-  while (std::getline(m_input, line))
+  while(std::getline(m_input, line))
   {
     auto fragment = getFragment(line);
-    if (!fragment.empty() && fragment.at(fragment.size() - 1) != '\n') fragment += "\n";
+    if(!fragment.empty() && fragment.at(fragment.size() - 1) != '\n') fragment += "\n";
     m_output << fragment;
   }
   m_output.flush();
@@ -225,9 +165,9 @@ auto Hex2Bin::extractNoPrint() -> bool
 {
   std::string line;
   auto error = false;
-  while (std::getline(m_input, line))
+  while(std::getline(m_input, line))
   {
-    if (line.empty())
+    if(line.empty())
     {
       std::cerr << "Empty line ignored" << std::endl;
       continue;
@@ -235,38 +175,38 @@ auto Hex2Bin::extractNoPrint() -> bool
     auto fragment = getFragment(line);
 
     const auto idxSpace = fragment.find(' ');
-    if (idxSpace != std::string::npos)
+    if(idxSpace != std::string::npos)
     {
       auto tokens = split(fragment, "\\s+");
-      for (const auto& token : tokens)
+      for(const auto& token : tokens)
       {
-	if (!validateHexAndLogOnError(fragment, token))
-	{
-	  error = true;
-	  continue;
-	}
-	m_output << static_cast<char>(std::stol(token, nullptr, 16));
+        if(!validateHexAndLogOnError(fragment, token))
+        {
+          error = true;
+          continue;
+        }
+        m_output << static_cast<char>(std::stol(token, nullptr, 16));
       }
     }
     else
     {
-      if (fragment.length() % 2)
+      if(fragment.length() % 2)
       {
-	std::cerr << "The following line must have an even number of characters:" << std::endl;
-	std::cerr << "Line: '" << fragment << "'" << std::endl;
-	error = true;
-	continue;
+        std::cerr << "The following line must have an even number of characters:" << std::endl;
+        std::cerr << "Line: '" << fragment << "'" << std::endl;
+        error = true;
+        continue;
       }
-      for (auto i = 0U; i < fragment.length(); i += 2)
+      for(auto i = 0U; i < fragment.length(); i += 2)
       {
-	auto s1 = std::string(1, fragment[i]);
-	auto s2 = std::string(1, fragment[i + 1]);
-	if (!validateHexAndLogOnError(fragment, s1) || !validateHexAndLogOnError(fragment, s2))
-	{
-	  error = true;
-	  break;
-	}
-	m_output << static_cast<char>(std::stol(s1 + s2, nullptr, 16));
+        auto s1 = std::string(1, fragment[i]);
+        auto s2 = std::string(1, fragment[i + 1]);
+        if(!validateHexAndLogOnError(fragment, s1) || !validateHexAndLogOnError(fragment, s2))
+        {
+          error = true;
+          break;
+        }
+        m_output << static_cast<char>(std::stol(s1 + s2, nullptr, 16));
       }
     }
   }
@@ -291,31 +231,34 @@ auto Hex2Bin::extractPrint() -> bool
 
   /* temp buffer */
   auto* buf = new uint8_t[static_cast<std::uint32_t>(length)];
-  if (buf == nullptr)
+  if(buf == nullptr)
   {
     std::cerr << "Unable to allocate a memory for the input buffer" << std::endl;
     return false;
   }
   auto i = 0L;
-  while (offset < length)
+  while(offset < length)
   {
     m_input.read(&c, 1);
-    if (!m_input)
+    if(!m_input)
     {
       break;
     }
     offset++;
-    if (std::isalnum(c))
+    if(std::isalnum(c))
     {
       buf[i++] = static_cast<uint8_t>(c);
     }
   }
   length = i;
   /* write the datas */
-  for (i = 0; i < length; i += 2)
+  for(i = 0; i < length; i += 2)
   {
-    char cc[2];
-    std::memcpy(cc, buf + i, 2);
+    char cc[] = {
+      static_cast<char>(buf[i]),
+      static_cast<char>(buf[i + 1]),
+      0
+    };
     m_output << static_cast<char>(std::stol(cc, nullptr, 16));
   }
   m_output.flush();
@@ -334,8 +277,8 @@ auto Hex2Bin::split(const std::string& in, const std::string& reg) -> std::vecto
 {
   // passing -1 as the submatch index parameter performs splitting
   std::regex re(reg);
-  std::sregex_token_iterator first{ in.begin(), in.end(), re, -1 }, last;
-  return { first, last };
+  std::sregex_token_iterator first{in.begin(), in.end(), re, -1}, last;
+  return {first, last};
 }
 
 /**
@@ -346,7 +289,7 @@ auto Hex2Bin::split(const std::string& in, const std::string& reg) -> std::vecto
 auto Hex2Bin::getFragment(const std::string& line) const -> std::string
 {
   auto len = line.size();
-  if (len < m_start)
+  if(len < m_start)
   {
     len = 0UL;
   }
@@ -364,10 +307,10 @@ auto Hex2Bin::getFragment(const std::string& line) const -> std::string
 auto Hex2Bin::search(const std::string& ref, const std::string& needle, bool ignoreCase) const -> bool
 {
   const auto it = std::search(ref.begin(), ref.end(), needle.begin(), needle.end(),
-			      [ignoreCase](const char c1, const char c2)
-			      {
-				return ignoreCase ? (std::toupper(c1) == std::toupper(c2)) : (c1 == c2);
-			      });
+                              [ignoreCase](const char c1, const char c2)
+  {
+    return ignoreCase ? (std::toupper(c1) == std::toupper(c2)) : (c1 == c2);
+  });
   return it != ref.end();
 }
 
@@ -379,9 +322,9 @@ auto Hex2Bin::search(const std::string& ref, const std::string& needle, bool ign
  */
 auto Hex2Bin::validateHexAndLogOnError(const std::string& line, const std::string& s) const -> bool
 {
-  if (s.length() == 1)
+  if(s.length() == 1)
   {
-    if (!search(HEX, s, true))
+    if(!search(HEX, s, true))
     {
       std::cerr << "Character '" << s << "' is not compatible with hexadecimal conversion." << std::endl;
       std::cerr << "Cancel line processing:" << std::endl;
@@ -391,17 +334,73 @@ auto Hex2Bin::validateHexAndLogOnError(const std::string& line, const std::strin
   }
   else
   {
-    for (const auto& c : s)
+    for(const auto& c : s)
     {
       auto temp = std::string(1, c);
-      if (!search(HEX, temp, true))
+      if(!search(HEX, temp, true))
       {
-	std::cerr << "Character '" << temp << "' is not compatible with hexadecimal conversion." << std::endl;
-	std::cerr << "Cancel line processing:" << std::endl;
-	std::cerr << "Line: '" << line << "'" << std::endl;
-	return false;
+        std::cerr << "Character '" << temp << "' is not compatible with hexadecimal conversion." << std::endl;
+        std::cerr << "Cancel line processing:" << std::endl;
+        std::cerr << "Line: '" << line << "'" << std::endl;
+        return false;
       }
     }
+  }
+  return true;
+}
+
+/**
+ * @brief Opens a file.
+ * @param[in,out] stream The file stream.
+ * @param[in] path The file path.
+ * @param[in] mode The opening mode.
+ * @retval False if error, otherwise true.
+ * @retval Hex2BinOpenResult.
+ */
+template<class Stream>
+auto Hex2Bin::openFile(Stream& stream, const std::string& path, std::ios_base::openmode mode) -> Hex2BinOpenResult
+{
+  if(path.empty())
+  {
+    return Hex2BinOpenResult::Error;
+  }
+  if(!stream.is_open())
+  {
+    stream.open(path, mode);
+    if(!stream.is_open() || stream.fail())
+    {
+      return Hex2BinOpenResult::Error;
+    }
+    return Hex2BinOpenResult::Success;
+  }
+  else
+  {
+    return Hex2BinOpenResult::Already;
+  }
+}
+
+/**
+ * @brief Sets the value from a string.
+ * @param[out] output Output value.
+ * @param[in] value Integer value in string format.
+ * @param[out] what The cause of the error (if the function returns false).
+ * @retval False if error, otherwise true.
+ */
+auto Hex2Bin::setValueFromstring(std::uint32_t& output, const std::string& value, std::string& what) -> bool
+{
+  try
+  {
+    auto val = std::stoi(value);
+    if(val < 0)
+    {
+      val = 0;
+    }
+    output = val;
+  }
+  catch(const std::exception& e)
+  {
+    what = e.what();
+    return false;
   }
   return true;
 }
