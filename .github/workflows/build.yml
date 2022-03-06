@@ -60,8 +60,13 @@ jobs:
             cmake --version
             python --version
       - name: Configure for debug on ${{ matrix.name }}
+        if: startsWith(matrix.os, 'ubuntu')
         shell: bash
         run: cmake -S . -B build -DDISTRIBUTION=debug -G "${{ matrix.generators }}"
+      - name: Configure for debug on ${{ matrix.name }}
+        if: startsWith(matrix.os, 'windows')
+        shell: bash
+        run: cmake -S . -B build -DDISTRIBUTION=debug -G "${{ matrix.generators }}" -DCMAKE_GENERATOR_INSTANCE="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community"
       - name: Build debug on ${{ matrix.name }}
         shell: bash
         run: cmake --build build
@@ -74,8 +79,13 @@ jobs:
         run: |
             python test.py --file ${{ matrix.hex2binPathDebug }}
       - name: Configure for release on ${{ matrix.name }}
+        if: startsWith(matrix.os, 'ubuntu')
         shell: bash
         run: cmake -S . -B build -DDISTRIBUTION=release -G "${{ matrix.generators }}"
+      - name: Configure for release on ${{ matrix.name }}
+        if: startsWith(matrix.os, 'windows')
+        shell: bash
+        run: cmake -S . -B build -DDISTRIBUTION=release -G "${{ matrix.generators }}" -DCMAKE_GENERATOR_INSTANCE="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community"
       - name: Build release on ${{ matrix.name }}
         shell: bash
         run: cmake --build build
