@@ -20,7 +20,7 @@ Download the software :
 	cd hex2bin
 	cmake -DDISTRIBUTION=[debug|release] . -G"Visual Studio 17 2022"
 	cmake --build .
-	bin\hex2bin.exe -h
+	bin\Debug\hex2bin.exe -h
 
 ### GNU Linux
 Download the software :
@@ -31,7 +31,7 @@ Download the software :
 	cd hex2bin
 	cmake -DDISTRIBUTION=[debug|release] . [-G"Ninja"]
 	cmake --build .
-	./bin/hex2bin.exe -h
+	./bin/hex2bin -h
 
 ### All
 Supported cmake options (optional):
