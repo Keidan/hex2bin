@@ -1,0 +1,59 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Linux
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    name: Ubuntu Latest GCC
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+            sudo apt-get update
+            sudo apt-get install cmake ninja-build python3
+            ninja --version
+            cmake --version
+            gcc --version
+            python --version
+      - name: Configure for debug
+        shell: bash
+        run: cmake -S . -B build -DDISTRIBUTION=debug -G "Ninja"
+      - name: Build debug
+        shell: bash
+        run: cmake --build build
+      - name: Run gtest
+        shell: bash
+        run: |
+            ./bin/hex2bin_gtest
+      - name: Run test
+        shell: bash
+        run: |
+            python test.py --file bin/hex2bin
+      - name: Configure for release
+        shell: bash
+        run: cmake -S . -B build -DDISTRIBUTION=release -G "Ninja"
+      - name: Build release
+        shell: bash
+        run: cmake --build build
+      - name: Run test
+        shell: bash
+        run: |
+            python test.py --file bin/hex2bin

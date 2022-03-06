@@ -1,5 +1,6 @@
 # hex2bin
-[![Build Status](https://github.com/Keidan/hex2bin/actions/workflows/build.yml/badge.svg)][build]
+[![Linux CI](https://github.com/Keidan/hex2bin/actions/workflows/linux.yml/badge.svg)][linuxCI]
+[![Windows CI](https://github.com/Keidan/hex2bin/actions/workflows/windows.yml/badge.svg)][windowsCI]
 [![CodeFactor](https://www.codefactor.io/repository/github/keidan/hex2bin/badge)][codefactor]
 [![Release](https://img.shields.io/github/v/release/Keidan/hex2bin.svg?logo=github)][releases]
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)][license]
@@ -65,7 +66,8 @@ _For Windows, remember to add .exe after the binary name._
 
 [GPLv3](https://github.com/Keidan/hex2bin/blob/master/license.txt)
 
-[build]: https://github.com/Keidan/hex2bin/actions
+[linuxCI]: https://github.com/Keidan/hex2bin/actions?query=workflow%3ALinux
+[windowsCI]: https://github.com/Keidan/hex2bin/actions?query=workflow%3AWindows
 [codefactor]: https://www.codefactor.io/repository/github/keidan/hex2bin
 [releases]: https://github.com/Keidan/hex2bin/releases
 [license]: https://github.com/Keidan/hex2bin/blob/master/license.txt
