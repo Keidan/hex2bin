@@ -55,7 +55,7 @@ jobs:
       - name: Install dependencies on ${{ matrix.name }}
         if: startsWith(matrix.os, 'windows')
         run: |
-            choco install ninja cmake python3
+            choco install ninja cmake python3 visualstudio2019community
             ninja --version
             cmake --version
             python --version
