@@ -34,7 +34,7 @@ jobs:
               gtest: ./bin/Debug/hex2bin_gtest.exe
               hex2binPathDebug: bin/Debug/hex2bin.exe
               hex2binPathRelease: bin/Release/hex2bin.exe
-              
+
     name: ${{ matrix.name }}
     # The type of runner that the job will run on
     runs-on: ${{ matrix.os }}
@@ -61,7 +61,7 @@ jobs:
             python --version
       - name: Configure for debug on ${{ matrix.name }}
         shell: bash
-        run: cmake -S . -B build -DDISTRIBUTION=debug -G "{{ matrix.generators }}"
+        run: cmake -S . -B build -DDISTRIBUTION=debug -G "${{ matrix.generators }}"
       - name: Build debug on ${{ matrix.name }}
         shell: bash
         run: cmake --build build
