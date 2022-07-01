@@ -6,9 +6,9 @@ name: Windows
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master ]
+      - master
   pull_request:
-    branches: [ master ]
+    types: [opened, synchronize, reopened]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -20,7 +20,8 @@ jobs:
     name: Windows 2019 MSVC
     # The type of runner that the job will run on
     runs-on: windows-2019
-
+    env:
+      CMAKE_GENERATOR: "Visual Studio 16 2019""
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Checkout the code
@@ -31,7 +32,7 @@ jobs:
             python --version
       - name: Configure for debug
         shell: bash
-        run: cmake -S . -B build -DDISTRIBUTION=debug -G "Visual Studio 16 2019"
+        run: cmake -S . -B build -DDISTRIBUTION=debug -G "${{ env.CMAKE_GENERATOR }}"
       - name: Build debug
         shell: bash
         run: cmake --build build
@@ -45,7 +46,7 @@ jobs:
             python test.py --file bin/Debug/hex2bin.exe
       - name: Configure for release
         shell: bash
-        run: cmake -S . -B build -DDISTRIBUTION=release -G "Visual Studio 16 2019"
+        run: cmake -S . -B build -DDISTRIBUTION=release -G "${{ env.CMAKE_GENERATOR }}"
       - name: Build release
         shell: bash
         run: cmake --build build
@@ -53,3 +54,4 @@ jobs:
         shell: bash
         run: |
             python test.py --file bin/Debug/hex2bin.exe
+

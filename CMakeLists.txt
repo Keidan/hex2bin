@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
 project(hex2bin)
-set (VERSION_MAJOR 1)
-set (VERSION_MINOR 7)
+
+file(READ "version.txt" ver)
+string(REGEX MATCH "VERSION_MAJOR ([0-9]*)" _ ${ver})
+set(VERSION_MAJOR ${CMAKE_MATCH_1})
+string(REGEX MATCH "VERSION_MINOR ([0-9]*)" _ ${ver})
+set(VERSION_MINOR ${CMAKE_MATCH_1})
 
 message("Supported distrib.: cmake -DDISTRIBUTION=[debug|release]")
 message("Default start value: cmake -DDEFSTART=[int value] (see the '-s, --start' option of the binary)")
@@ -103,13 +107,18 @@ if("${DISTRIBUTION}" MATCHES "debug")
   endif()
 endif()
 
-
+add_custom_target(
+ update_sonar_version ALL
+ COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/update_sonar_version.py --root ${CMAKE_CURRENT_SOURCE_DIR}
+ COMMENT "Target update_sonar_version"
+)
 set(common_src ${APP_SRC_DIR}/Hex2Bin.cpp)
 set(bin_src ${common_src} ${APP_SRC_DIR}/main.cpp)
 if(WIN32)
   set(bin_src ${bin_src} ${APP_SRC_DIR}/win32/getopt.c ${APP_SRC_DIR}/win32/getopt_long.c ${APP_SRC_DIR}/win32/getopt.h)
 endif()
 add_executable(hex2bin ${bin_src})
+add_dependencies(hex2bin update_sonar_version)
 
 
 if("${DISTRIBUTION}" MATCHES "debug")

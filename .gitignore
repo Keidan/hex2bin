@@ -22,3 +22,4 @@ out/
 /win32/
 /x64/
 /build/
+/.vscode/
