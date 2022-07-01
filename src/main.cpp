@@ -50,7 +50,7 @@ static const struct option long_options[] = {
   { "extract_only" , 0, nullptr, 'e' },
   { nullptr        , 0, nullptr,  0  },
 };
-static std::shared_ptr<h2b::Hex2Bin> hex2bin = nullptr;
+static const std::shared_ptr<h2b::Hex2Bin> hex2bin = std::make_shared<h2b::Hex2Bin>();
 
 /* Static forward -----------------------------------------------------------*/
 static auto usage(int32_t xcode) -> void;
@@ -76,8 +76,6 @@ auto main(int argc, char** argv) -> int
   signal(SIGINT, signalHook);
   signal(SIGTERM, signalHook);
 #endif
-
-  hex2bin = std::make_shared<h2b::Hex2Bin>();
 
   processArguments(argc, argv, context);
 
