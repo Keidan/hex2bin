@@ -14,6 +14,7 @@
 #include <cstdio>
 #include <cstring>
 #include <algorithm>
+#include <exception>
 
 /* Usings -------------------------------------------------------------------*/
 using namespace h2b;
@@ -35,8 +36,9 @@ Hex2Bin::~Hex2Bin()
       m_output.close();
     }
   }
-  catch(...)
+  catch(const std::ios_base::failure& ex)
   {
+    std::cerr << "Exception: " << ex.what() << std::endl;
   }
 }
 
@@ -230,12 +232,8 @@ auto Hex2Bin::extractPrint() -> bool
   m_input.seekg(0, std::ios_base::beg);
 
   /* temp buffer */
-  auto* buf = new uint8_t[static_cast<std::uint32_t>(length)];
-  if(buf == nullptr)
-  {
-    std::cerr << "Unable to allocate a memory for the input buffer" << std::endl;
-    return false;
-  }
+  std::vector<uint8_t> buf{};
+  buf.reserve(length);
   auto i = 0L;
   while(offset < length)
   {
@@ -254,15 +252,14 @@ auto Hex2Bin::extractPrint() -> bool
   /* write the datas */
   for(i = 0; i < length; i += 2)
   {
-    char cc[] = {
+    std::string cc{
       static_cast<char>(buf[i]),
       static_cast<char>(buf[i + 1]),
       0
     };
-    m_output << static_cast<char>(std::stol(cc, nullptr, 16));
+    m_output << static_cast<char>(std::stol(cc.c_str(), nullptr, 16));
   }
   m_output.flush();
-  delete[] buf;
   return true;
 }
 
@@ -277,7 +274,8 @@ auto Hex2Bin::split(const std::string& in, const std::string& reg) -> std::vecto
 {
   // passing -1 as the submatch index parameter performs splitting
   std::regex re(reg);
-  std::sregex_token_iterator first{in.begin(), in.end(), re, -1}, last;
+  std::sregex_token_iterator first{in.begin(), in.end(), re, -1};
+  std::sregex_token_iterator last;
   return {first, last};
 }
 
@@ -358,7 +356,7 @@ auto Hex2Bin::validateHexAndLogOnError(const std::string& line, const std::strin
  * @retval Hex2BinOpenResult.
  */
 template<class Stream>
-auto Hex2Bin::openFile(Stream& stream, const std::string& path, std::ios_base::openmode mode) -> Hex2BinOpenResult
+auto Hex2Bin::openFile(Stream& stream, const std::string& path, std::ios_base::openmode mode) const -> Hex2BinOpenResult
 {
   if(path.empty())
   {
@@ -397,7 +395,12 @@ auto Hex2Bin::setValueFromstring(std::uint32_t& output, const std::string& value
     }
     output = val;
   }
-  catch(const std::exception& e)
+  catch(const std::invalid_argument& e)
+  {
+    what = e.what();
+    return false;
+  }
+  catch(const std::out_of_range& e)
   {
     what = e.what();
     return false;

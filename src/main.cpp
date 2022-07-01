@@ -15,7 +15,16 @@
 #endif
 #include <cerrno>
 #include <functional>
+#include <memory>
 #include "Hex2Bin.hpp"
+
+
+/* Defines-------------------------------------------------------------------*/
+#ifndef WIN32
+#define NO_RETURN __attribute__((noreturn))
+#else
+#define NO_RETURN
+#endif /* WIN32 */
 
 
 /* Usings--------------------------------------------------------------------*/
@@ -32,24 +41,23 @@ struct Context
 
 /* Private variables --------------------------------------------------------*/
 static const struct option long_options[] = {
-  { "help"         , 0, NULL, 'h' },
-  { "input"        , 1, NULL, 'i' },
-  { "output"       , 1, NULL, 'o' },
-  { "limit"        , 1, NULL, 'l' },
-  { "start"        , 1, NULL, 's' },
-  { "printable"    , 0, NULL, 'p' },
-  { "extract_only" , 0, NULL, 'e' },
-  { NULL           , 0, NULL,  0  },
+  { "help"         , 0, nullptr, 'h' },
+  { "input"        , 1, nullptr, 'i' },
+  { "output"       , 1, nullptr, 'o' },
+  { "limit"        , 1, nullptr, 'l' },
+  { "start"        , 1, nullptr, 's' },
+  { "printable"    , 0, nullptr, 'p' },
+  { "extract_only" , 0, nullptr, 'e' },
+  { nullptr        , 0, nullptr,  0  },
 };
-static h2b::Hex2Bin* hex2bin = nullptr;
+static std::shared_ptr<h2b::Hex2Bin> hex2bin = nullptr;
 
 /* Static forward -----------------------------------------------------------*/
 static auto usage(int32_t xcode) -> void;
 static auto signalHook(int s) -> void;
-static auto shutdownHook() -> void;
 static auto processMain(const Context& context) -> int;
-static auto decodeArgStartOrLimit(const std::string& optarg, bool isLimit) -> void;
-static auto decodeArgInputOrOutput(const std::string& optarg, bool isInput) -> void;
+static auto decodeArgStartOrLimit(const std::string& optionArg, bool isLimit) -> void;
+static auto decodeArgInputOrOutput(const std::string& optionArg, bool isInput) -> void;
 static auto processArguments(int argc, char** argv, Context& context) -> void;
 
 
@@ -62,15 +70,14 @@ auto main(int argc, char** argv) -> int
 
   std::memset(&sa, 0, sizeof(struct sigaction));
   sa.sa_handler = &signalHook;
-  sigaction(SIGINT, &sa, NULL);
-  sigaction(SIGTERM, &sa, NULL);
+  sigaction(SIGINT, &sa, nullptr);
+  sigaction(SIGTERM, &sa, nullptr);
 #else
   signal(SIGINT, signalHook);
   signal(SIGTERM, signalHook);
 #endif
-  atexit(shutdownHook);
 
-  hex2bin = new h2b::Hex2Bin();
+  hex2bin = std::make_shared<h2b::Hex2Bin>();
 
   processArguments(argc, argv, context);
 
@@ -83,27 +90,16 @@ auto main(int argc, char** argv) -> int
  * @brief Hook function used to capture signals.
  * @param[in] s Signal.
  */
-static auto signalHook(const int s) -> void
+static NO_RETURN void signalHook(const int s)
 {
   exit((s == SIGINT || s == SIGTERM) ? EXIT_SUCCESS : EXIT_FAILURE);
-}
-
-/**
- * @brief Hook function called by atexit.
- */
-static auto shutdownHook() -> void
-{
-  if(hex2bin != nullptr)
-  {
-    delete hex2bin, hex2bin = nullptr;
-  }
 }
 
 /**
  * @brief usage function.
  * @param[in] xcode The exit code.
  */
-static auto usage(const int32_t xcode) -> void
+static NO_RETURN void usage(const int32_t xcode)
 {
   std::cout << "hex2bin version " << VERSION_MAJOR << "." << VERSION_MINOR << " (";
 #if DEBUG
@@ -181,13 +177,13 @@ static auto processMain(const Context& context) -> int
 /* Arguments functions ------------------------------------------------------*/
 /**
  * @brief Decodes the "start" or "limit" argument.
- * @param[in] optarg Value of the argument.
+ * @param[in] optionArg Value of the argument.
  * @param[in] isLimit Argument "limit" or "start" ?
  */
-static auto decodeArgStartOrLimit(const std::string& optarg, const bool isLimit) -> void
+static auto decodeArgStartOrLimit(const std::string& optionArg, const bool isLimit) -> void
 {
   std::string what{};
-  const auto ret = isLimit ? hex2bin->setLimit(optarg, what) : hex2bin->setStart(optarg, what);
+  const auto ret = isLimit ? hex2bin->setLimit(optionArg, what) : hex2bin->setStart(optionArg, what);
   if(!ret)
   {
     std::cerr << "Invalid " << (isLimit ? "limit" : "start") << " value: " << what << std::endl;
@@ -198,12 +194,12 @@ static auto decodeArgStartOrLimit(const std::string& optarg, const bool isLimit)
 /**
  * @brief Decodes the "input" or "output" argument.
  * @note This function can call the "exit" method via the "usage" method call.
- * @param[in] optarg Value of the argument.
+ * @param[in] optionArg Value of the argument.
  * @param[in] isInput Argument "input" or "output" ?
  */
-static auto decodeArgInputOrOutput(const std::string& optarg, const bool isInput) -> void
+static auto decodeArgInputOrOutput(const std::string& optionArg, const bool isInput) -> void
 {
-  const auto openResult = isInput ? hex2bin->openInput(optarg) : hex2bin->openOutput(optarg);
+  const auto openResult = isInput ? hex2bin->openInput(optionArg) : hex2bin->openOutput(optionArg);
 
   if(openResult == Hex2BinOpenResult::Error)
   {
@@ -215,7 +211,7 @@ static auto decodeArgInputOrOutput(const std::string& optarg, const bool isInput
     if(strerror_s(error, ERROR_SIZE, errno))
       throw std::exception("strerror_s failed!");
 #endif
-    std::cerr << "Unable to open the file '" << optarg << "': (" << errno << ") " << error << std::endl;
+    std::cerr << "Unable to open the file '" << optionArg << "': (" << errno << ") " << error << std::endl;
     usage(EXIT_FAILURE);
   }
   else if(openResult == Hex2BinOpenResult::Already)
@@ -235,7 +231,7 @@ static auto processArguments(const int argc, char** argv, Context& context) -> v
 {
   auto opt = -1;
   /* parse the options */
-  while((opt = getopt_long(argc, argv, "hi:o:s:l:pe", long_options, NULL)) != -1)
+  while((opt = getopt_long(argc, argv, "hi:o:s:l:pe", long_options, nullptr)) != -1)
   {
     switch(opt)
     {

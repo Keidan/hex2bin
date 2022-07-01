@@ -41,8 +41,6 @@ namespace h2b
   {
     public:
       Hex2Bin() = default;
-      Hex2Bin(const Hex2Bin& p) = delete;
-      Hex2Bin(Hex2Bin&& p) = delete;
       virtual ~Hex2Bin();
 
       /**
@@ -50,14 +48,14 @@ namespace h2b
        * @param[in] path The file path.
        * @retval Hex2BinOpenResult.
        */
-      auto openInput(const std::string& path)->Hex2BinOpenResult;
+      auto openInput(const std::string& path) -> Hex2BinOpenResult;
 
       /**
        * @brief Opens the output file.
        * @param[in] path The file path.
        * @retval Hex2BinOpenResult.
        */
-      auto openOutput(const std::string& path)->Hex2BinOpenResult;
+      auto openOutput(const std::string& path) -> Hex2BinOpenResult;
 
       /**
        * @brief Sets the starting value.
@@ -77,7 +75,7 @@ namespace h2b
        * @brief Returns the start value.
        * @retval std::uint32_t
        */
-      auto getStart() const->std::uint32_t;
+      auto getStart() const -> std::uint32_t;
 
       /**
        * @brief Sets the limit value.
@@ -97,13 +95,13 @@ namespace h2b
        * @brief Returns the limit value.
        * @retval std::uint32_t
        */
-      auto getLimit() const->std::uint32_t;
+      auto getLimit() const -> std::uint32_t;
 
       /**
        * @brief Test if the files are open.
        * @retval Hex2BinIsOpen.
        */
-      auto isFilesOpen() const->Hex2BinIsOpen;
+      auto isFilesOpen() const -> Hex2BinIsOpen;
 
       /**
        * @brief Only extracts words from "start" to "limit".
@@ -134,14 +132,14 @@ namespace h2b
        * @param[in] reg The regex.
        * @retval The result in a vector.
        */
-      static auto split(const std::string& in, const std::string& reg)->std::vector<std::string>;
+      static auto split(const std::string& in, const std::string& reg) -> std::vector<std::string>;
 
       /**
        * @brief Returns a fragment of the input line.
        * @param[in] line The input line.
        * @retval The fragment of the input line.
        */
-      auto getFragment(const std::string& line) const->std::string;
+      auto getFragment(const std::string& line) const -> std::string;
 
       /**
        * @brief Searches for a string in another.
@@ -169,7 +167,7 @@ namespace h2b
        * @retval Hex2BinOpenResult.
        */
       template<class Stream>
-      auto openFile(Stream& stream, const std::string& path, std::ios_base::openmode mode)->Hex2BinOpenResult;
+      auto openFile(Stream& stream, const std::string& path, std::ios_base::openmode mode) const -> Hex2BinOpenResult;
 
       /**
        * @brief Sets the value from a string.

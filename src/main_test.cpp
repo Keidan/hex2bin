@@ -73,18 +73,10 @@ TEST(Hex2BinTest, TestLimit)
   EXPECT_EQ(1, hex2bin.getLimit() == value);
 }
 
-TEST(Hex2BinTest, TestExtractNoPrint1)
+static auto testExtractNoPrintWithStart(h2b::Hex2Bin& hex2bin, const std::string& sstart, const std::string& fileIn, const std::string& fileOut) -> void
 {
-  h2b::Hex2Bin hex2bin{};
-  const auto sstart = "6";
-  const auto slimit = "47";
-  const auto fileIn = SAMPLE1;
-  const auto fileOut = SAMPLE_TEMP;
   std::string what{};
 
-  EXPECT_EQ(1, hex2bin.setLimit(slimit, what) == true);
-  EXPECT_EQ(1, what.empty() == true);
-  EXPECT_EQ(1, hex2bin.isValidLimit() == true);
   EXPECT_EQ(1, hex2bin.setStart(sstart, what) == true);
   EXPECT_EQ(1, what.empty() == true);
   EXPECT_EQ(1, hex2bin.isValidStart() == true);
@@ -98,7 +90,18 @@ TEST(Hex2BinTest, TestExtractNoPrint1)
   EXPECT_EQ(1, oret == h2b::Hex2BinIsOpen::Success);
   EXPECT_EQ(1, hex2bin.extractNoPrint());
 
-  std::remove(fileOut);
+  std::remove(fileOut.c_str());
+}
+
+TEST(Hex2BinTest, TestExtractNoPrint1)
+{
+  h2b::Hex2Bin hex2bin{};
+  std::string what{};
+
+  EXPECT_EQ(1, hex2bin.setLimit("47", what) == true);
+  EXPECT_EQ(1, what.empty() == true);
+
+  testExtractNoPrintWithStart(hex2bin, "6", SAMPLE1, SAMPLE_TEMP);
 }
 
 TEST(Hex2BinTest, TestExtractNoPrint2)
@@ -128,26 +131,7 @@ TEST(Hex2BinTest, TestExtractNoPrint2)
 TEST(Hex2BinTest, TestExtractNoPrint3)
 {
   h2b::Hex2Bin hex2bin{};
-  const auto sstart = "1";
-  const auto fileIn = SAMPLE3;
-  const auto fileOut = SAMPLE_TEMP;
-  std::string what{};
-
-  EXPECT_EQ(1, hex2bin.setStart(sstart, what) == true);
-  EXPECT_EQ(1, what.empty() == true);
-  EXPECT_EQ(1, hex2bin.isValidStart() == true);
-
-
-  const auto retIn = hex2bin.openInput(fileIn);
-  const auto retOut = hex2bin.openOutput(fileOut);
-  const auto oret = hex2bin.isFilesOpen();
-
-  EXPECT_EQ(1, retIn == h2b::Hex2BinOpenResult::Success);
-  EXPECT_EQ(1, retOut == h2b::Hex2BinOpenResult::Success);
-  EXPECT_EQ(1, oret == h2b::Hex2BinIsOpen::Success);
-  EXPECT_EQ(1, hex2bin.extractNoPrint());
-
-  std::remove(fileOut);
+  testExtractNoPrintWithStart(hex2bin, "1", SAMPLE3, SAMPLE_TEMP);
 }
 
 /* Public function ----------------------------------------------------------*/
