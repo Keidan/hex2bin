@@ -12,21 +12,21 @@ RESULT3 = "00000000005030000000000000603000"
 class Test:
   def __init__(self):
     self.testNum = 1
-  def testPass(self, label):
+  def test_pass(self, label):
     print("Test \033[1m{0}\033[0m \033[38;5;208m{1}\033[0m \033[32mOK\033[0m".format(self.testNum, label))
     self.testNum = self.testNum + 1
         
-  def testFail(self, label):
+  def test_fail(self, label):
     print("Test \033[1m{0}\033[0m \033[38;5;208m{1}\033[0m \033[31mFAILED\033[0m".format(self.testNum, label))
     sys.exit(1)
     
-def execProcess(args):
+def exec_process(args):
   process = subprocess.Popen(args)
   stdout, stderr = process.communicate()
-  exitCode = process.wait()
-  return exitCode
+  exit_code = process.wait()
+  return exit_code
 
-def readFile(file):
+def read_file(file):
   with open(file) as f:
     content = f.read()
   return content
@@ -47,45 +47,44 @@ def main(argv):
     sys.exit(1)
     
   t = Test()
-  curDir = os.getcwd()
-  sampleDir = getSample(SAMPLE_TEMP)
-  retCode = execProcess([args.file, "-i", getSample(SAMPLE1), "-o", sampleDir, "-s", "6", "-l", "47"])
-  if retCode != 0:
-    os.remove(sampleDir)
-    t.testFail("sample1 exec")
+  sample_dir = getSample(SAMPLE_TEMP)
+  ret_code = exec_process([args.file, "-i", getSample(SAMPLE1), "-o", sample_dir, "-s", "6", "-l", "47"])
+  if ret_code != 0:
+    os.remove(sample_dir)
+    t.test_fail("sample1 exec")
 
-  t.testPass("sample1 exec   ")
-  result = readFile(sampleDir)
+  t.test_pass("sample1 exec   ")
+  result = read_file(sample_dir)
   if result != RESULT1:
-    os.remove(sampleDir)
-    t.testFail("sample1 compare")
+    os.remove(sample_dir)
+    t.test_fail("sample1 compare")
 
-  t.testPass("sample1 compare")
-  retCode = execProcess([args.file, "-i", getSample(SAMPLE2), "-o", sampleDir, "-l", "47"])
-  if retCode != 0:
-    os.remove(sampleDir)
-    t.testFail("sample2 exec")
+  t.test_pass("sample1 compare")
+  ret_code = exec_process([args.file, "-i", getSample(SAMPLE2), "-o", sample_dir, "-l", "47"])
+  if ret_code != 0:
+    os.remove(sample_dir)
+    t.test_fail("sample2 exec")
 
-  t.testPass("sample2 exec   ")
-  result = readFile(sampleDir)
+  t.test_pass("sample2 exec   ")
+  result = read_file(sample_dir)
   if result != RESULT2:
-    os.remove(sampleDir)
-    t.testFail("sample2 compare")
+    os.remove(sample_dir)
+    t.test_fail("sample2 compare")
 
-  t.testPass("sample2 compare")
-  retCode = execProcess([args.file, "-i", getSample(SAMPLE3), "-o", sampleDir, "-s", "1"])
-  if retCode != 0:
-    os.remove(sampleDir)
-    t.testFail("sample3 exec")
+  t.test_pass("sample2 compare")
+  ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-s", "1"])
+  if ret_code != 0:
+    os.remove(sample_dir)
+    t.test_fail("sample3 exec")
 
-  t.testPass("sample3 exec   ")
+  t.test_pass("sample3 exec   ")
   if result != RESULT3:
-    os.remove(sampleDir)
-    t.testFail("sample3 compare")
+    os.remove(sample_dir)
+    t.test_fail("sample3 compare")
     
-  t.testPass("sample3 compare")
+  t.test_pass("sample3 compare")
   print("TEST \033[32mPASSED\033[0m")
-  os.remove(sampleDir)
+  os.remove(sample_dir)
   
 if __name__ == '__main__':
   main(sys.argv[1:])
