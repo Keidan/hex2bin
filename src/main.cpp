@@ -237,7 +237,6 @@ static auto processArguments(const int argc, char** argv, Context& context) -> v
     {
       case 'h': /* help */
         usage(EXIT_SUCCESS);
-        break;
       case 'i': /* input */
         decodeArgInputOrOutput(optarg, true);
         break;
