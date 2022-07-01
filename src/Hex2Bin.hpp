@@ -181,6 +181,20 @@ namespace h2b
        * @retval False if error, otherwise true.
        */
       static auto setValueFromstring(std::uint32_t& output, const std::string& value, std::string& what) -> bool;
+
+      /**
+       * @brief Extracts and without converting all printable characters (sub loop 1).
+       * @param[in] fragment A fragment of the input line.
+       * @param[out] error Error?
+       */
+      auto extractNoPrintSpaceFound(const std::string& fragment, bool& error) -> void;
+
+      /**
+       * @brief Extracts and without converting all printable characters (sub loop 2).
+       * @param[in] fragment A fragment of the input line.
+       * @param[out] error Error?
+       */
+      auto extractNoPrintNoSpaceFound(const std::string& fragment, bool& error) -> void;
   };
 }
 #endif /* __HEX2BIN_HPP__ */

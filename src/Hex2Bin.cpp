@@ -183,16 +183,7 @@ auto Hex2Bin::extractNoPrint() -> bool
     const auto idxSpace = fragment.find(' ');
     if(idxSpace != std::string::npos)
     {
-      auto tokens = split(fragment, "\\s+");
-      for(const auto& token : tokens)
-      {
-        if(!validateHexAndLogOnError(fragment, token))
-        {
-          error = true;
-          continue;
-        }
-        m_output << static_cast<char>(std::stol(token, nullptr, 16));
-      }
+      extractNoPrintSpaceFound(fragment, error);
     }
     else
     {
@@ -203,17 +194,7 @@ auto Hex2Bin::extractNoPrint() -> bool
         error = true;
         continue;
       }
-      for(auto i = 0U; i < fragment.length(); i += 2)
-      {
-        auto s1 = std::string(1, fragment[i]);
-        auto s2 = std::string(1, fragment[i + 1]);
-        if(!validateHexAndLogOnError(fragment, s1) || !validateHexAndLogOnError(fragment, s2))
-        {
-          error = true;
-          break;
-        }
-        m_output << static_cast<char>(std::stol(s1 + s2, nullptr, 16));
-      }
+      extractNoPrintNoSpaceFound(fragment, error);
     }
   }
   m_output.flush();
@@ -412,3 +393,43 @@ auto Hex2Bin::setValueFromstring(std::uint32_t& output, const std::string& value
   }
   return true;
 }
+
+/**
+ * @brief Extracts and without converting all printable characters (sub loop 1).
+ * @param[in] fragment A fragment of the input line.
+ * @param[out] error Error?
+ */
+auto Hex2Bin::extractNoPrintSpaceFound(const std::string& fragment, bool& error) -> void
+{
+  auto tokens = split(fragment, "\\s+");
+  for(const auto& token : tokens)
+  {
+    if(!validateHexAndLogOnError(fragment, token))
+    {
+      error = true;
+      continue;
+    }
+    m_output << static_cast<char>(std::stol(token, nullptr, 16));
+  }
+}
+
+/**
+ * @brief Extracts and without converting all printable characters (sub loop 2).
+ * @param[in] fragment A fragment of the input line.
+ * @param[out] error Error?
+ */
+auto Hex2Bin::extractNoPrintNoSpaceFound(const std::string& fragment, bool& error) -> void
+{
+  for(auto i = 0U; i < fragment.length(); i += 2)
+  {
+    auto s1 = std::string(1, fragment[i]);
+    auto s2 = std::string(1, fragment[i + 1]);
+    if(!validateHexAndLogOnError(fragment, s1) || !validateHexAndLogOnError(fragment, s2))
+    {
+      error = true;
+      break;
+    }
+    m_output << static_cast<char>(std::stol(s1 + s2, nullptr, 16));
+  }
+}
+
