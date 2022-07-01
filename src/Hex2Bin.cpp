@@ -23,7 +23,11 @@ using namespace h2b;
 static constexpr auto* HEX = "0123456789abcdef\0";
 
 /* Public functions ---------------------------------------------------------*/
-Hex2Bin::~Hex2Bin()
+
+/**
+ * @brief Closes the files.
+ */
+auto Hex2Bin::close() -> void
 {
   try
   {
@@ -245,7 +249,8 @@ auto Hex2Bin::extractPrint() -> bool
     offset++;
     if(std::isalnum(c))
     {
-      buf[i++] = static_cast<uint8_t>(c);
+      buf[i] = static_cast<uint8_t>(c);
+      i++;
     }
   }
   length = i;

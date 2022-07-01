@@ -55,6 +55,7 @@ static const std::shared_ptr<h2b::Hex2Bin> hex2bin = std::make_shared<h2b::Hex2B
 /* Static forward -----------------------------------------------------------*/
 static auto usage(int32_t xcode) -> void;
 static auto signalHook(int s) -> void;
+static auto shutdownHook() -> void;
 static auto processMain(const Context& context) -> int;
 static auto decodeArgStartOrLimit(const std::string& optionArg, bool isLimit) -> void;
 static auto decodeArgInputOrOutput(const std::string& optionArg, bool isInput) -> void;
@@ -76,6 +77,7 @@ auto main(int argc, char** argv) -> int
   signal(SIGINT, signalHook);
   signal(SIGTERM, signalHook);
 #endif
+  atexit(shutdownHook);
 
   processArguments(argc, argv, context);
 
@@ -93,6 +95,13 @@ static NO_RETURN void signalHook(const int s)
   exit((s == SIGINT || s == SIGTERM) ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 
+/**
+ * @brief Hook function called by atexit.
+ */
+static auto shutdownHook() -> void
+{
+  hex2bin->close();
+}
 /**
  * @brief usage function.
  * @param[in] xcode The exit code.

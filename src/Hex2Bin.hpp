@@ -41,7 +41,6 @@ namespace h2b
   {
     public:
       Hex2Bin() = default;
-      virtual ~Hex2Bin();
 
       /**
        * @brief Opens the input file.
@@ -56,6 +55,11 @@ namespace h2b
        * @retval Hex2BinOpenResult.
        */
       auto openOutput(const std::string& path) -> Hex2BinOpenResult;
+
+      /**
+       * @brief Closes the files.
+       */
+      auto close() -> void;
 
       /**
        * @brief Sets the starting value.
