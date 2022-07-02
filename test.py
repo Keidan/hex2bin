@@ -4,6 +4,7 @@ import argparse, sys, os, subprocess
 SAMPLE1 = "sample1.txt"
 SAMPLE2 = "sample2.txt"
 SAMPLE3 = "sample3.txt"
+SAMPLE4 = "sample4.txt"
 SAMPLE_TEMP = "sample.txt.temp"
 RESULT1 = "00000000004030000000000000203000"
 RESULT2 = "00000000005030000000000000603000"
@@ -42,6 +43,7 @@ def getSample(file):
 def main(argv):
   parser = argparse.ArgumentParser()
   parser.add_argument("-f", "--file", help="Binary file.")
+  parser.add_argument("-e", "--extra", action='store_true', help="Extra tests.")
   args = parser.parse_args()
   if args.file == None:
     print("Unspecified file name")
@@ -87,43 +89,55 @@ def main(argv):
     t.test_fail("sample3 compare")
   t.test_pass("sample3 compare")
 
-  ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-p"])
-  if ret_code != 0:
-    os.remove(sample_dir)
-    t.test_fail("sample4 exec")
-  t.test_pass("sample4 exec   ")
+  if args.extra:
+    ret_code = exec_process([args.file, "-i", getSample(SAMPLE4), "-o", sample_dir, "-s", "1"])
+    if ret_code == 0:
+      os.remove(sample_dir)
+      t.test_fail("sample4 exec")
+    t.test_pass("sample4 exec   ")
 
-  ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-e"])
-  if ret_code != 0:
-    os.remove(sample_dir)
-    t.test_fail("sample5 exec")
-  t.test_pass("sample5 exec   ")
+    ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-p"])
+    if ret_code != 0:
+      os.remove(sample_dir)
+      t.test_fail("print exec")
+    t.test_pass("print exec     ")
 
-  ret_code = exec_process([args.file, "-0"], False)
-  if ret_code == 0:
-    t.test_fail("opt error")
-  t.test_pass("opt error      ")
+    ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-e"])
+    if ret_code != 0:
+      os.remove(sample_dir)
+      t.test_fail("extract exec")
+    t.test_pass("extract exec   ")
 
-  ret_code = exec_process([args.file, "-i", "hey"], False)
-  if ret_code == 0:
-    t.test_fail("file in error")
-  t.test_pass("file in error  ")
+    ret_code = exec_process([args.file, "-0"], False)
+    if ret_code == 0:
+      t.test_fail("opt error")
+    t.test_pass("opt error      ")
 
-  ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir])
-  if ret_code == 0:
-    os.remove(sample_dir)
-    t.test_fail("even exec")
-  t.test_pass("even exec      ")
+    ret_code = exec_process([args.file, "-i", "hey"], False)
+    if ret_code == 0:
+      t.test_fail("file in error")
+    t.test_pass("file in error  ")
 
-  ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-l", "az"], False)
-  if ret_code == 0:
-    t.test_fail("limit error")
-  t.test_pass("limit error    ")
+    ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", "/root/test"], False)
+    if ret_code == 0:
+      t.test_fail("file out error")
+    t.test_pass("file out error ")
 
-  ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-s", "az"], False)
-  if ret_code == 0:
-    t.test_fail("start error")
-  t.test_pass("start error    ")
+    ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir])
+    if ret_code == 0:
+      os.remove(sample_dir)
+      t.test_fail("even exec")
+    t.test_pass("even exec      ")
+
+    ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-l", "az"], False)
+    if ret_code == 0:
+      t.test_fail("limit error")
+    t.test_pass("limit error    ")
+
+    ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-s", "az"], False)
+    if ret_code == 0:
+      t.test_fail("start error")
+    t.test_pass("start error    ")
 
   print("TEST \033[32mPASSED\033[0m")
   os.remove(sample_dir)

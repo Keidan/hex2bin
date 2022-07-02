@@ -94,7 +94,7 @@ jobs:
       - name: Run test
         shell: bash
         run: |
-            python test.py --file bin/hex2bin
+            python test.py --file bin/hex2bin --extra
       - name: Collect coverage into one XML report
         run: |
           gcovr --sonarqube > coverage.xml
