@@ -303,7 +303,7 @@ auto Hex2Bin::validateHexAndLogOnError(const std::string& line, const std::strin
   {
     if(!search(HEX, s, true))
     {
-      std::cerr << "Character '" << s << "' is not compatible with hexadecimal conversion." << std::endl;
+      std::cerr << "0 Character '" << s << "' is not compatible with hexadecimal conversion." << std::endl;
       std::cerr << "Cancel line processing:" << std::endl;
       std::cerr << "Line: '" << line << "'" << std::endl;
       return false;
@@ -316,7 +316,7 @@ auto Hex2Bin::validateHexAndLogOnError(const std::string& line, const std::strin
       auto temp = std::string(1, c);
       if(!search(HEX, temp, true))
       {
-        std::cerr << "Character '" << temp << "' is not compatible with hexadecimal conversion." << std::endl;
+        std::cerr << "1 Character '" << temp << "' is not compatible with hexadecimal conversion." << std::endl;
         std::cerr << "Cancel line processing:" << std::endl;
         std::cerr << "Line: '" << line << "'" << std::endl;
         return false;
