@@ -137,11 +137,9 @@ if("${DISTRIBUTION}" MATCHES "debug")
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   )
   set(OBJECT_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/hex2bin.dir/src)
-  set(OBJECT_DIR_TEST ${CMAKE_BINARY_DIR}/CMakeFiles/hex2bin_gtest.dir/src)
   add_custom_command(TARGET gcov
     COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/Hex2Bin.cpp.gcno -o ${OBJECT_DIR}
     COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/main.cpp.gcno -o ${OBJECT_DIR}
-    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/main_test.cpp.gcno -o ${OBJECT_DIR_TEST}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage
   )
   add_dependencies(gcov hex2bin)
