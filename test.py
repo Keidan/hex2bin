@@ -20,9 +20,13 @@ class Test:
     print("Test \033[1m{0}\033[0m \033[38;5;208m{1}\033[0m \033[31mFAILED\033[0m".format(self.testNum, label))
     sys.exit(1)
     
-def exec_process(args):
-  process = subprocess.Popen(args)
-  stdout, stderr = process.communicate()
+def exec_process(args, useStd = True):
+  if useStd:
+    process = subprocess.Popen(args)
+    stdout, stderr = process.communicate()
+  else:
+    process = subprocess.Popen(args, stdout=subprocess.DEVNULL)
+    process.communicate()
   exit_code = process.wait()
   return exit_code
 
@@ -52,49 +56,75 @@ def main(argv):
   if ret_code != 0:
     os.remove(sample_dir)
     t.test_fail("sample1 exec")
-
   t.test_pass("sample1 exec   ")
+
   result = read_file(sample_dir)
   if result != RESULT1:
     os.remove(sample_dir)
     t.test_fail("sample1 compare")
-
   t.test_pass("sample1 compare")
+
   ret_code = exec_process([args.file, "-i", getSample(SAMPLE2), "-o", sample_dir, "-l", "47"])
   if ret_code != 0:
     os.remove(sample_dir)
     t.test_fail("sample2 exec")
-
   t.test_pass("sample2 exec   ")
+
   result = read_file(sample_dir)
   if result != RESULT2:
     os.remove(sample_dir)
     t.test_fail("sample2 compare")
-
   t.test_pass("sample2 compare")
+
   ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-s", "1"])
   if ret_code != 0:
     os.remove(sample_dir)
     t.test_fail("sample3 exec")
-
   t.test_pass("sample3 exec   ")
+
   if result != RESULT3:
     os.remove(sample_dir)
     t.test_fail("sample3 compare")
-    
   t.test_pass("sample3 compare")
+
   ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-p"])
   if ret_code != 0:
     os.remove(sample_dir)
     t.test_fail("sample4 exec")
-
   t.test_pass("sample4 exec   ")
+
   ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-e"])
   if ret_code != 0:
     os.remove(sample_dir)
     t.test_fail("sample5 exec")
-
   t.test_pass("sample5 exec   ")
+
+  ret_code = exec_process([args.file, "-0"], False)
+  if ret_code == 0:
+    t.test_fail("opt error")
+  t.test_pass("opt error      ")
+
+  ret_code = exec_process([args.file, "-i", "hey"], False)
+  if ret_code == 0:
+    t.test_fail("file in error")
+  t.test_pass("file in error  ")
+
+  ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir])
+  if ret_code == 0:
+    os.remove(sample_dir)
+    t.test_fail("even exec")
+  t.test_pass("even exec      ")
+
+  ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-l", "az"], False)
+  if ret_code == 0:
+    t.test_fail("limit error")
+  t.test_pass("limit error    ")
+
+  ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-s", "az"], False)
+  if ret_code == 0:
+    t.test_fail("start error")
+  t.test_pass("start error    ")
+
   print("TEST \033[32mPASSED\033[0m")
   os.remove(sample_dir)
   
