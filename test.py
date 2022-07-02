@@ -83,6 +83,18 @@ def main(argv):
     t.test_fail("sample3 compare")
     
   t.test_pass("sample3 compare")
+  ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-p"])
+  if ret_code != 0:
+    os.remove(sample_dir)
+    t.test_fail("sample4 exec")
+
+  t.test_pass("sample4 exec   ")
+  ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-e"])
+  if ret_code != 0:
+    os.remove(sample_dir)
+    t.test_fail("sample5 exec")
+
+  t.test_pass("sample5 exec   ")
   print("TEST \033[32mPASSED\033[0m")
   os.remove(sample_dir)
   

@@ -89,6 +89,7 @@ jobs:
       - name: Run gtest
         shell: bash
         run: |
+            ./bin/hex2bin --help
             ./bin/hex2bin_gtest
       - name: Run test
         shell: bash
