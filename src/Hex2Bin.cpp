@@ -271,7 +271,7 @@ auto Hex2Bin::getFragment(const std::string& line) const -> std::string
     len = 0UL;
   }
   const auto lim = (m_limit == 0 || m_limit > len) ? len : m_limit;
-  return line.substr(m_start, lim);
+  return line.substr(std::min(m_start, static_cast<std::uint32_t>(len)), lim);
 }
 
 /**
@@ -376,12 +376,12 @@ auto Hex2Bin::setValueFromstring(std::uint32_t& output, const std::string& value
   }
   catch(const std::invalid_argument& e)
   {
-    what = e.what();
+    what = std::string("invalid_argument: ") + e.what();
     return false;
   }
   catch(const std::out_of_range& e)
   {
-    what = e.what();
+    what = std::string("out_of_range: ") + e.what();
     return false;
   }
   return true;
