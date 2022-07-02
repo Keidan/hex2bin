@@ -111,7 +111,23 @@ def main(argv):
     ret_code = exec_process([args.file, "-0"], False)
     if ret_code == 0:
       t.test_fail("opt error")
-    t.test_pass("opt error      ")
+    t.test_pass("opt error    ")
+
+    ret_code = exec_process([args.file, "-o", "file_not_found"], False)
+    os.remove("file_not_found")
+    if ret_code == 0:
+      t.test_fail("no in error")
+    t.test_pass("no in error  ")
+
+    ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-s", "1"], False)
+    if ret_code == 0:
+      t.test_fail("no out error")
+    t.test_pass("no out error ")
+
+    ret_code = exec_process([args.file], False)
+    if ret_code == 0:
+      t.test_fail("nofile error")
+    t.test_pass("nofile error ")
 
     ret_code = exec_process([args.file, "-i", "file_not_found"], False)
     if ret_code == 0:
