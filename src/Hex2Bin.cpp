@@ -29,20 +29,13 @@ static constexpr auto* HEX = "0123456789abcdef\0";
  */
 auto Hex2Bin::close() -> void
 {
-  try
+  if(m_input.is_open())
   {
-    if(m_input.is_open())
-    {
-      m_input.close();
-    }
-    if(m_output.is_open())
-    {
-      m_output.close();
-    }
+    m_input.close();
   }
-  catch(const std::ios_base::failure& ex)
+  if(m_output.is_open())
   {
-    std::cerr << "Exception: " << ex.what() << std::endl;
+    m_output.close();
   }
 }
 
