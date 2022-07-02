@@ -45,11 +45,17 @@ jobs:
       - name: Install dependencies
         run: |
             sudo apt-get update
-            sudo apt-get install cmake ninja-build python3
+            sudo apt-get install cmake ninja-build
             ninja --version
             cmake --version
             gcc --version
-            python --version
+      - name: Set up Python 3.8 for gcovr
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: install gcovr 5.0
+        run: |
+          pip install gcovr==5.0 # 5.1 is not supported
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
@@ -77,6 +83,9 @@ jobs:
       - name: Build debug
         shell: bash
         run: cmake --build build
+      - name: Generate GCOV
+        run: |
+          cmake --build build --target gcov
       - name: Run gtest
         shell: bash
         run: |
@@ -85,6 +94,9 @@ jobs:
         shell: bash
         run: |
             python test.py --file bin/hex2bin
+      - name: Collect coverage into one XML report
+        run: |
+          gcovr --sonarqube > coverage.xml
       - name: Configure for release
         shell: bash
         run: cmake -S . -B build -DDISTRIBUTION=release -G "${{ env.CMAKE_GENERATOR }}"
@@ -98,10 +110,13 @@ jobs:
       - name: Run build-wrapper
         run: |
           cmake -S . -B build -DDISTRIBUTION=debug -G "${{ env.CMAKE_GENERATOR }}"
-          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build build/ --config Release
+          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build build
       - name: Run sonar-scanner
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          sonar-scanner --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}"
+          sonar-scanner \
+            --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" \
+            --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}" \
+            --define sonar.coverageReportPaths=coverage.xml

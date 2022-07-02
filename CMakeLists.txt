@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 project(hex2bin)
 
@@ -36,6 +36,8 @@ else()
     add_definitions(-DWIN32)
   else(WIN32)
     set(CXX_OPTIONS "-Wall -Og -g -std=c++11")
+    # GCOV
+    set(CXX_OPTIONS "${CXX_OPTIONS} --coverage")
   endif(WIN32)
   add_definitions(-DDEBUG)
   add_definitions(-D_DEBUG)
@@ -112,6 +114,7 @@ add_custom_target(
  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/update_sonar_version.py --root ${CMAKE_CURRENT_SOURCE_DIR}
  COMMENT "Target update_sonar_version"
 )
+
 set(common_src ${APP_SRC_DIR}/Hex2Bin.cpp)
 set(bin_src ${common_src} ${APP_SRC_DIR}/main.cpp)
 if(WIN32)
@@ -127,4 +130,31 @@ if("${DISTRIBUTION}" MATCHES "debug")
   # Now simply link against gtest or gtest_main as needed. Eg
   target_link_libraries(hex2bin_gtest gtest_main)
   add_test(NAME hex2bin_test COMMAND hex2bin_gtest)
+
+  # Create the gcov target. Run coverage tests with 'make gcov'
+  add_custom_target(gcov
+    COMMAND mkdir -p coverage
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  )
+  set(OBJECT_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/hex2bin.dir/src)
+  set(OBJECT_DIR_TEST ${CMAKE_BINARY_DIR}/CMakeFiles/hex2bin_gtest.dir/src)
+  add_custom_command(TARGET gcov
+    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/Hex2Bin.cpp.gcno -o ${OBJECT_DIR}
+    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/main.cpp.gcno -o ${OBJECT_DIR}
+    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/main_test.cpp.gcno -o ${OBJECT_DIR_TEST}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage
+  )
+  add_dependencies(gcov hex2bin)
+
+  # Make sure to clean up the coverage folder
+  set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES coverage)
+
+  # Create the gcov-clean target. This cleans the build as well as generated 
+  # .gcda and .gcno files.
+  add_custom_target(scrub
+    COMMAND ${CMAKE_MAKE_PROGRAM} clean
+    COMMAND rm -f ${OBJECT_DIR}/*.gcno
+    COMMAND rm -f ${OBJECT_DIR}/*.gcda
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  )
 endif()
