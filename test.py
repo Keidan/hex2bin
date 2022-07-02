@@ -139,6 +139,11 @@ def main(argv):
       t.test_fail("limit2 error")
     t.test_pass("limit2 error ")
 
+    ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-l", "-1"], False)
+    if ret_code == 0:
+      t.test_fail("limit3 error")
+    t.test_pass("limit3 error ")
+
     ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", sample_dir, "-s", "az"], False)
     if ret_code == 0:
       t.test_fail("start1 error")
@@ -153,6 +158,11 @@ def main(argv):
     if ret_code == 0:
       t.test_fail("start3 error")
     t.test_pass("start3 error ")
+
+    ret_code = exec_process([args.file, "-i", getSample(SAMPLE4), "-o", sample_dir, "-s", "-1"], False)
+    if ret_code == 0:
+      t.test_fail("start4 error")
+    t.test_pass("start4 error ")
 
   print("TEST \033[32mPASSED\033[0m")
   os.remove(sample_dir)

@@ -97,7 +97,7 @@ jobs:
           cmake --build build --target gcov
       - name: Collect coverage into one XML report
         run: |
-          gcovr --sonarqube > coverage.xml
+          gcovr --exclude-throw-branches --sonarqube > coverage.xml
       - name: Configure for release
         shell: bash
         run: cmake -S . -B build -DDISTRIBUTION=release -G "${{ env.CMAKE_GENERATOR }}"
