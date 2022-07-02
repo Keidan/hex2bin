@@ -113,12 +113,12 @@ def main(argv):
       t.test_fail("opt error")
     t.test_pass("opt error      ")
 
-    ret_code = exec_process([args.file, "-i", "hey"], False)
+    ret_code = exec_process([args.file, "-i", "file_not_found"], False)
     if ret_code == 0:
       t.test_fail("file in error")
     t.test_pass("file in error  ")
 
-    ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", "/root/test"], False)
+    ret_code = exec_process([args.file, "-i", getSample(SAMPLE3), "-o", "/file_not_found"], False)
     if ret_code == 0:
       t.test_fail("file out error")
     t.test_pass("file out error ")

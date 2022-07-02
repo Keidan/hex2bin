@@ -27,7 +27,9 @@ TEST(Hex2BinTest, TestOpenOutput)
   h2b::Hex2Bin hex2bin{};
   const auto file = SAMPLE_TEMP;
   const auto ret = hex2bin.openOutput(file);
+  const auto oretInput = hex2bin.isFilesOpen();
   EXPECT_EQ(1, ret == h2b::Hex2BinOpenResult::Success);
+  EXPECT_EQ(1, oretInput == h2b::Hex2BinIsOpen::Input);
   std::remove(SAMPLE_TEMP);
 }
 
@@ -36,15 +38,19 @@ TEST(Hex2BinTest, TestOpenFiles)
   h2b::Hex2Bin hex2bin{};
   const auto fileIn = SAMPLE1;
   const auto fileOut = SAMPLE_TEMP;
+  const auto oretBoth = hex2bin.isFilesOpen();
   const auto retIn = hex2bin.openInput(fileIn);
+  const auto oretOutput = hex2bin.isFilesOpen();
   const auto retOut = hex2bin.openOutput(fileOut);
-  const auto oret = hex2bin.isFilesOpen();
+  const auto oretSuccess = hex2bin.isFilesOpen();
 
   std::remove(fileOut);
 
   EXPECT_EQ(1, retIn == h2b::Hex2BinOpenResult::Success);
   EXPECT_EQ(1, retOut == h2b::Hex2BinOpenResult::Success);
-  EXPECT_EQ(1, oret == h2b::Hex2BinIsOpen::Success);
+  EXPECT_EQ(1, oretBoth == h2b::Hex2BinIsOpen::Both);
+  EXPECT_EQ(1, oretOutput == h2b::Hex2BinIsOpen::Output);
+  EXPECT_EQ(1, oretSuccess == h2b::Hex2BinIsOpen::Success);
 }
 
 TEST(Hex2BinTest, TestStart)
