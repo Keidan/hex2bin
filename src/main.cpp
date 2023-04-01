@@ -135,8 +135,8 @@ static NO_RETURN void usage(const int32_t xcode)
  */
 static auto processMain(const Context& context) -> int
 {
-  const auto isOpen = hex2bin->isFilesOpen();
-  if(Hex2BinIsOpen::Success != isOpen)
+  
+  if(const auto isOpen = hex2bin->isFilesOpen(); Hex2BinIsOpen::Success != isOpen)
   {
     if(Hex2BinIsOpen::Both == isOpen)
     {
