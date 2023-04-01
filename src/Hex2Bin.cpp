@@ -78,7 +78,7 @@ auto Hex2Bin::setStart(const std::string& value, std::string& what) -> bool
  */
 auto Hex2Bin::isValidStart() const -> bool
 {
-  return m_start != 0;
+  return 0U != m_start;
 }
 
 /**
@@ -107,7 +107,7 @@ auto Hex2Bin::setLimit(const std::string& value, std::string& what) -> bool
  */
 auto Hex2Bin::isValidLimit() const -> bool
 {
-  return m_limit != 0;
+  return 0U != m_limit;
 }
 
 /**
@@ -150,7 +150,7 @@ auto Hex2Bin::extractOnly() -> void
   while(std::getline(m_input, line))
   {
     auto fragment = getFragment(line);
-    if(!fragment.empty() && fragment.at(fragment.size() - 1) != '\n') fragment += "\n";
+    if(!fragment.empty() && fragment.at(fragment.size() - 1U) != '\n') fragment += "\n";
     m_output << fragment;
   }
   m_output.flush();
@@ -174,13 +174,13 @@ auto Hex2Bin::extractNoPrint() -> bool
     auto fragment = getFragment(line);
 
     const auto idxSpace = fragment.find(' ');
-    if(idxSpace != std::string::npos)
+    if(std::string::npos != idxSpace)
     {
       extractNoPrintSpaceFound(fragment, error);
     }
     else
     {
-      if(fragment.length() % 2)
+      if(fragment.length() % 2U)
       {
         std::cerr << "The following line must have an even number of characters:" << std::endl;
         std::cerr << "Line: '" << fragment << "'" << std::endl;
@@ -207,7 +207,7 @@ auto Hex2Bin::extractPrint() -> bool
   m_input.ignore(std::numeric_limits<std::streamsize>::max());
   auto length = m_input.gcount();
   m_input.clear();   //  Since ignore will have set eof.
-  m_input.seekg(0, std::ios_base::beg);
+  m_input.seekg(0U, std::ios_base::beg);
 
   /* temp buffer */
   std::vector<uint8_t> buf{};
@@ -215,7 +215,7 @@ auto Hex2Bin::extractPrint() -> bool
   auto i = 0L;
   while(offset < length)
   {
-    m_input.read(&c, 1);
+    m_input.read(&c, 1U);
     if(!m_input)
     {
       break;
@@ -228,15 +228,15 @@ auto Hex2Bin::extractPrint() -> bool
     }
   }
   length = i;
-  /* write the datas */
-  for(i = 0; i < length; i += 2)
+  /* write the data */
+  for(i = 0U; i < length; i += 2U)
   {
     std::string cc{
       static_cast<char>(buf[i]),
-      static_cast<char>(buf[i + 1]),
+      static_cast<char>(buf[i + 1U]),
       0
     };
-    m_output << static_cast<char>(std::stol(cc.c_str(), nullptr, 16));
+    m_output << static_cast<char>(std::stol(cc.c_str(), nullptr, 16U));
   }
   m_output.flush();
   return true;
@@ -288,7 +288,7 @@ auto Hex2Bin::search(const std::string& ref, const std::string& needle, bool ign
   {
     return ignoreCase ? (std::toupper(c1) == std::toupper(c2)) : (c1 == c2);
   });
-  return it != ref.end();
+  return ref.end() != it;
 }
 
 /**
@@ -299,7 +299,7 @@ auto Hex2Bin::search(const std::string& ref, const std::string& needle, bool ign
  */
 auto Hex2Bin::validateHexAndLogOnError(const std::string& line, const std::string& s) const -> bool
 {
-  if(s.length() == 1)
+  if(1 == s.length())
   {
     if(!search(HEX, s, true))
     {
@@ -370,7 +370,7 @@ auto Hex2Bin::setValueFromstring(std::uint32_t& output, const std::string& value
     auto val = std::stoi(value);
     if(val < 0)
     {
-      val = 0;
+      val = 0U;
     }
     output = val;
   }
@@ -402,7 +402,7 @@ auto Hex2Bin::extractNoPrintSpaceFound(const std::string& fragment, bool& error)
       error = true;
       continue;
     }
-    m_output << static_cast<char>(std::stol(token, nullptr, 16));
+    m_output << static_cast<char>(std::stol(token, nullptr, 16U));
   }
 }
 
@@ -413,16 +413,16 @@ auto Hex2Bin::extractNoPrintSpaceFound(const std::string& fragment, bool& error)
  */
 auto Hex2Bin::extractNoPrintNoSpaceFound(const std::string& fragment, bool& error) -> void
 {
-  for(auto i = 0U; i < fragment.length(); i += 2)
+  for(auto i = 0U; i < fragment.length(); i += 2U)
   {
     auto s1 = std::string(1, fragment[i]);
-    auto s2 = std::string(1, fragment[i + 1]);
+    auto s2 = std::string(1, fragment[i + 1U]);
     if(!validateHexAndLogOnError(fragment, s1) || !validateHexAndLogOnError(fragment, s2))
     {
       error = true;
       break;
     }
-    m_output << static_cast<char>(std::stol(s1 + s2, nullptr, 16));
+    m_output << static_cast<char>(std::stol(s1 + s2, nullptr, 16U));
   }
 }
 

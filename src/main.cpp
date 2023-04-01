@@ -92,7 +92,7 @@ auto main(int argc, char** argv) -> int
  */
 static NO_RETURN void signalHook(const int s)
 {
-  exit((s == SIGINT || s == SIGTERM) ? EXIT_SUCCESS : EXIT_FAILURE);
+  exit((SIGINT == s  || SIGTERM == s) ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 
 /**
@@ -136,17 +136,17 @@ static NO_RETURN void usage(const int32_t xcode)
 static auto processMain(const Context& context) -> int
 {
   const auto isOpen = hex2bin->isFilesOpen();
-  if(isOpen != Hex2BinIsOpen::Success)
+  if(Hex2BinIsOpen::Success != isOpen)
   {
-    if(isOpen == Hex2BinIsOpen::Both)
+    if(Hex2BinIsOpen::Both == isOpen)
     {
       std::cerr << "Invalid input and output values" << std::endl;
     }
-    else if(isOpen == Hex2BinIsOpen::Input)
+    else if(Hex2BinIsOpen::Input == isOpen)
     {
       std::cerr << "Invalid input value" << std::endl;
     }
-    else if(isOpen == Hex2BinIsOpen::Output)
+    else if(Hex2BinIsOpen::Output == isOpen)
     {
       std::cerr << "Invalid output value" << std::endl;
     }
@@ -208,7 +208,7 @@ static auto decodeArgInputOrOutput(const std::string& optionArg, const bool isIn
 {
   const auto openResult = isInput ? hex2bin->openInput(optionArg) : hex2bin->openOutput(optionArg);
 
-  if(openResult == Hex2BinOpenResult::Error)
+  if(Hex2BinOpenResult::Error == openResult)
   {
 #ifndef WIN32
     const auto error = strerror(errno);
@@ -221,7 +221,7 @@ static auto decodeArgInputOrOutput(const std::string& optionArg, const bool isIn
     std::cerr << "Unable to open the file '" << optionArg << "': (" << errno << ") " << error << std::endl;
     usage(EXIT_FAILURE);
   }
-  else if(openResult == Hex2BinOpenResult::Already)
+  else if(Hex2BinOpenResult::Already == openResult)
   {
     std::cerr << "Option '" << (isInput ? "input" : "output") << "' already called." << std::endl;
   }
@@ -238,7 +238,7 @@ static auto processArguments(const int argc, char** argv, Context& context) -> v
 {
   auto opt = -1;
   /* parse the options */
-  while((opt = getopt_long(argc, argv, "hi:o:s:l:pe", long_options, nullptr)) != -1)
+  while(-1 != (opt = getopt_long(argc, argv, "hi:o:s:l:pe", long_options, nullptr)))
   {
     switch(opt)
     {
