@@ -17,11 +17,11 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    name: Windows 2019 MSVC
+    name: Windows 2022 MSVC
     # The type of runner that the job will run on
-    runs-on: windows-2019
+    runs-on: windows-2022
     env:
-      CMAKE_GENERATOR: "Visual Studio 16 2019"
+      CMAKE_GENERATOR: "Visual Studio 17 2022"
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Checkout the code
