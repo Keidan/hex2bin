@@ -249,11 +249,12 @@ auto Hex2Bin::extractPrint() -> bool
  * @param[in] reg The regex.
  * @retval The result in a vector.
  */
-auto Hex2Bin::split(const std::string& in, const std::string& reg) -> std::vector<std::string>
+auto Hex2Bin::split(std::string_view in, const std::string& reg) -> std::vector<std::string>
 {
   // passing -1 as the submatch index parameter performs splitting
   std::regex re(reg);
-  std::sregex_token_iterator first{in.begin(), in.end(), re, -1};
+  std::string input(in);
+  std::sregex_token_iterator first{input.begin(), input.end(), re, -1};
   std::sregex_token_iterator last;
   return {first, last};
 }
@@ -263,7 +264,7 @@ auto Hex2Bin::split(const std::string& in, const std::string& reg) -> std::vecto
  * @param[in] line The input line.
  * @retval The fragment of the input line.
  */
-auto Hex2Bin::getFragment(const std::string& line) const -> std::string
+auto Hex2Bin::getFragment(std::string_view line) const -> std::string
 {
   auto len = line.size();
   if(len < m_start)
@@ -271,7 +272,7 @@ auto Hex2Bin::getFragment(const std::string& line) const -> std::string
     len = 0UL;
   }
   const auto lim = (m_limit == 0 || m_limit > len) ? len : m_limit;
-  return line.substr(std::min(m_start, static_cast<std::uint32_t>(len)), lim);
+  return std::string(line.substr(std::min(m_start, static_cast<std::uint32_t>(len)), lim));
 }
 
 /**
@@ -281,7 +282,7 @@ auto Hex2Bin::getFragment(const std::string& line) const -> std::string
  * @param[in] ignoreCase True for case-insensitive.
  * @retval bool
  */
-auto Hex2Bin::search(const std::string& ref, const std::string& needle, bool ignoreCase) const -> bool
+auto Hex2Bin::search(std::string_view ref, std::string_view needle, bool ignoreCase) const -> bool
 {
   const auto it = std::search(ref.begin(), ref.end(), needle.begin(), needle.end(),
                               [ignoreCase](const char c1, const char c2)

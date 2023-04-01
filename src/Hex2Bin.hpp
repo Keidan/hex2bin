@@ -136,14 +136,14 @@ namespace h2b
        * @param[in] reg The regex.
        * @retval The result in a vector.
        */
-      static auto split(const std::string& in, const std::string& reg) -> std::vector<std::string>;
+      static auto split(std::string_view in, const std::string& reg) -> std::vector<std::string>;
 
       /**
        * @brief Returns a fragment of the input line.
        * @param[in] line The input line.
        * @retval The fragment of the input line.
        */
-      auto getFragment(const std::string& line) const -> std::string;
+      auto getFragment(std::string_view line) const -> std::string;
 
       /**
        * @brief Searches for a string in another.
@@ -152,7 +152,7 @@ namespace h2b
        * @param[in] ignoreCase True for case-insensitive.
        * @retval bool
        */
-      auto search(const std::string& ref, const std::string& needle, bool ignoreCase = false) const -> bool;
+      auto search(std::string_view ref, std::string_view needle, bool ignoreCase = false) const -> bool;
 
       /**
        * @brief Validates the line and displays an error message if the validation fails.
