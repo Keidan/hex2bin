@@ -50,7 +50,7 @@ static const struct option long_options[] = {
   { "extract_only" , 0, nullptr, 'e' },
   { nullptr        , 0, nullptr,  0  },
 };
-static const std::shared_ptr<h2b::Hex2Bin> hex2bin = std::make_shared<h2b::Hex2Bin>();
+static const std::unique_ptr<h2b::Hex2Bin> hex2bin = std::make_unique<h2b::Hex2Bin>();
 
 /* Static forward -----------------------------------------------------------*/
 static auto usage(int32_t xcode) -> void;
