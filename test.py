@@ -21,7 +21,7 @@ class Test:
     print("Test \033[1m{0}\033[0m \033[38;5;208m{1}\033[0m \033[31mFAILED\033[0m".format(self.testNum, label))
     sys.exit(1)
     
-def exec_process(args, useStd = True):
+def exec_process(args, useStd = True) -> int:
   if useStd:
     process = subprocess.Popen(args)
     stdout, stderr = process.communicate()
@@ -31,16 +31,16 @@ def exec_process(args, useStd = True):
   exit_code = process.wait()
   return exit_code
 
-def read_file(file):
+def read_file(file) -> str:
   with open(file) as f:
     content = f.read()
   return content
 
-def getSample(file):
+def getSample(file) -> str:
     p = os.path.join(os.getcwd(), "samples")
     return os.path.join(p, file)
 
-def main(argv):
+def main(argv) -> int:
   parser = argparse.ArgumentParser()
   parser.add_argument("-f", "--file", help="Binary file.")
   parser.add_argument("-e", "--extra", action='store_true', help="Extra tests.")
@@ -182,6 +182,7 @@ def main(argv):
 
   print("TEST \033[32mPASSED\033[0m")
   os.remove(sample_dir)
+  return 0
   
 if __name__ == '__main__':
-  main(sys.argv[1:])
+  sys.exit(main(sys.argv[1:]))
