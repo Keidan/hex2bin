@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
-project(hex2bin CXX)
+project(hex2bin C CXX)
 
 file(READ "version.txt" ver)
 string(REGEX MATCH "VERSION_MAJOR ([0-9]*)" _ ${ver})
