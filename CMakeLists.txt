@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
-project(hex2bin)
+project(hex2bin CXX)
 
 file(READ "version.txt" ver)
 string(REGEX MATCH "VERSION_MAJOR ([0-9]*)" _ ${ver})
@@ -122,29 +122,29 @@ set(bin_src ${common_src} ${APP_SRC_DIR}/main.cpp)
 if(WIN32)
   set(bin_src ${bin_src} ${APP_SRC_DIR}/win32/getopt.c ${APP_SRC_DIR}/win32/getopt_long.c ${APP_SRC_DIR}/win32/getopt.h)
 endif()
-add_executable(hex2bin ${bin_src})
-add_dependencies(hex2bin update_sonar_version)
+add_executable(${CMAKE_PROJECT_NAME} ${bin_src})
+add_dependencies(${CMAKE_PROJECT_NAME} update_sonar_version)
 
 
 if("${DISTRIBUTION}" MATCHES "debug")
   set(bin_src ${common_src} ${APP_SRC_DIR}/main_test.cpp)
-  add_executable(hex2bin_gtest ${bin_src})
+  add_executable(${CMAKE_PROJECT_NAME}_gtest ${bin_src})
   # Now simply link against gtest or gtest_main as needed. Eg
-  target_link_libraries(hex2bin_gtest gtest_main)
-  add_test(NAME hex2bin_test COMMAND hex2bin_gtest)
+  target_link_libraries(${CMAKE_PROJECT_NAME}_gtest gtest_main)
+  add_test(NAME ${CMAKE_PROJECT_NAME}_test COMMAND ${CMAKE_PROJECT_NAME}_gtest)
 
   # Create the gcov target. Run coverage tests with 'make gcov'
   add_custom_target(gcov
     COMMAND mkdir -p coverage
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   )
-  set(OBJECT_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/hex2bin.dir/src)
+  set(OBJECT_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/${CMAKE_PROJECT_NAME}.dir/src)
   add_custom_command(TARGET gcov
     COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/Hex2Bin.cpp.gcno -o ${OBJECT_DIR}
     COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/main.cpp.gcno -o ${OBJECT_DIR}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage
   )
-  add_dependencies(gcov hex2bin)
+  add_dependencies(gcov ${CMAKE_PROJECT_NAME})
 
   # Make sure to clean up the coverage folder
   set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES coverage)
