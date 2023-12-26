@@ -30,7 +30,7 @@ Download the software :
 	git clone https://github.com/Keidan/hex2bin.git
 	cd hex2bin
 	cmake -S . -B build -DDISTRIBUTION=[debug|release] -G"Visual Studio 17 2022"
-	cmake --build .
+	cmake --build build
 	bin\Debug\hex2bin.exe -h
 
 ### GNU Linux
@@ -41,7 +41,7 @@ Download the software :
 	git clone https://github.com/Keidan/hex2bin.git
 	cd hex2bin
 	cmake -S . -B build -DDISTRIBUTION=[debug|release] -G"Ninja"
-	cmake --build .
+	cmake --build build
 	./bin/hex2bin -h
 
 ### All
