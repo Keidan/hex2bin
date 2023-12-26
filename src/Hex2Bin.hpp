@@ -7,6 +7,7 @@
 #define __HEX2BIN_HPP__
 
 /* Includes -----------------------------------------------------------------*/
+#include <cstdint>
 #include <fstream>
 #include <vector>
 #include "config.h"
