@@ -75,7 +75,7 @@ _For Windows, remember to add .exe after the binary name._
 
 ## License
 
-[GPLv3](https://github.com/Keidan/hex2bin/blob/master/license.txt)
+[GNU GPL v3 or later](https://github.com/Keidan/hex2bin/blob/master/license.txt)
 
 [linuxCI]: https://github.com/Keidan/hex2bin/actions?query=workflow%3ALinux
 [windowsCI]: https://github.com/Keidan/hex2bin/actions?query=workflow%3AWindows
