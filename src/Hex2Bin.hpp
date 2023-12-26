@@ -14,16 +14,16 @@
 
 /* Public defines -----------------------------------------------------------*/
 #ifndef DEFAULT_START
-#define DEFAULT_START 0
+#  define DEFAULT_START 0
 #endif /* DEFAULT_START */
 #ifndef DEFAULT_LIMIT
-#define DEFAULT_LIMIT 0
+#  define DEFAULT_LIMIT 0
 #endif /* DEFAULT_LIMIT */
 
 /* Public class -------------------------------------------------------------*/
 namespace h2b
 {
-  enum class Hex2BinIsOpen: std::uint8_t
+  enum class Hex2BinIsOpen : std::uint8_t
   {
     Success = 0,
     Both = 1,
@@ -31,7 +31,7 @@ namespace h2b
     Output = 3
   };
 
-  enum class Hex2BinOpenResult: std::uint8_t
+  enum class Hex2BinOpenResult : std::uint8_t
   {
     Success = 0,
     Error = 1,
@@ -171,7 +171,7 @@ namespace h2b
        * @retval False if error, otherwise true.
        * @retval Hex2BinOpenResult.
        */
-      template<class Stream>
+      template <class Stream>
       auto openFile(Stream& stream, const std::string& path, std::ios_base::openmode mode) const -> Hex2BinOpenResult;
 
       /**
@@ -197,5 +197,5 @@ namespace h2b
        */
       auto extractNoPrintNoSpaceFound(const std::string& fragment, bool& error) -> void;
   };
-}
+} // namespace h2b
 #endif /* __HEX2BIN_HPP__ */

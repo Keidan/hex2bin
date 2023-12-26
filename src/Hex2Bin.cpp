@@ -150,7 +150,8 @@ auto Hex2Bin::extractOnly() -> void
   while(std::getline(m_input, line))
   {
     auto fragment = getFragment(line);
-    if(!fragment.empty() && fragment.at(fragment.size() - 1U) != '\n') fragment += "\n";
+    if(!fragment.empty() && fragment.at(fragment.size() - 1U) != '\n')
+      fragment += "\n";
     m_output << fragment;
   }
   m_output.flush();
@@ -206,7 +207,7 @@ auto Hex2Bin::extractPrint() -> bool
 
   m_input.ignore(std::numeric_limits<std::streamsize>::max());
   auto length = m_input.gcount();
-  m_input.clear();   //  Since ignore will have set eof.
+  m_input.clear(); //  Since ignore will have set eof.
   m_input.seekg(0U, std::ios_base::beg);
 
   /* temp buffer */
@@ -231,11 +232,7 @@ auto Hex2Bin::extractPrint() -> bool
   /* write the data */
   for(i = 0U; i < length; i += 2U)
   {
-    std::string cc{
-      static_cast<char>(buf[i]),
-      static_cast<char>(buf[i + 1U]),
-      0
-    };
+    std::string cc{static_cast<char>(buf[i]), static_cast<char>(buf[i + 1U]), 0};
     m_output << static_cast<char>(std::stol(cc.c_str(), nullptr, 16U));
   }
   m_output.flush();
@@ -284,9 +281,7 @@ auto Hex2Bin::getFragment(std::string_view line) const -> std::string
  */
 auto Hex2Bin::search(std::string_view ref, std::string_view needle, bool ignoreCase) const -> bool
 {
-  const auto it = std::search(ref.begin(), ref.end(), needle.begin(), needle.end(),
-                              [ignoreCase](const char c1, const char c2)
-  {
+  const auto it = std::search(ref.begin(), ref.end(), needle.begin(), needle.end(), [ignoreCase](const char c1, const char c2) {
     return ignoreCase ? (std::toupper(c1) == std::toupper(c2)) : (c1 == c2);
   });
   return ref.end() != it;
@@ -335,7 +330,7 @@ auto Hex2Bin::validateHexAndLogOnError(const std::string& line, const std::strin
  * @retval False if error, otherwise true.
  * @retval Hex2BinOpenResult.
  */
-template<class Stream>
+template <class Stream>
 auto Hex2Bin::openFile(Stream& stream, const std::string& path, std::ios_base::openmode mode) const -> Hex2BinOpenResult
 {
   if(path.empty())
@@ -426,4 +421,3 @@ auto Hex2Bin::extractNoPrintNoSpaceFound(const std::string& fragment, bool& erro
     m_output << static_cast<char>(std::stol(s1 + s2, nullptr, 16U));
   }
 }
-

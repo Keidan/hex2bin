@@ -8,24 +8,22 @@
 #include <cstring>
 #include <csignal>
 #ifndef WIN32
-#include <getopt.h>
+#  include <getopt.h>
 #else
-#include <Windows.h> 
-#include "win32/getopt.h"
+#  include <Windows.h>
+#  include "win32/getopt.h"
 #endif
 #include <cerrno>
 #include <functional>
 #include <memory>
 #include "Hex2Bin.hpp"
 
-
 /* Defines-------------------------------------------------------------------*/
 #ifndef WIN32
-#define NO_RETURN __attribute__((noreturn))
+#  define NO_RETURN __attribute__((noreturn))
 #else
-#define NO_RETURN
+#  define NO_RETURN
 #endif /* WIN32 */
-
 
 /* Usings--------------------------------------------------------------------*/
 using h2b::Hex2BinIsOpen;
@@ -34,21 +32,21 @@ using h2b::Hex2BinOpenResult;
 /* Private structures--------------------------------------------------------*/
 struct Context
 {
-  bool printable = false;
-  bool extractOnly = false;
-  bool defaultValue = true;
+    bool printable = false;
+    bool extractOnly = false;
+    bool defaultValue = true;
 };
 
 /* Private variables --------------------------------------------------------*/
 static const struct option long_options[] = {
-  { "help"         , 0, nullptr, 'h' },
-  { "input"        , 1, nullptr, 'i' },
-  { "output"       , 1, nullptr, 'o' },
-  { "limit"        , 1, nullptr, 'l' },
-  { "start"        , 1, nullptr, 's' },
-  { "printable"    , 0, nullptr, 'p' },
-  { "extract_only" , 0, nullptr, 'e' },
-  { nullptr        , 0, nullptr,  0  },
+  {        "help", 0, nullptr, 'h'},
+  {       "input", 1, nullptr, 'i'},
+  {      "output", 1, nullptr, 'o'},
+  {       "limit", 1, nullptr, 'l'},
+  {       "start", 1, nullptr, 's'},
+  {   "printable", 0, nullptr, 'p'},
+  {"extract_only", 0, nullptr, 'e'},
+  {       nullptr, 0, nullptr,   0},
 };
 static const std::unique_ptr<h2b::Hex2Bin> hex2bin = std::make_unique<h2b::Hex2Bin>();
 
@@ -60,7 +58,6 @@ static auto processMain(const Context& context) -> int;
 static auto decodeArgStartOrLimit(const std::string& optionArg, bool isLimit) -> void;
 static auto decodeArgInputOrOutput(const std::string& optionArg, bool isInput) -> void;
 static auto processArguments(int argc, char** argv, Context& context) -> void;
-
 
 /* Public function ----------------------------------------------------------*/
 auto main(int argc, char** argv) -> int
@@ -92,7 +89,7 @@ auto main(int argc, char** argv) -> int
  */
 static NO_RETURN void signalHook(const int s)
 {
-  exit((SIGINT == s  || SIGTERM == s) ? EXIT_SUCCESS : EXIT_FAILURE);
+  exit((SIGINT == s || SIGTERM == s) ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 
 /**
@@ -120,7 +117,8 @@ static NO_RETURN void usage(const int32_t xcode)
   std::cout << "\t--help, -h: Print this help" << std::endl;
   std::cout << "\t--input, -i: The input file to use (containing the hexadecimal characters)." << std::endl;
   std::cout << "\t--output, -o: The output file to use." << std::endl;
-  std::cout << "\t--limit, -l: Limit of characters per line (the value of the \"start\" option is not included; default value: " << DEFAULT_LIMIT << ")." << std::endl;
+  std::cout << "\t--limit, -l: Limit of characters per line (the value of the \"start\" option is not included; default value: " << DEFAULT_LIMIT << ")."
+            << std::endl;
   std::cout << "\t--start, -s: Adds a start offset per line (default value: " << DEFAULT_START << ")." << std::endl;
   std::cout << "\t--printable, -p: Extract and convert all printable characters." << std::endl;
   std::cout << "\t--extract_only, -e: Extract only the words from \"start\" to \"limit\"." << std::endl;
@@ -135,7 +133,7 @@ static NO_RETURN void usage(const int32_t xcode)
  */
 static auto processMain(const Context& context) -> int
 {
-  
+
   if(const auto isOpen = hex2bin->isFilesOpen(); Hex2BinIsOpen::Success != isOpen)
   {
     if(Hex2BinIsOpen::Both == isOpen)
@@ -213,7 +211,10 @@ static auto decodeArgInputOrOutput(const std::string& optionArg, const bool isIn
 #ifndef WIN32
     const auto error = strerror(errno);
 #else
-    enum { ERROR_SIZE = 200 };
+    enum
+    {
+      ERROR_SIZE = 200
+    };
     char error[ERROR_SIZE];
     if(strerror_s(error, ERROR_SIZE, errno))
       throw std::exception("strerror_s failed!");
