@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.22)
 
 set(H2B_PROJECT_NAME hex2bin)
 project(${H2B_PROJECT_NAME} C CXX)
