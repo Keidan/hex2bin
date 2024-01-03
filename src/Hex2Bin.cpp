@@ -169,7 +169,6 @@ auto Hex2Bin::extractNoPrint() -> bool
       continue;
     }
     auto fragment = Helper::getFragment(line, m_start, m_limit);
-    ;
 
     const auto idxSpace = fragment.find(' ');
     if(std::string::npos != idxSpace)
