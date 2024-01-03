@@ -5,16 +5,11 @@
  */
 /* Includes -----------------------------------------------------------------*/
 #include "Hex2Bin.hpp"
+#include "Helper.hpp"
 #include <iostream>
 #include <fstream>
-#include <regex>
-#include <vector>
 #include <limits>
 #include <cctype>
-#include <cstdio>
-#include <cstring>
-#include <algorithm>
-#include <exception>
 
 /* Usings -------------------------------------------------------------------*/
 using namespace h2b;
@@ -69,7 +64,7 @@ auto Hex2Bin::openOutput(std::string_view path) -> Hex2BinOpenResult
  */
 auto Hex2Bin::setStart(std::string_view value, std::string& what) -> bool
 {
-  return setValueFromstring(m_start, value, what);
+  return Helper::setValueFromstring(m_start, value, what);
 }
 
 /**
@@ -98,7 +93,7 @@ auto Hex2Bin::getStart() const -> std::uint32_t
  */
 auto Hex2Bin::setLimit(std::string_view value, std::string& what) -> bool
 {
-  return setValueFromstring(m_limit, value, what);
+  return Helper::setValueFromstring(m_limit, value, what);
 }
 
 /**
@@ -150,7 +145,7 @@ auto Hex2Bin::extractOnly() -> void
 
   while(std::getline(m_input, line))
   {
-    auto fragment = getFragment(line);
+    auto fragment = Helper::getFragment(line, m_start, m_limit);
     if(!fragment.empty() && fragment.at(fragment.size() - 1U) != '\n')
       fragment += "\n";
     m_output << fragment;
@@ -173,7 +168,8 @@ auto Hex2Bin::extractNoPrint() -> bool
       std::cerr << "Empty line ignored" << std::endl;
       continue;
     }
-    auto fragment = getFragment(line);
+    auto fragment = Helper::getFragment(line, m_start, m_limit);
+    ;
 
     const auto idxSpace = fragment.find(' ');
     if(std::string::npos != idxSpace)
@@ -242,54 +238,6 @@ auto Hex2Bin::extractPrint() -> bool
 
 /* Private functions --------------------------------------------------------*/
 /**
- * @brief Splits a string according to the specified regex
- * @param[in] in The input string.
- * @param[in] reg The regex.
- * @retval The result in a vector.
- */
-auto Hex2Bin::split(std::string_view in, std::string_view reg) -> std::vector<std::string>
-{
-  // passing -1 as the submatch index parameter performs splitting
-  auto sreg = std::string(reg);
-  std::regex re(sreg);
-  std::string input(in);
-  std::sregex_token_iterator first{input.begin(), input.end(), re, -1};
-  std::sregex_token_iterator last;
-  return {first, last};
-}
-
-/**
- * @brief Returns a fragment of the input line.
- * @param[in] line The input line.
- * @retval The fragment of the input line.
- */
-auto Hex2Bin::getFragment(std::string_view line) const -> std::string
-{
-  auto len = line.size();
-  if(len < m_start)
-  {
-    len = 0UL;
-  }
-  const auto lim = (m_limit == 0 || m_limit > len) ? len : m_limit;
-  return std::string(line.substr(std::min(m_start, static_cast<std::uint32_t>(len)), lim));
-}
-
-/**
- * @brief Searches for a string in another.
- * @param[in] ref The reference string.
- * @param[in] needle The string to search.
- * @param[in] ignoreCase True for case-insensitive.
- * @retval bool
- */
-auto Hex2Bin::search(std::string_view ref, std::string_view needle, bool ignoreCase) const -> bool
-{
-  const auto found = std::ranges::search(ref, needle, [ignoreCase](const char c1, const char c2) {
-    return ignoreCase ? (std::toupper(c1) == std::toupper(c2)) : (c1 == c2);
-  });
-  return !found.empty() && ref.end() != found.end();
-}
-
-/**
  * @brief Validates the line and displays an error message if the validation fails.
  * @param[in] line The reference line.
  * @param[in] s The string to validate.
@@ -299,7 +247,7 @@ auto Hex2Bin::validateHexAndLogOnError(std::string_view line, std::string_view s
 {
   if(1 == s.length())
   {
-    if(!search(HEX, s, true))
+    if(!Helper::search(HEX, s, true))
     {
       std::cerr << "0 Character '" << s << "' is not compatible with hexadecimal conversion." << std::endl;
       std::cerr << "Cancel line processing:" << std::endl;
@@ -312,7 +260,7 @@ auto Hex2Bin::validateHexAndLogOnError(std::string_view line, std::string_view s
     for(const auto& c : s)
     {
       auto temp = std::string(1, c);
-      if(!search(HEX, temp, true))
+      if(!Helper::search(HEX, temp, true))
       {
         std::cerr << "1 Character '" << temp << "' is not compatible with hexadecimal conversion." << std::endl;
         std::cerr << "Cancel line processing:" << std::endl;
@@ -357,45 +305,13 @@ auto Hex2Bin::openFile(Stream& stream, std::string_view path, std::ios_base::ope
 }
 
 /**
- * @brief Sets the value from a string.
- * @param[out] output Output value.
- * @param[in] value Integer value in string format.
- * @param[out] what The cause of the error (if the function returns false).
- * @retval False if error, otherwise true.
- */
-auto Hex2Bin::setValueFromstring(std::uint32_t& output, std::string_view value, std::string& what) -> bool
-{
-  try
-  {
-    auto sv = std::string(value);
-    auto val = std::stoi(sv);
-    if(val < 0)
-    {
-      val = 0U;
-    }
-    output = val;
-  }
-  catch(const std::invalid_argument& e)
-  {
-    what = std::string("invalid_argument: ") + e.what();
-    return false;
-  }
-  catch(const std::out_of_range& e)
-  {
-    what = std::string("out_of_range: ") + e.what();
-    return false;
-  }
-  return true;
-}
-
-/**
  * @brief Extracts and without converting all printable characters (sub loop 1).
  * @param[in] fragment A fragment of the input line.
  * @param[out] error Error?
  */
 auto Hex2Bin::extractNoPrintSpaceFound(std::string_view fragment, bool& error) -> void
 {
-  auto tokens = split(fragment, "\\s+");
+  auto tokens = Helper::split(fragment, "\\s+");
   for(const auto& token : tokens)
   {
     if(!validateHexAndLogOnError(fragment, token))

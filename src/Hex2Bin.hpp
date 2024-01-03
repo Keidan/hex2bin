@@ -131,30 +131,6 @@ namespace h2b
       std::ifstream m_input{};
 
       /**
-       * @brief Splits a string according to the specified regex
-       * @param[in] in The input string.
-       * @param[in] reg The regex.
-       * @retval The result in a vector.
-       */
-      static auto split(std::string_view in, std::string_view reg) -> std::vector<std::string>;
-
-      /**
-       * @brief Returns a fragment of the input line.
-       * @param[in] line The input line.
-       * @retval The fragment of the input line.
-       */
-      auto getFragment(std::string_view line) const -> std::string;
-
-      /**
-       * @brief Searches for a string in another.
-       * @param[in] ref The reference string.
-       * @param[in] needle The string to search.
-       * @param[in] ignoreCase True for case-insensitive.
-       * @retval bool
-       */
-      auto search(std::string_view ref, std::string_view needle, bool ignoreCase = false) const -> bool;
-
-      /**
        * @brief Validates the line and displays an error message if the validation fails.
        * @param[in] line The reference line.
        * @param[in] s The string to validate.
@@ -174,15 +150,6 @@ namespace h2b
       auto openFile(Stream& stream, std::string_view path, std::ios_base::openmode mode) const -> Hex2BinOpenResult;
 
       /**
-       * @brief Sets the value from a string.
-       * @param[out] output Output value.
-       * @param[in] value Integer value in string format.
-       * @param[out] what The cause of the error (if the function returns false).
-       * @retval False if error, otherwise true.
-       */
-      static auto setValueFromstring(std::uint32_t& output, std::string_view value, std::string& what) -> bool;
-
-      /**
        * @brief Extracts and without converting all printable characters (sub loop 1).
        * @param[in] fragment A fragment of the input line.
        * @param[out] error Error?
@@ -197,4 +164,3 @@ namespace h2b
       auto extractNoPrintNoSpaceFound(std::string_view fragment, bool& error) -> void;
   };
 } // namespace h2b
- 
