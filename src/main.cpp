@@ -40,6 +40,7 @@ struct Context
 /* Private variables --------------------------------------------------------*/
 static const struct option long_options[] = {
   {        "help", 0, nullptr, 'h'},
+  {     "version", 0, nullptr, 'v'},
   {       "input", 1, nullptr, 'i'},
   {      "output", 1, nullptr, 'o'},
   {       "limit", 1, nullptr, 'l'},
@@ -52,6 +53,7 @@ static const std::unique_ptr<h2b::Hex2Bin> hex2bin = std::make_unique<h2b::Hex2B
 
 /* Static forward -----------------------------------------------------------*/
 static auto usage(int32_t xcode) -> void;
+static auto version() -> void;
 static auto signalHook(int s) -> void;
 static auto shutdownHook() -> void;
 static auto processMain(const Context& context) -> int;
@@ -105,15 +107,8 @@ static auto shutdownHook() -> void
  */
 static NO_RETURN void usage(const int32_t xcode)
 {
-  std::cout << "hex2bin version " << VERSION_MAJOR << "." << VERSION_MINOR << " (";
-#if DEBUG
-  std::cout << "debug";
-#else
-  std::cout << "release";
-#endif
-  std::cout << ")" << std::endl;
-
-  std::cout << "usage: hex2bin [options]" << std::endl;
+  version();
+  std::cout << "usage: " << APP_NAME << " [options]" << std::endl;
   std::cout << "\t--help, -h: Print this help" << std::endl;
   std::cout << "\t--input, -i: The input file to use (containing the hexadecimal characters)." << std::endl;
   std::cout << "\t--output, -o: The output file to use." << std::endl;
@@ -125,6 +120,19 @@ static NO_RETURN void usage(const int32_t xcode)
   exit(xcode);
 }
 
+/**
+ * @brief Print the version
+ */
+static NO_RETURN void version()
+{
+  std::cout << APP_NAME << " version " << VERSION_MAJOR << "." << VERSION_MINOR << " (";
+#if DEBUG
+  std::cout << "debug";
+#else
+  std::cout << "release";
+#endif
+  std::cout << ")" << std::endl;
+}
 /**
  * @brief Processes the application processing of the main function.
  * @note This function can call the "exit" method via the "usage" method call.
@@ -239,12 +247,16 @@ static auto processArguments(const int argc, char** argv, Context& context) -> v
 {
   auto opt = -1;
   /* parse the options */
-  while(-1 != (opt = getopt_long(argc, argv, "hi:o:s:l:pe", long_options, nullptr)))
+  while(-1 != (opt = getopt_long(argc, argv, "vhi:o:s:l:pe", long_options, nullptr)))
   {
     switch(opt)
     {
       case 'h': /* help */
         usage(EXIT_SUCCESS);
+      case 'v': /* version */
+        version();
+        exit(EXIT_SUCCESS);
+        break;
       case 'i': /* input */
         decodeArgInputOrOutput(optarg, true);
         break;

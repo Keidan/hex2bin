@@ -6,6 +6,7 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
+#define APP_NAME      "@H2B_PROJECT_NAME@"
 #define VERSION_MAJOR @VERSION_MAJOR@
 #define VERSION_MINOR @VERSION_MINOR@
 #define DEFAULT_LIMIT @DEFLIMIT@
