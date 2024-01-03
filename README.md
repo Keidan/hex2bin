@@ -23,31 +23,48 @@ This software is distributed in the hope that it will be useful, but WITHOUT ANY
 ## Instructions
 
 ### MS Windows
-Download the software :
+On MS Windows, you'll need to install MS Visual Studio build tools.
 
-	mkdir devel
-	cd devel
-	git clone https://github.com/Keidan/hex2bin.git
-	cd hex2bin
-	cmake -S . -B build -DDISTRIBUTION=[debug|release] -G"Visual Studio 17 2022"
-	cmake --build build
-	bin\Debug\hex2bin.exe -h
+To do this, you can use the following commands (open powershell as administrator):
+
+Installation of Chocolatey:
+
+	Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+Installation of Python, Ninja and MS Visual Studio build tools :
+
+	choco install python3 ninja visualstudio2022buildtools
 
 ### GNU Linux
-Download the software :
+On GNU Linux, you'll need to install CMake and Ninja.
+
+	sudo apt-get install cmake ninja-build
+
+### Download
 
 	mkdir devel
 	cd devel
 	git clone https://github.com/Keidan/hex2bin.git
 	cd hex2bin
-	cmake -S . -B build -DDISTRIBUTION=[debug|release] -G"Ninja"
+
+### Build 
+
+#### MS Windows
+
+	cmake -S . -B build -DCMAKE_BUILD_TYPE=release -G"Visual Studio 17 2022"
 	cmake --build build
-	./bin/hex2bin -h
+	
+#### GNU Linux
 
-### All
-Supported cmake options (optional):
+	cmake -S . -B build -DCMAKE_BUILD_TYPE=release -G"Ninja"
+	cmake --build build
 
+### VSCode
+An MS VSCode workspace file can be found at the following location .vscode/hex2bin.code-workspace
+
+### CMake options
 	* Supported distrib.: -DDISTRIBUTION=[debug|release]
+	* Supported distrib.: -DCMAKE_BUILD_TYPE=[debug|release]
 	* Default start value: cmake -DDEFSTART=[int value] (see the '-s, --start' option of the binary)
 	* Default limit value: cmake -DDEFLIMIT=[int value] (see the '-l, --limit' option of the binary)
 
