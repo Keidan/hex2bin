@@ -141,18 +141,18 @@ static void version()
  */
 static auto processMain(const Context& context) -> int
 {
-
-  if(const auto isOpen = hex2bin->isFilesOpen(); Hex2BinIsOpen::Success != isOpen)
+  using enum Hex2BinIsOpen;
+  if(const auto isOpen = hex2bin->isFilesOpen(); Success != isOpen)
   {
-    if(Hex2BinIsOpen::Both == isOpen)
+    if(Both == isOpen)
     {
       std::cerr << "Invalid input and output values" << std::endl;
     }
-    else if(Hex2BinIsOpen::Input == isOpen)
+    else if(Input == isOpen)
     {
       std::cerr << "Invalid input value" << std::endl;
     }
-    else if(Hex2BinIsOpen::Output == isOpen)
+    else if(Output == isOpen)
     {
       std::cerr << "Invalid output value" << std::endl;
     }

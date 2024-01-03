@@ -125,19 +125,20 @@ auto Hex2Bin::getLimit() const -> std::uint32_t
  */
 auto Hex2Bin::isFilesOpen() const -> Hex2BinIsOpen
 {
+  using enum Hex2BinIsOpen;
   if(!m_input.is_open() || !m_output.is_open())
   {
     if(!m_input.is_open() && !m_output.is_open())
     {
-      return Hex2BinIsOpen::Both;
+      return Both;
     }
     if(!m_input.is_open())
     {
-      return Hex2BinIsOpen::Input;
+      return Input;
     }
-    return Hex2BinIsOpen::Output;
+    return Output;
   }
-  return Hex2BinIsOpen::Success;
+  return Success;
 }
 
 /**
@@ -334,9 +335,10 @@ auto Hex2Bin::validateHexAndLogOnError(std::string_view line, std::string_view s
 template <class Stream>
 auto Hex2Bin::openFile(Stream& stream, std::string_view path, std::ios_base::openmode mode) const -> Hex2BinOpenResult
 {
+  using enum Hex2BinOpenResult;
   if(path.empty())
   {
-    return Hex2BinOpenResult::Error;
+    return Error;
   }
   if(!stream.is_open())
   {
@@ -344,13 +346,13 @@ auto Hex2Bin::openFile(Stream& stream, std::string_view path, std::ios_base::ope
     stream.open(p, mode);
     if(!stream.is_open() || stream.fail())
     {
-      return Hex2BinOpenResult::Error;
+      return Error;
     }
-    return Hex2BinOpenResult::Success;
+    return Success;
   }
   else
   {
-    return Hex2BinOpenResult::Already;
+    return Already;
   }
 }
 
