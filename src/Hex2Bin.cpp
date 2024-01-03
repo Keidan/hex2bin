@@ -283,10 +283,10 @@ auto Hex2Bin::getFragment(std::string_view line) const -> std::string
  */
 auto Hex2Bin::search(std::string_view ref, std::string_view needle, bool ignoreCase) const -> bool
 {
-  const auto it = std::search(ref.begin(), ref.end(), needle.begin(), needle.end(), [ignoreCase](const char c1, const char c2) {
+  const auto found = std::ranges::search(ref, needle, [ignoreCase](const char c1, const char c2) {
     return ignoreCase ? (std::toupper(c1) == std::toupper(c2)) : (c1 == c2);
   });
-  return ref.end() != it;
+  return !found.empty() && ref.end() != found.end();
 }
 
 /**
