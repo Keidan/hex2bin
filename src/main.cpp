@@ -49,7 +49,7 @@ static const std::vector<struct option> g_longOptions = {
   {"extract_only", 0, nullptr, 'e'},
   {       nullptr, 0, nullptr,   0},
 };
-static const std::unique_ptr<h2b::Hex2Bin> hex2bin = std::make_unique<h2b::Hex2Bin>();
+static const std::unique_ptr<h2b::Hex2Bin> g_hex2bin = std::make_unique<h2b::Hex2Bin>();
 
 /* Static forward -----------------------------------------------------------*/
 static auto usage(int32_t xcode) -> void;
@@ -99,7 +99,7 @@ static NO_RETURN void signalHook(const int s)
  */
 static auto shutdownHook() -> void
 {
-  hex2bin->close();
+  g_hex2bin->close();
 }
 /**
  * @brief usage function.
@@ -142,7 +142,7 @@ static void version()
 static auto processMain(const Context& context) -> int
 {
   using enum Hex2BinIsOpen;
-  if(const auto isOpen = hex2bin->isFilesOpen(); Success != isOpen)
+  if(const auto isOpen = g_hex2bin->isFilesOpen(); Success != isOpen)
   {
     if(Both == isOpen)
     {
@@ -161,24 +161,24 @@ static auto processMain(const Context& context) -> int
   auto ret = EXIT_SUCCESS;
   if(context.extractOnly)
   {
-    hex2bin->extractOnly();
+    g_hex2bin->extractOnly();
   }
   else
   {
     if(!context.printable)
     {
-      if(!hex2bin->extractNoPrint())
+      if(!g_hex2bin->extractNoPrint())
       {
         ret = EXIT_FAILURE;
       }
     }
     else
     {
-      if(!context.defaultValue && (hex2bin->isValidStart() || hex2bin->isValidLimit()))
+      if(!context.defaultValue && (g_hex2bin->isValidStart() || g_hex2bin->isValidLimit()))
       {
         std::cout << "The start and limit options are not managed in this mode." << std::endl;
       }
-      if(!hex2bin->extractPrint())
+      if(!g_hex2bin->extractPrint())
       {
         ret = EXIT_FAILURE;
       }
@@ -196,7 +196,7 @@ static auto processMain(const Context& context) -> int
 static auto decodeArgStartOrLimit(std::string_view optionArg, const bool isLimit) -> void
 {
   std::string what{};
-  const auto ret = isLimit ? hex2bin->setLimit(optionArg, what) : hex2bin->setStart(optionArg, what);
+  const auto ret = isLimit ? g_hex2bin->setLimit(optionArg, what) : g_hex2bin->setStart(optionArg, what);
   if(!ret)
   {
     std::cerr << "Invalid " << (isLimit ? "limit" : "start") << " value: " << what << std::endl;
@@ -212,7 +212,7 @@ static auto decodeArgStartOrLimit(std::string_view optionArg, const bool isLimit
  */
 static auto decodeArgInputOrOutput(std::string_view optionArg, const bool isInput) -> void
 {
-  const auto openResult = isInput ? hex2bin->openInput(optionArg) : hex2bin->openOutput(optionArg);
+  const auto openResult = isInput ? g_hex2bin->openInput(optionArg) : g_hex2bin->openOutput(optionArg);
 
   if(Hex2BinOpenResult::Error == openResult)
   {
