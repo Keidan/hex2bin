@@ -212,7 +212,7 @@ auto Hex2Bin::extractPrint() -> bool
 
   /* temp buffer */
   std::vector<uint8_t> buf{};
-  buf.reserve(length);
+  buf.reserve(static_cast<std::size_t>(length));
   auto i = 0L;
   while(offset < length)
   {
@@ -224,7 +224,7 @@ auto Hex2Bin::extractPrint() -> bool
     offset++;
     if(std::isalnum(c))
     {
-      buf[i] = static_cast<uint8_t>(c);
+      buf.emplace_back(static_cast<uint8_t>(c));
       i++;
     }
   }
