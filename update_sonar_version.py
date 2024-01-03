@@ -4,13 +4,13 @@ import argparse, sys, os, re
 VERSION="version.txt"
 SONAR_PROJECT="sonar-project.properties"
 
-def read_file(filename):
+def read_file(filename) -> str:
   lines = ""
   with open(filename) as f:
     lines += f.read()
   return lines
 
-def main():
+def main() -> int:
   parser = argparse.ArgumentParser()
   parser.add_argument("-r", "--root", help="Root folder.")
   args = parser.parse_args()
@@ -25,10 +25,10 @@ def main():
 
   if not os.path.exists(version):
     print("File {0} not found".format(version))
-    sys.exit(1)
+    return 1
   if not os.path.exists(sonar_project):
     print("File {0} not found".format(sonar_project))
-    sys.exit(1)
+    return 1
     
   major = ""
   minor = ""
@@ -37,10 +37,10 @@ def main():
   minor = result.group(2)
   if len(major) == 0:
     print("Major version number not found")
-    sys.exit(1)
+    return 1
   if len(minor) == 0:
     print("Minor version number not found")
-    sys.exit(1)
+    return 1
   vers = major + "." + minor
   content = read_file(sonar_project)
   result = re.search(r"([\s\S]+sonar\.projectVersion=)[0-9]*\.[0-9]*([\s\S]+)", content)
@@ -50,6 +50,7 @@ def main():
     print("Update sonar-project version")
     with open(sonar_project, "w") as f:
       f.write(new_content)
+  return 0
 
 if __name__ == '__main__':
-  main()
+  sys.exit(main())
