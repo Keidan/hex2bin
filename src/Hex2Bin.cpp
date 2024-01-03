@@ -45,7 +45,7 @@ auto Hex2Bin::close() -> void
  * @retval False if error, otherwise true.
  * @retval Hex2BinOpenResult.
  */
-auto Hex2Bin::openInput(const std::string& path) -> Hex2BinOpenResult
+auto Hex2Bin::openInput(std::string_view path) -> Hex2BinOpenResult
 {
   return openFile<std::ifstream>(m_input, path, std::ios::in | std::ios::binary);
 }
@@ -56,7 +56,7 @@ auto Hex2Bin::openInput(const std::string& path) -> Hex2BinOpenResult
  * @retval False if error, otherwise true.
  * @retval Hex2BinOpenResult.
  */
-auto Hex2Bin::openOutput(const std::string& path) -> Hex2BinOpenResult
+auto Hex2Bin::openOutput(std::string_view path) -> Hex2BinOpenResult
 {
   return openFile<std::ofstream>(m_output, path, std::ios::out | std::ios::binary);
 }
@@ -67,7 +67,7 @@ auto Hex2Bin::openOutput(const std::string& path) -> Hex2BinOpenResult
  * @param[out] what The cause of the error (if the function returns false).
  * @retval False if error, otherwise true.
  */
-auto Hex2Bin::setStart(const std::string& value, std::string& what) -> bool
+auto Hex2Bin::setStart(std::string_view value, std::string& what) -> bool
 {
   return setValueFromstring(m_start, value, what);
 }
@@ -96,7 +96,7 @@ auto Hex2Bin::getStart() const -> std::uint32_t
  * @param[out] what The cause of the error (if the function returns false).
  * @retval False if error, otherwise true.
  */
-auto Hex2Bin::setLimit(const std::string& value, std::string& what) -> bool
+auto Hex2Bin::setLimit(std::string_view value, std::string& what) -> bool
 {
   return setValueFromstring(m_limit, value, what);
 }
@@ -246,10 +246,11 @@ auto Hex2Bin::extractPrint() -> bool
  * @param[in] reg The regex.
  * @retval The result in a vector.
  */
-auto Hex2Bin::split(std::string_view in, const std::string& reg) -> std::vector<std::string>
+auto Hex2Bin::split(std::string_view in, std::string_view reg) -> std::vector<std::string>
 {
   // passing -1 as the submatch index parameter performs splitting
-  std::regex re(reg);
+  auto sreg = std::string(reg);
+  std::regex re(sreg);
   std::string input(in);
   std::sregex_token_iterator first{input.begin(), input.end(), re, -1};
   std::sregex_token_iterator last;
@@ -293,7 +294,7 @@ auto Hex2Bin::search(std::string_view ref, std::string_view needle, bool ignoreC
  * @param[in] s The string to validate.
  * @retval bool
  */
-auto Hex2Bin::validateHexAndLogOnError(const std::string& line, const std::string& s) const -> bool
+auto Hex2Bin::validateHexAndLogOnError(std::string_view line, std::string_view s) const -> bool
 {
   if(1 == s.length())
   {
@@ -331,7 +332,7 @@ auto Hex2Bin::validateHexAndLogOnError(const std::string& line, const std::strin
  * @retval Hex2BinOpenResult.
  */
 template <class Stream>
-auto Hex2Bin::openFile(Stream& stream, const std::string& path, std::ios_base::openmode mode) const -> Hex2BinOpenResult
+auto Hex2Bin::openFile(Stream& stream, std::string_view path, std::ios_base::openmode mode) const -> Hex2BinOpenResult
 {
   if(path.empty())
   {
@@ -339,7 +340,8 @@ auto Hex2Bin::openFile(Stream& stream, const std::string& path, std::ios_base::o
   }
   if(!stream.is_open())
   {
-    stream.open(path, mode);
+    auto p = std::string(path);
+    stream.open(p, mode);
     if(!stream.is_open() || stream.fail())
     {
       return Hex2BinOpenResult::Error;
@@ -359,11 +361,12 @@ auto Hex2Bin::openFile(Stream& stream, const std::string& path, std::ios_base::o
  * @param[out] what The cause of the error (if the function returns false).
  * @retval False if error, otherwise true.
  */
-auto Hex2Bin::setValueFromstring(std::uint32_t& output, const std::string& value, std::string& what) -> bool
+auto Hex2Bin::setValueFromstring(std::uint32_t& output, std::string_view value, std::string& what) -> bool
 {
   try
   {
-    auto val = std::stoi(value);
+    auto sv = std::string(value);
+    auto val = std::stoi(sv);
     if(val < 0)
     {
       val = 0U;
@@ -388,7 +391,7 @@ auto Hex2Bin::setValueFromstring(std::uint32_t& output, const std::string& value
  * @param[in] fragment A fragment of the input line.
  * @param[out] error Error?
  */
-auto Hex2Bin::extractNoPrintSpaceFound(const std::string& fragment, bool& error) -> void
+auto Hex2Bin::extractNoPrintSpaceFound(std::string_view fragment, bool& error) -> void
 {
   auto tokens = split(fragment, "\\s+");
   for(const auto& token : tokens)
@@ -407,7 +410,7 @@ auto Hex2Bin::extractNoPrintSpaceFound(const std::string& fragment, bool& error)
  * @param[in] fragment A fragment of the input line.
  * @param[out] error Error?
  */
-auto Hex2Bin::extractNoPrintNoSpaceFound(const std::string& fragment, bool& error) -> void
+auto Hex2Bin::extractNoPrintNoSpaceFound(std::string_view fragment, bool& error) -> void
 {
   for(auto i = 0U; i < fragment.length(); i += 2U)
   {

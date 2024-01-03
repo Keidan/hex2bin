@@ -55,8 +55,8 @@ static auto usage(int32_t xcode) -> void;
 static auto signalHook(int s) -> void;
 static auto shutdownHook() -> void;
 static auto processMain(const Context& context) -> int;
-static auto decodeArgStartOrLimit(const std::string& optionArg, bool isLimit) -> void;
-static auto decodeArgInputOrOutput(const std::string& optionArg, bool isInput) -> void;
+static auto decodeArgStartOrLimit(std::string_view optionArg, bool isLimit) -> void;
+static auto decodeArgInputOrOutput(std::string_view optionArg, bool isInput) -> void;
 static auto processArguments(int argc, char** argv, Context& context) -> void;
 
 /* Public function ----------------------------------------------------------*/
@@ -185,7 +185,7 @@ static auto processMain(const Context& context) -> int
  * @param[in] optionArg Value of the argument.
  * @param[in] isLimit Argument "limit" or "start" ?
  */
-static auto decodeArgStartOrLimit(const std::string& optionArg, const bool isLimit) -> void
+static auto decodeArgStartOrLimit(std::string_view optionArg, const bool isLimit) -> void
 {
   std::string what{};
   const auto ret = isLimit ? hex2bin->setLimit(optionArg, what) : hex2bin->setStart(optionArg, what);
@@ -202,7 +202,7 @@ static auto decodeArgStartOrLimit(const std::string& optionArg, const bool isLim
  * @param[in] optionArg Value of the argument.
  * @param[in] isInput Argument "input" or "output" ?
  */
-static auto decodeArgInputOrOutput(const std::string& optionArg, const bool isInput) -> void
+static auto decodeArgInputOrOutput(std::string_view optionArg, const bool isInput) -> void
 {
   const auto openResult = isInput ? hex2bin->openInput(optionArg) : hex2bin->openOutput(optionArg);
 

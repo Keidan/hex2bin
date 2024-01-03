@@ -48,14 +48,14 @@ namespace h2b
        * @param[in] path The file path.
        * @retval Hex2BinOpenResult.
        */
-      auto openInput(const std::string& path) -> Hex2BinOpenResult;
+      auto openInput(std::string_view path) -> Hex2BinOpenResult;
 
       /**
        * @brief Opens the output file.
        * @param[in] path The file path.
        * @retval Hex2BinOpenResult.
        */
-      auto openOutput(const std::string& path) -> Hex2BinOpenResult;
+      auto openOutput(std::string_view path) -> Hex2BinOpenResult;
 
       /**
        * @brief Closes the files.
@@ -68,7 +68,7 @@ namespace h2b
        * @param[out] what The cause of the error (if the function returns false).
        * @retval False if error, otherwise true.
        */
-      auto setStart(const std::string& value, std::string& what) -> bool;
+      auto setStart(std::string_view value, std::string& what) -> bool;
 
       /**
        * @brief Tests whether the start value is valid or not.
@@ -88,7 +88,7 @@ namespace h2b
        * @param[out] what The cause of the error (if the function returns false).
        * @retval False if error, otherwise true.
        */
-      auto setLimit(const std::string& value, std::string& what) -> bool;
+      auto setLimit(std::string_view value, std::string& what) -> bool;
 
       /**
        * @brief Tests whether the limit value is valid or not.
@@ -137,7 +137,7 @@ namespace h2b
        * @param[in] reg The regex.
        * @retval The result in a vector.
        */
-      static auto split(std::string_view in, const std::string& reg) -> std::vector<std::string>;
+      static auto split(std::string_view in, std::string_view reg) -> std::vector<std::string>;
 
       /**
        * @brief Returns a fragment of the input line.
@@ -161,7 +161,7 @@ namespace h2b
        * @param[in] s The string to validate.
        * @retval bool
        */
-      auto validateHexAndLogOnError(const std::string& line, const std::string& s) const -> bool;
+      auto validateHexAndLogOnError(std::string_view line, std::string_view s) const -> bool;
 
       /**
        * @brief Opens a file.
@@ -172,7 +172,7 @@ namespace h2b
        * @retval Hex2BinOpenResult.
        */
       template <class Stream>
-      auto openFile(Stream& stream, const std::string& path, std::ios_base::openmode mode) const -> Hex2BinOpenResult;
+      auto openFile(Stream& stream, std::string_view path, std::ios_base::openmode mode) const -> Hex2BinOpenResult;
 
       /**
        * @brief Sets the value from a string.
@@ -181,21 +181,21 @@ namespace h2b
        * @param[out] what The cause of the error (if the function returns false).
        * @retval False if error, otherwise true.
        */
-      static auto setValueFromstring(std::uint32_t& output, const std::string& value, std::string& what) -> bool;
+      static auto setValueFromstring(std::uint32_t& output, std::string_view value, std::string& what) -> bool;
 
       /**
        * @brief Extracts and without converting all printable characters (sub loop 1).
        * @param[in] fragment A fragment of the input line.
        * @param[out] error Error?
        */
-      auto extractNoPrintSpaceFound(const std::string& fragment, bool& error) -> void;
+      auto extractNoPrintSpaceFound(std::string_view fragment, bool& error) -> void;
 
       /**
        * @brief Extracts and without converting all printable characters (sub loop 2).
        * @param[in] fragment A fragment of the input line.
        * @param[out] error Error?
        */
-      auto extractNoPrintNoSpaceFound(const std::string& fragment, bool& error) -> void;
+      auto extractNoPrintNoSpaceFound(std::string_view fragment, bool& error) -> void;
   };
 } // namespace h2b
 #endif /* __HEX2BIN_HPP__ */
