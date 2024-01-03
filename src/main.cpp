@@ -38,7 +38,7 @@ struct Context
 };
 
 /* Private variables --------------------------------------------------------*/
-static const struct option long_options[] = {
+static const std::vector<struct option> g_longOptions = {
   {        "help", 0, nullptr, 'h'},
   {     "version", 0, nullptr, 'v'},
   {       "input", 1, nullptr, 'i'},
@@ -247,7 +247,8 @@ static auto processArguments(const int argc, char** argv, Context& context) -> v
 {
   auto opt = -1;
   /* parse the options */
-  while(-1 != (opt = getopt_long(argc, argv, "vhi:o:s:l:pe", long_options, nullptr)))
+  const auto* longOptions = g_longOptions.data();
+  while(-1 != (opt = getopt_long(argc, argv, "vhi:o:s:l:pe", longOptions, nullptr)))
   {
     switch(opt)
     {
