@@ -123,7 +123,7 @@ static NO_RETURN void usage(const int32_t xcode)
 /**
  * @brief Print the version
  */
-static NO_RETURN void version()
+static void version()
 {
   std::cout << APP_NAME << " version " << VERSION_MAJOR << "." << VERSION_MINOR << " (";
 #if DEBUG
