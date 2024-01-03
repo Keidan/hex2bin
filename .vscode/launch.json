@@ -1,0 +1,66 @@
+{
+  "configurations": [
+    {
+      "name": "(MSVC) hex2bin help",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/hex2bin.exe",
+      "args": [
+        "-h"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+    },
+    {
+      "name": "(MSVC) hex2bin gtest",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/hex2bin_gtest.exe",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+    },
+    {
+      "name": "(MSVC) hex2bin python",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/test.py",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "--file", "bin/hex2bin.exe",
+        "--extra"
+      ],
+      "console": "integratedTerminal",
+    },
+    /* GDB */
+    {
+      "name": "(GDB) hex2bin help",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/hex2bin",
+      "args": [
+        "-h"
+      ],
+      "cwd": "${workspaceFolder}",
+    },
+    {
+      "name": "(GDB) hex2bin gtest",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/hex2bin_gtest",
+      "cwd": "${workspaceFolder}",
+    },
+    {
+      "name": "(GDB) hex2bin python",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/test.py",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "--file", "bin/hex2bin",
+        "--extra"
+      ],
+      "console": "integratedTerminal",
+    },
+    
+  ]
+}
