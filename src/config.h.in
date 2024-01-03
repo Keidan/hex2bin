@@ -3,13 +3,10 @@
  * @author Keidan (Kevin Billonneau)
  * @copyright GNU GENERAL PUBLIC LICENSE Version 3
  */
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
+#pragma once
 
 #define APP_NAME      "@H2B_PROJECT_NAME@"
 #define VERSION_MAJOR @VERSION_MAJOR@
 #define VERSION_MINOR @VERSION_MINOR@
 #define DEFAULT_LIMIT @DEFLIMIT@
 #define DEFAULT_START @DEFSTART@
-  
-#endif /* __CONFIG_H__ */

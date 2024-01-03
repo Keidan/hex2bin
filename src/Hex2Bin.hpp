@@ -3,8 +3,7 @@
  * @author Keidan (Kevin Billonneau)
  * @copyright GNU GENERAL PUBLIC LICENSE Version 3
  */
-#ifndef __HEX2BIN_HPP__
-#define __HEX2BIN_HPP__
+#pragma once
 
 /* Includes -----------------------------------------------------------------*/
 #include <cstdint>
@@ -198,4 +197,4 @@ namespace h2b
       auto extractNoPrintNoSpaceFound(std::string_view fragment, bool& error) -> void;
   };
 } // namespace h2b
-#endif /* __HEX2BIN_HPP__ */
+ 
