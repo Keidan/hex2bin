@@ -5,6 +5,7 @@
  */
 /* Includes -----------------------------------------------------------------*/
 #include "Hex2Bin.hpp"
+#include "Helper.hpp"
 #include "gtest/gtest.h"
 #include <filesystem>
 
@@ -15,6 +16,7 @@ static constexpr auto* SAMPLE3 = "samples/sample3.txt";
 static constexpr auto* SAMPLE_TEMP = "samples/sample.txt.temp";
 
 using h2b::Hex2Bin;
+using h2b::Helper;
 using h2b::Hex2BinOpenResult;
 using h2b::Hex2BinIsOpen;
 namespace fs = std::filesystem;
@@ -23,10 +25,54 @@ namespace fs = std::filesystem;
 static auto cleanup(Hex2Bin& hex2bin, std::string_view path) -> void
 {
   hex2bin.close();
-  fs::remove(path);
+  if(fs::exists(path))
+    fs::remove(path);
 }
 
-TEST(Hex2BinTest, TestOpenInput)
+TEST(Hex2BinTest, HelperFragment)
+{
+  const auto dum = std::string("sssssss");
+  const auto str = std::string("azerty qwerty");
+  const auto toTest = dum + str + dum;
+  const auto fragment = Helper::getFragment(toTest, 7, 13);
+  EXPECT_EQ(1, fragment == str);
+}
+
+TEST(Hex2BinTest, HelperSplit)
+{
+  const auto sp = Helper::split("azerty qwerty", "\\s+");
+  EXPECT_EQ(2, sp.size());
+}
+
+TEST(Hex2BinTest, HelperSetValueFromstringSuccess)
+{
+  std::uint32_t output = 0;
+  std::string what;
+  const auto ret = Helper::setValueFromstring(output, "1", what);
+  EXPECT_EQ(1, ret);
+}
+
+TEST(Hex2BinTest, HelperSetValueFromstringInvalidArg)
+{
+  std::uint32_t output = 0;
+  std::string what;
+  const auto ret = Helper::setValueFromstring(output, "azerty", what);
+  const auto view = std::string_view(what);
+  EXPECT_EQ(0, ret);
+  EXPECT_EQ(1, view.starts_with("invalid_argument"));
+}
+
+TEST(Hex2BinTest, HelperSetValueFromstringOutOfRange)
+{
+  std::uint32_t output = 0;
+  std::string what;
+  const auto ret = Helper::setValueFromstring(output, "4294967296", what);
+  const auto view = std::string_view(what);
+  EXPECT_EQ(0, ret);
+  EXPECT_EQ(1, view.starts_with("out_of_range"));
+}
+
+TEST(Hex2BinTest, OpenInput)
 {
   Hex2Bin hex2bin{};
   const auto file = SAMPLE1;
@@ -34,7 +80,7 @@ TEST(Hex2BinTest, TestOpenInput)
   EXPECT_EQ(1, ret == Hex2BinOpenResult::Success);
 }
 
-TEST(Hex2BinTest, TestOpenOutput)
+TEST(Hex2BinTest, OpenOutput)
 {
   Hex2Bin hex2bin{};
   const auto file = SAMPLE_TEMP;
@@ -45,7 +91,7 @@ TEST(Hex2BinTest, TestOpenOutput)
   EXPECT_EQ(1, oretInput == Hex2BinIsOpen::Input);
 }
 
-TEST(Hex2BinTest, TestOpenFiles)
+TEST(Hex2BinTest, OpenFiles)
 {
   Hex2Bin hex2bin{};
   const auto fileIn = SAMPLE1;
@@ -64,7 +110,7 @@ TEST(Hex2BinTest, TestOpenFiles)
   EXPECT_EQ(1, oretSuccess == Hex2BinIsOpen::Success);
 }
 
-TEST(Hex2BinTest, TestStart)
+TEST(Hex2BinTest, Start)
 {
   Hex2Bin hex2bin{};
   const auto svalue = "32";
@@ -77,7 +123,7 @@ TEST(Hex2BinTest, TestStart)
   EXPECT_EQ(1, hex2bin.getStart() == value);
 }
 
-TEST(Hex2BinTest, TestLimit)
+TEST(Hex2BinTest, Limit)
 {
   Hex2Bin hex2bin{};
   const auto svalue = "16";
@@ -110,7 +156,7 @@ static auto testExtractNoPrintWithStart(Hex2Bin& hex2bin, std::string_view sstar
   EXPECT_EQ(1, eret);
 }
 
-TEST(Hex2BinTest, TestExtractNoPrint1)
+TEST(Hex2BinTest, ExtractNoPrintSample1)
 {
   Hex2Bin hex2bin{};
   std::string what{};
@@ -121,7 +167,7 @@ TEST(Hex2BinTest, TestExtractNoPrint1)
   testExtractNoPrintWithStart(hex2bin, "6", SAMPLE1, SAMPLE_TEMP);
 }
 
-TEST(Hex2BinTest, TestExtractNoPrint2)
+TEST(Hex2BinTest, ExtractNoPrintSample2)
 {
   Hex2Bin hex2bin{};
   const auto slimit = "47";
@@ -145,7 +191,7 @@ TEST(Hex2BinTest, TestExtractNoPrint2)
   EXPECT_EQ(1, eret);
 }
 
-TEST(Hex2BinTest, TestExtractNoPrint3)
+TEST(Hex2BinTest, ExtractNoPrintSample3)
 {
   Hex2Bin hex2bin{};
   testExtractNoPrintWithStart(hex2bin, "1", SAMPLE3, SAMPLE_TEMP);
