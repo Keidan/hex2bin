@@ -13,6 +13,7 @@
 #include <exception>
 #include <algorithm>
 #include <sstream>
+#include <iomanip>
 
 /* Public defines -----------------------------------------------------------*/
 
@@ -142,7 +143,7 @@ namespace h2b
       static auto int2hex(T t, char fill = '0', int width = 1) -> std::string
       {
         std::stringstream ss;
-        ss << std::hex << hex;
+        ss << std::hex;
         ss << std::setfill(fill);
         ss << std::setw(width);
         ss << t;
