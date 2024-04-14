@@ -12,6 +12,36 @@
       "console": "integratedTerminal",
     },
     {
+      "name": "(MSVC) hex2bin ihex h2b",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/hex2bin.exe",
+      "args": [
+        "-i", "samples/sample2.hex", 
+        "-o", "samples/sample2.bin.temp", 
+        "--ihex", "h2b",
+        "--offset", "0x08000000"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+    },
+    {
+      "name": "(MSVC) hex2bin ihex b2h",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/hex2bin.exe",
+      "args": [
+        "-i", "samples/sample2.bin", 
+        "-o", "samples/sample2.hex.temp", 
+        "--ihex", "b2h",
+        "--offset", "0x08000000",
+        "--linear", "0x080002c5",
+        "--padding_width", "0x20"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+    },
+    {
       "name": "(MSVC) hex2bin gtest",
       "type": "cppvsdbg",
       "request": "launch",
@@ -21,13 +51,12 @@
     },
     {
       "name": "(MSVC) hex2bin python",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/test.py",
       "cwd": "${workspaceFolder}",
       "args": [
-        "--file", "bin/hex2bin.exe",
-        "--extra"
+        "--file", "bin/hex2bin.exe"
       ],
       "console": "integratedTerminal",
     },
@@ -51,7 +80,7 @@
     },
     {
       "name": "(GDB) hex2bin python",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/test.py",
       "cwd": "${workspaceFolder}",

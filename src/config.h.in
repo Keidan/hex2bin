@@ -1,4 +1,4 @@
-/*
+/**
  * @file config.h
  * @author Keidan (Kevin Billonneau)
  * @copyright GNU GENERAL PUBLIC LICENSE Version 3
@@ -10,3 +10,4 @@
 #define VERSION_MINOR @VERSION_MINOR@
 #define DEFAULT_LIMIT @DEFLIMIT@
 #define DEFAULT_START @DEFSTART@
+#define DEFAULT_WIDTH @DEFWIDTH@

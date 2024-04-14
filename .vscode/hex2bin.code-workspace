@@ -93,7 +93,8 @@
       "deque": "cpp",
       "set": "cpp",
       "unordered_set": "cpp",
-      "variant": "cpp"
+      "variant": "cpp",
+      "numeric": "cpp"
     }
   }
 }

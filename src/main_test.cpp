@@ -1,10 +1,11 @@
-/*
+/**
  * @file main_test.cpp
  * @author Keidan (Kevin Billonneau)
  * @copyright GNU GENERAL PUBLIC LICENSE Version 3
  */
 /* Includes -----------------------------------------------------------------*/
 #include "Hex2Bin.hpp"
+#include "IntelHex.hpp"
 #include "Helper.hpp"
 #include "gtest/gtest.h"
 #include <filesystem>
@@ -14,17 +15,23 @@ static constexpr auto* SAMPLE1 = "samples/sample1.txt";
 static constexpr auto* SAMPLE2 = "samples/sample2.txt";
 static constexpr auto* SAMPLE3 = "samples/sample3.txt";
 static constexpr auto* SAMPLE_TEMP = "samples/sample.txt.temp";
+static constexpr auto* SAMPLE1_HEX = "samples/sample1.hex";
+static constexpr auto* SAMPLE1_BIN = "samples/sample1.bin";
+static constexpr auto* SAMPLE2_HEX = "samples/sample2.hex";
+static constexpr auto* SAMPLE2_BIN = "samples/sample2.bin";
+static constexpr auto* SAMPLE_HEX_TEMP = "samples/sample.hex.temp";
+static constexpr auto* SAMPLE_BIN_TEMP = "samples/sample.bin.temp";
 
 using h2b::Hex2Bin;
+using h2b::IntelHex;
 using h2b::Helper;
-using h2b::Hex2BinOpenResult;
-using h2b::Hex2BinIsOpen;
+using h2b::Files;
 namespace fs = std::filesystem;
 
 /* Tests --------------------------------------------------------------------*/
-static auto cleanup(Hex2Bin& hex2bin, std::string_view path) -> void
+static auto cleanup(Files& files, std::string_view path) -> void
 {
-  hex2bin.close();
+  files.close();
   if(fs::exists(path))
     fs::remove(path);
 }
@@ -74,94 +81,103 @@ TEST(Hex2BinTest, HelperSetValueFromstringOutOfRange)
 
 TEST(Hex2BinTest, OpenInput)
 {
-  Hex2Bin hex2bin{};
+  using enum Files::OpenResult;
+  Files files;
   const auto file = SAMPLE1;
-  const auto ret = hex2bin.openInput(file);
-  EXPECT_EQ(1, ret == Hex2BinOpenResult::Success);
+  const auto ret = files.openInput(file);
+  EXPECT_EQ(1, ret == Success);
 }
 
 TEST(Hex2BinTest, OpenOutput)
 {
-  Hex2Bin hex2bin{};
+  using enum Files::OpenResult;
+  using enum Files::OpenStatus;
+  Files files;
   const auto file = SAMPLE_TEMP;
-  const auto ret = hex2bin.openOutput(file);
-  const auto oretInput = hex2bin.isFilesOpen();
-  cleanup(hex2bin, SAMPLE_TEMP);
-  EXPECT_EQ(1, ret == Hex2BinOpenResult::Success);
-  EXPECT_EQ(1, oretInput == Hex2BinIsOpen::Input);
+  const auto ret = files.openOutput(file);
+  const auto oretInput = files.isFilesOpen();
+  cleanup(files, file);
+  EXPECT_EQ(1, ret == Success);
+  EXPECT_EQ(1, oretInput == InputClosed);
 }
 
 TEST(Hex2BinTest, OpenFiles)
 {
-  Hex2Bin hex2bin{};
+  using enum Files::OpenResult;
+  using enum Files::OpenStatus;
+  Files files;
   const auto fileIn = SAMPLE1;
   const auto fileOut = SAMPLE_TEMP;
-  const auto oretBoth = hex2bin.isFilesOpen();
-  const auto retIn = hex2bin.openInput(fileIn);
-  const auto oretOutput = hex2bin.isFilesOpen();
-  const auto retOut = hex2bin.openOutput(fileOut);
-  const auto oretSuccess = hex2bin.isFilesOpen();
-  cleanup(hex2bin, fileOut);
+  const auto oretBoth = files.isFilesOpen();
+  const auto retIn = files.openInput(fileIn);
+  const auto oretOutput = files.isFilesOpen();
+  const auto retOut = files.openOutput(fileOut);
+  const auto oretSuccess = files.isFilesOpen();
+  cleanup(files, fileOut);
 
-  EXPECT_EQ(1, retIn == Hex2BinOpenResult::Success);
-  EXPECT_EQ(1, retOut == Hex2BinOpenResult::Success);
-  EXPECT_EQ(1, oretBoth == Hex2BinIsOpen::Both);
-  EXPECT_EQ(1, oretOutput == Hex2BinIsOpen::Output);
-  EXPECT_EQ(1, oretSuccess == Hex2BinIsOpen::Success);
+  EXPECT_EQ(1, retIn == Success);
+  EXPECT_EQ(1, retOut == Success);
+  EXPECT_EQ(1, oretBoth == AllClosed);
+  EXPECT_EQ(1, oretOutput == OutputClosed);
+  EXPECT_EQ(1, oretSuccess == AllOpened);
 }
 
 TEST(Hex2BinTest, Start)
 {
-  Hex2Bin hex2bin{};
+  Hex2Bin hex2bin{nullptr};
   const auto svalue = "32";
   const auto value = 32U;
   std::string what{};
 
-  EXPECT_EQ(1, hex2bin.setStart(svalue, what) == true);
+  EXPECT_EQ(1, hex2bin.start(svalue, what) == true);
   EXPECT_EQ(1, what.empty() == true);
-  EXPECT_EQ(1, hex2bin.isValidStart() == true);
-  EXPECT_EQ(1, hex2bin.getStart() == value);
+  EXPECT_EQ(1, hex2bin.isStart() == true);
+  EXPECT_EQ(1, hex2bin.start() == value);
 }
 
 TEST(Hex2BinTest, Limit)
 {
-  Hex2Bin hex2bin{};
+  Hex2Bin hex2bin{nullptr};
   const auto svalue = "16";
   const auto value = 16U;
   std::string what{};
 
-  EXPECT_EQ(1, hex2bin.setLimit(svalue, what) == true);
+  EXPECT_EQ(1, hex2bin.limit(svalue, what) == true);
   EXPECT_EQ(1, what.empty() == true);
-  EXPECT_EQ(1, hex2bin.isValidLimit() == true);
-  EXPECT_EQ(1, hex2bin.getLimit() == value);
+  EXPECT_EQ(1, hex2bin.isLimit() == true);
+  EXPECT_EQ(1, hex2bin.limit() == value);
 }
 
 static auto testExtractNoPrintWithStart(Hex2Bin& hex2bin, std::string_view sstart, std::string_view fileIn, std::string_view fileOut) -> void
 {
+  using enum Files::OpenResult;
+  using enum Files::OpenStatus;
   std::string what{};
 
-  EXPECT_EQ(1, hex2bin.setStart(sstart, what) == true);
+  EXPECT_EQ(1, hex2bin.start(sstart, what) == true);
   EXPECT_EQ(1, what.empty() == true);
-  EXPECT_EQ(1, hex2bin.isValidStart() == true);
+  EXPECT_EQ(1, hex2bin.isStart() == true);
 
-  const auto retIn = hex2bin.openInput(fileIn);
-  const auto retOut = hex2bin.openOutput(fileOut);
-  const auto oret = hex2bin.isFilesOpen();
+  const auto& files = hex2bin.files();
+  const auto retIn = files->openInput(fileIn);
+  const auto retOut = files->openOutput(fileOut);
+  const auto oret = files->isFilesOpen();
   const auto eret = hex2bin.extractNoPrint();
-  cleanup(hex2bin, fileOut);
+  cleanup(*files, fileOut);
 
-  EXPECT_EQ(1, retIn == Hex2BinOpenResult::Success);
-  EXPECT_EQ(1, retOut == Hex2BinOpenResult::Success);
-  EXPECT_EQ(1, oret == Hex2BinIsOpen::Success);
+  EXPECT_EQ(1, retIn == Success);
+  EXPECT_EQ(1, retOut == Success);
+  EXPECT_EQ(1, oret == AllOpened);
   EXPECT_EQ(1, eret);
 }
 
 TEST(Hex2BinTest, ExtractNoPrintSample1)
 {
-  Hex2Bin hex2bin{};
+  auto files = std::make_unique<Files>();
+  Hex2Bin hex2bin{files};
   std::string what{};
 
-  EXPECT_EQ(1, hex2bin.setLimit("47", what) == true);
+  EXPECT_EQ(1, hex2bin.limit("47", what) == true);
   EXPECT_EQ(1, what.empty() == true);
 
   testExtractNoPrintWithStart(hex2bin, "6", SAMPLE1, SAMPLE_TEMP);
@@ -169,32 +185,236 @@ TEST(Hex2BinTest, ExtractNoPrintSample1)
 
 TEST(Hex2BinTest, ExtractNoPrintSample2)
 {
-  Hex2Bin hex2bin{};
+  using enum Files::OpenResult;
+  using enum Files::OpenStatus;
+  auto files = std::make_unique<Files>();
+  Hex2Bin hex2bin{files};
   const auto slimit = "47";
   const auto fileIn = SAMPLE2;
   const auto fileOut = SAMPLE_TEMP;
   std::string what{};
 
-  EXPECT_EQ(1, hex2bin.setLimit(slimit, what) == true);
+  EXPECT_EQ(1, hex2bin.limit(slimit, what) == true);
   EXPECT_EQ(1, what.empty() == true);
-  EXPECT_EQ(1, hex2bin.isValidLimit() == true);
+  EXPECT_EQ(1, hex2bin.isLimit() == true);
 
-  const auto retIn = hex2bin.openInput(fileIn);
-  const auto retOut = hex2bin.openOutput(fileOut);
-  const auto oret = hex2bin.isFilesOpen();
+  const auto retIn = files->openInput(fileIn);
+  const auto retOut = files->openOutput(fileOut);
+  const auto oret = files->isFilesOpen();
   const auto eret = hex2bin.extractNoPrint();
-  cleanup(hex2bin, fileOut);
+  cleanup(*files, fileOut);
 
-  EXPECT_EQ(1, retIn == Hex2BinOpenResult::Success);
-  EXPECT_EQ(1, retOut == Hex2BinOpenResult::Success);
-  EXPECT_EQ(1, oret == Hex2BinIsOpen::Success);
+  EXPECT_EQ(1, retIn == Success);
+  EXPECT_EQ(1, retOut == Success);
+  EXPECT_EQ(1, oret == AllOpened);
   EXPECT_EQ(1, eret);
 }
 
 TEST(Hex2BinTest, ExtractNoPrintSample3)
 {
-  Hex2Bin hex2bin{};
+  auto files = std::make_unique<Files>();
+  Hex2Bin hex2bin{files};
   testExtractNoPrintWithStart(hex2bin, "1", SAMPLE3, SAMPLE_TEMP);
+}
+
+/* -------- */
+/* IntelHex */
+/* -------- */
+TEST(IntelHexTest, OpenInput)
+{
+  using enum Files::OpenResult;
+  Files files;
+  const auto file = SAMPLE1_HEX;
+  const auto ret = files.openInput(file);
+  EXPECT_EQ(1, ret == Success);
+}
+
+TEST(IntelHexTest, OpenOutput)
+{
+  using enum Files::OpenResult;
+  using enum Files::OpenStatus;
+  Files files;
+  const auto file = SAMPLE_BIN_TEMP;
+  const auto ret = files.openOutput(file);
+  const auto oretInput = files.isFilesOpen();
+  cleanup(files, file);
+  EXPECT_EQ(1, ret == Success);
+  EXPECT_EQ(1, oretInput == InputClosed);
+}
+
+TEST(IntelHexTest, OpenFiles)
+{
+  using enum Files::OpenResult;
+  using enum Files::OpenStatus;
+  Files files;
+  const auto fileIn = SAMPLE1;
+  const auto fileOut = SAMPLE_BIN_TEMP;
+  const auto oretBoth = files.isFilesOpen();
+  const auto retIn = files.openInput(fileIn);
+  const auto oretOutput = files.isFilesOpen();
+  const auto retOut = files.openOutput(fileOut);
+  const auto oretSuccess = files.isFilesOpen();
+  cleanup(files, fileOut);
+
+  EXPECT_EQ(1, retIn == Success);
+  EXPECT_EQ(1, retOut == Success);
+  EXPECT_EQ(1, oretBoth == AllClosed);
+  EXPECT_EQ(1, oretOutput == OutputClosed);
+  EXPECT_EQ(1, oretSuccess == AllOpened);
+}
+
+TEST(IntelHexTest, AddressOffset)
+{
+  IntelHex intelhex{nullptr};
+  const auto svalue = "0x8000000";
+  const auto value = 0x8000000;
+  std::string what{};
+  EXPECT_EQ(1, intelhex.offset(svalue, what) == true);
+  EXPECT_EQ(1, what.empty() == true);
+  EXPECT_EQ(1, intelhex.offset() == value);
+}
+
+TEST(IntelHexTest, Width)
+{
+  IntelHex intelhex{nullptr};
+  const auto svalue = "0x10";
+  const auto value = 0x10;
+  std::string what{};
+  EXPECT_EQ(1, intelhex.width(svalue, what) == true);
+  EXPECT_EQ(1, what.empty() == true);
+  EXPECT_EQ(1, intelhex.width() == value);
+}
+
+TEST(IntelHexTest, Linear)
+{
+  IntelHex intelhex{nullptr};
+  const auto svalue = "0x80002C5";
+  const auto value = 0x80002C5;
+  std::string what{};
+  EXPECT_EQ(1, intelhex.linear(svalue, what) == true);
+  EXPECT_EQ(1, what.empty() == true);
+  EXPECT_EQ(1, intelhex.linear() == value);
+}
+
+TEST(IntelHexTest, Padding)
+{
+  IntelHex intelhex{nullptr};
+  const auto svalue = "0x22";
+  const auto value = 0x22;
+  std::string what{};
+  EXPECT_EQ(1, intelhex.padding(svalue, what) == true);
+  EXPECT_EQ(1, what.empty() == true);
+  EXPECT_EQ(1, intelhex.padding() == value);
+}
+
+TEST(IntelHexTest, PaddingWidth)
+{
+  IntelHex intelhex{nullptr};
+  const auto svalue = "10";
+  const auto value = 10;
+  std::string what{};
+  EXPECT_EQ(1, intelhex.paddingWidth(svalue, what) == true);
+  EXPECT_EQ(1, what.empty() == true);
+  EXPECT_EQ(1, intelhex.paddingWidth() == value);
+}
+
+TEST(IntelHexTest, ParseLine)
+{
+  auto input = ":1000000000200020C5020008B9020008BB02000859";
+  IntelHex::Line line{};
+  auto b = IntelHex::parseLine(input, line);
+  EXPECT_EQ(1, b);
+  EXPECT_EQ(1, line.length == 0x10);
+  EXPECT_EQ(1, line.address == 0);
+  EXPECT_EQ(1, line.type == IntelHex::RecordType::Data);
+  EXPECT_EQ(1, line.data.size() == 16);
+  EXPECT_EQ(1, line.checksum == 89);
+}
+
+TEST(IntelHexTest, ConvertLine)
+{
+  IntelHex::Line line{};
+  line.address = 0x03AC;
+  line.type = IntelHex::RecordType::Data;
+  line.data.emplace_back(0x00);
+  line.data.emplace_back(0x24);
+  line.data.emplace_back(0xF4);
+  line.data.emplace_back(0x00);
+  line.length = static_cast<std::uint8_t>(line.data.size());
+  line.checksum = IntelHex::evalCRC(line);
+  auto convertData = IntelHex::convertLine(line);
+  line = {};
+  line.type = IntelHex::RecordType::EndOfFile;
+  line.checksum = IntelHex::evalCRC(line);
+  auto convertEoF = IntelHex::convertLine(line);
+  EXPECT_EQ(1, convertData == ":0403AC000024F40035\n");
+  EXPECT_EQ(1, convertEoF == ":00000001FF\n");
+}
+
+static auto testIntelToBin(IntelHex& intelhex, std::string_view fileIn, std::string_view fileOut) -> void
+{
+  using enum Files::OpenResult;
+  using enum Files::OpenStatus;
+  const auto& files = intelhex.files();
+  const auto retIn = files->openInput(fileIn);
+  const auto retOut = files->openOutput(fileOut);
+  const auto oret = files->isFilesOpen();
+  auto eret = intelhex.intel2bin(false);
+  cleanup(*files, fileOut);
+  EXPECT_EQ(1, retIn == Success);
+  EXPECT_EQ(1, retOut == Success);
+  EXPECT_EQ(1, oret == AllOpened);
+  EXPECT_EQ(1, eret);
+}
+
+TEST(IntelHexTest, IntelToBin1)
+{
+  auto files = std::make_unique<Files>();
+  IntelHex intelhex{files};
+  testIntelToBin(intelhex, SAMPLE1_HEX, SAMPLE_BIN_TEMP);
+}
+
+TEST(IntelHexTest, IntelToBin2)
+{
+  auto files = std::make_unique<Files>();
+  IntelHex intelhex{files};
+  testIntelToBin(intelhex, SAMPLE2_HEX, SAMPLE_BIN_TEMP);
+}
+
+static auto testBinToIntel(IntelHex& intelhex, std::string_view fileIn, std::string_view fileOut) -> void
+{
+  using enum Files::OpenResult;
+  using enum Files::OpenStatus;
+  const auto& files = intelhex.files();
+  const auto retIn = files->openInput(fileIn);
+  const auto retOut = files->openOutput(fileOut);
+  const auto oret = files->isFilesOpen();
+  auto eret = intelhex.bin2intel(false);
+  cleanup(*files, fileOut);
+  EXPECT_EQ(1, retIn == Success);
+  EXPECT_EQ(1, retOut == Success);
+  EXPECT_EQ(1, oret == AllOpened);
+  EXPECT_EQ(1, eret);
+}
+
+TEST(IntelHexTest, BinToIntel1)
+{
+  auto files = std::make_unique<Files>();
+  IntelHex intelhex{files};
+  testBinToIntel(intelhex, SAMPLE1_BIN, SAMPLE_HEX_TEMP);
+}
+TEST(IntelHexTest, BinToIntel2)
+{
+  auto files = std::make_unique<Files>();
+  IntelHex intelhex{files};
+  std::string what{};
+  intelhex.offset("0x08000000", what);
+  EXPECT_EQ(1, what.empty() == true);
+  intelhex.linear("0x080002c5", what);
+  EXPECT_EQ(1, what.empty() == true);
+  intelhex.paddingWidth("0x20", what);
+  EXPECT_EQ(1, what.empty() == true);
+  testBinToIntel(intelhex, SAMPLE2_BIN, SAMPLE_HEX_TEMP);
 }
 
 /* Public function ----------------------------------------------------------*/

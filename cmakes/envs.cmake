@@ -4,6 +4,7 @@ message(STATUS "Supported distrib.: cmake -DDISTRIBUTION=[debug|release]")
 message(STATUS "Supported distrib.: cmake -DCMAKE_BUILD_TYPE=[debug|release]")
 message(STATUS "Default start value: cmake -DDEFSTART=[int value] (see the '-s, --start' option of the binary)")
 message(STATUS "Default limit value: cmake -DDEFLIMIT=[int value] (see the '-l, --limit' option of the binary)")
+message(STATUS "Default width value: cmake -DDEFWIDTH=[int value] (see the '--width' option of the binary)")
 
 # Python for update_sonar_version.py
 find_package(Python COMPONENTS Interpreter)
@@ -24,6 +25,7 @@ set(DISTRIBUTION "" CACHE STRING "Distribution type (release or debug)")
 set(CMAKE_BUILD_TYPE "" CACHE STRING "Distribution type (release or debug)")
 set(DEFSTART "0" CACHE STRING "Default start value (see the '-s, --start' option of the binary)")
 set(DEFLIMIT "0" CACHE STRING "Default limit value (see the '-l, --limit' option of the binary)")
+set(DEFWIDTH "16" CACHE STRING "Default width value (see the '--width' option of the binary)")
 
 # sanity check
 if (NOT DEFINED DISTRIBUTION OR DISTRIBUTION STREQUAL "")
@@ -44,11 +46,21 @@ elseif (DISTRIBUTION STREQUAL "debug")
 endif()
 
 if(NOT DEFSTART MATCHES "^[0-9]+$")
-   message(FATAL_ERROR "DEFSTART must be a valid integer: '${DEFSTART}'")
+ccmessage(FATAL_ERROR "DEFSTART must be a valid integer: '${DEFSTART}'")
 endif()
 
 if(NOT DEFLIMIT MATCHES "^[0-9]+$")
-   message(FATAL_ERROR "DEFLIMIT must be a valid integer: '${DEFLIMIT}'")
+  message(FATAL_ERROR "DEFLIMIT must be a valid integer: '${DEFLIMIT}'")
+endif()
+
+if(NOT DEFWIDTH MATCHES "^[0-9]+$")
+  message(FATAL_ERROR "DEFWIDTH must be a valid integer: '${DEFWIDTH}'")
+endif()
+if(DEFWIDTH EQUAL 0)
+  message(FATAL_ERROR "DEFWIDTH cannot be equal to 0: '${DEFWIDTH}'")
+endif()
+if(DEFWIDTH GREATER 255)
+  message(FATAL_ERROR "DEFWIDTH cannot exceed 255: '${DEFWIDTH}'")
 endif()
 
 # Information
@@ -56,6 +68,7 @@ message(STATUS "-- Version: ${VERSION_MAJOR}.${VERSION_MINOR}")
 message(STATUS "-- Distrib.: ${DISTRIBUTION}")
 message(STATUS "-- Default start value: ${DEFSTART}")
 message(STATUS "-- Default limit value: ${DEFLIMIT}")
+message(STATUS "-- Default width value: ${DEFWIDTH}")
 
 # update directories
 set(H2B_ROOT_SRC_DIR ${CMAKE_SOURCE_DIR})

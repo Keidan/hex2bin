@@ -32,7 +32,7 @@ def main() -> int:
     
   major = ""
   minor = ""
-  result = re.search(r"VERSION_MAJOR ([0-9]*)\nVERSION_MINOR ([0-9]*)", read_file(version))
+  result = re.search(r"VERSION_MAJOR ([\d]*)\nVERSION_MINOR ([\d]*)", read_file(version))
   major = result.group(1)
   minor = result.group(2)
   if len(major) == 0:
@@ -43,7 +43,7 @@ def main() -> int:
     return 1
   vers = major + "." + minor
   content = read_file(sonar_project)
-  result = re.search(r"([\s\S]+sonar\.projectVersion=)[0-9]*\.[0-9]*([\s\S]+)", content)
+  result = re.search(r"([\s\S]+sonar\.projectVersion=)[\d]*\.[\d]*([\s\S]+)", content)
   new_content = result.group(1) + vers + result.group(2)
 
   if new_content != content:

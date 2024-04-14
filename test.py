@@ -1,15 +1,22 @@
 #!/usr/bin/env python3
-import argparse, sys, os, subprocess
+import argparse, sys, os, subprocess, hashlib
 
 SAMPLE1 = 'sample1.txt'
 SAMPLE2 = 'sample2.txt'
 SAMPLE3 = 'sample3.txt'
 SAMPLE4 = 'sample4.txt'
+SAMPLE1_HEX = 'sample1.hex'
+SAMPLE1_BIN = 'sample1.bin'
+SAMPLE2_HEX = 'sample2.hex'
+SAMPLE2_BIN = 'sample2.bin'
+SAMPLE_HEX_TEMP = 'sample.hex.temp'
+SAMPLE_BIN_TEMP1 = 'sample1.bin.temp'
+SAMPLE_BIN_TEMP2 = 'sample2.bin.temp'
 SAMPLE_TEMP = 'sample.txt.temp'
 RESULT1 = '00000000004030000000000000203000'
 RESULT2 = '00000000005030000000000000603000'
 RESULT3 = '00000000005030000000000000603000'
-MAX_CHAR_RESULT = 20
+MAX_CHAR_RESULT = 25
 
 class Result:
   def __init__(self):
@@ -46,8 +53,18 @@ class TU:
   def __init__(self, file):
     self.file = file
     self.res = Result()
-    self.sample_dir = self.get_sample(SAMPLE_TEMP)
+    self.temp_sample = self.get_sample(SAMPLE_TEMP)
+    self.temp_hex = self.get_sample(SAMPLE_HEX_TEMP)
+    self.temp_bin1 = self.get_sample(SAMPLE_BIN_TEMP1)
+    self.temp_bin2 = self.get_sample(SAMPLE_BIN_TEMP2)
 
+  def md5(self, fname):
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+      for chunk in iter(lambda: f.read(4096), b""):
+        hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+  
   def get_sample(self, file) -> str:
       p = os.path.join(os.getcwd(), 'samples')
       return os.path.join(p, file)
@@ -66,139 +83,191 @@ class TU:
     return exit_code
 
   def read_temp_file(self) -> bytes:
-    with open(self.sample_dir, 'rb') as f:
+    with open(self.temp_sample, 'rb') as f:
       content = f.read()
     return content
     
   def generic(self):
-    label = self.format('opt error')
+    label = self.format('gen: opt error')
     ret_code = self.exec_process([self.file, '-0'], False)
     self.res.print(ret_code == 0, label)
 
-    label = self.format('help')
+    label = self.format('gen: help')
     ret_code = self.exec_process([self.file, '-h'], False)
     self.res.print(ret_code != 0, label)
 
-    label = self.format('version')
+    label = self.format('gen: version')
     ret_code = self.exec_process([self.file, '-v'], False)
     self.res.print(ret_code != 0, label)
-    
-  def samples(self):
-    label = self.format('sample1 exec')
-    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE1), '-o', self.sample_dir, '-s', '6', '-l', '47'])
-    self.res.print(ret_code != 0, label)
 
-    label = self.format('sample1 compare')
-    result = self.read_temp_file()
-    self.res.print(result.decode('utf-8') != RESULT1, label)
-    os.remove(self.sample_dir)
-
-    label = self.format('sample2 exec')
-    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE2), '-o', self.sample_dir, '-l', '47'])
-    self.res.print(ret_code != 0, label)
-
-    label = self.format('sample2 compare')
-    result = self.read_temp_file()
-    self.res.print(result.decode('utf-8') != RESULT2, label)
-    os.remove(self.sample_dir)
-
-    label = self.format('sample3 exec')
-    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.sample_dir, '-s', '1'])
-    self.res.print(ret_code != 0, label)
-
-    label = self.format('sample3 compare')
-    result = self.read_temp_file()
-    self.res.print(result.hex() != RESULT3, label)
-    os.remove(self.sample_dir)
-
-  def extra_limits(self):
-    label = self.format('limit1 error')
-    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.sample_dir, '-l', 'az'], False)
-    self.res.print(ret_code == 0, label)
-
-    label = self.format('limit2 error')
-    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.sample_dir, '-l', '4294967295'], False)
-    self.res.print(ret_code == 0, label)
-
-    label = self.format('limit3 error')
-    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.sample_dir, '-l', '-1'], False)
-    self.res.print(ret_code == 0, label)
-
-  def extra_starts(self):
-    label = self.format('start1 error')
-    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.sample_dir, '-s', 'az'], False)
-    self.res.print(ret_code == 0, label)
-
-    label = self.format('start2 error')
-    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE4), '-o', self.sample_dir, '-s', '6'], False)
-    self.res.print(ret_code == 0, label)
-
-    label = self.format('start3 error')
-    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE4), '-o', self.sample_dir, '-s', '4294967295'], False)
-    self.res.print(ret_code == 0, label)
-
-    label = self.format('start4 error')
-    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE4), '-o', self.sample_dir, '-s', '-1'], False)
-    self.res.print(ret_code == 0, label)
-
-    label = self.format('start warning')
-    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE1), '-o', self.sample_dir, '-s', '1', '-p'], False)
-    self.res.print(ret_code != 0, label)
-
-  def extra(self):
-    label = self.format('sample4 exec')
-    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE4), '-o', self.sample_dir, '-s', '1'], False)
-    self.res.print(ret_code == 0, label)
-    os.remove(self.sample_dir)
-
-    label = self.format('print exec')
-    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.sample_dir, '-p'], False)
-    self.res.print(ret_code != 0, label)
-    os.remove(self.sample_dir)
-
-    label = self.format('extract exec')
-    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.sample_dir, '-e'], False)
-    self.res.print(ret_code != 0, label)
-    os.remove(self.sample_dir)
-
-    label = self.format('no in error')
+  
+  
+  def files(self):
+    label = self.format('files: no in error')
     ret_code = self.exec_process([self.file, '-o', 'file_not_found'], False)
     os.remove('file_not_found')
     self.res.print(ret_code == 0, label)
 
-    label = self.format('no out error')
+    label = self.format('files: no out error')
     ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-s', '1'], False)
     self.res.print(ret_code == 0, label)
 
-    label = self.format('nofile error')
+    label = self.format('files: nofile error')
     ret_code = self.exec_process([self.file], False)
     self.res.print(ret_code == 0, label)
 
-    label = self.format('file in error')
+    label = self.format('files: file in error')
     ret_code = self.exec_process([self.file, '-i', 'file_not_found'], False)
     self.res.print(ret_code == 0, label)
 
-    label = self.format('file out error')
+    label = self.format('files: file out error')
     ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', '/file_not_found'], False)
     self.res.print(ret_code == 0, label)
 
-    label = self.format('even exec')
-    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.sample_dir], False)
+    label = self.format('files: even exec')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.temp_sample], False)
     self.res.print(ret_code == 0, label)
-    os.remove(self.sample_dir)
+    os.remove(self.temp_sample)
+
+  def h2b_samples(self):
+    label = self.format('h2b: limit1 error')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.temp_sample, '-l', 'az'], False)
+    self.res.print(ret_code == 0, label)
+
+    label = self.format('h2b: limit2 error')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.temp_sample, '-l', '4294967295'], False)
+    self.res.print(ret_code == 0, label)
+
+    label = self.format('h2b: limit3 error')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.temp_sample, '-l', '-1'], False)
+    self.res.print(ret_code == 0, label)
+
+    label = self.format('h2b: start1 error')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.temp_sample, '-s', 'az'], False)
+    self.res.print(ret_code == 0, label)
+
+    label = self.format('h2b: start2 error')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE4), '-o', self.temp_sample, '-s', '6'], False)
+    self.res.print(ret_code == 0, label)
+
+    label = self.format('h2b: start3 error')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE4), '-o', self.temp_sample, '-s', '4294967295'], False)
+    self.res.print(ret_code == 0, label)
+
+    label = self.format('h2b: start4 error')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE4), '-o', self.temp_sample, '-s', '-1'], False)
+    self.res.print(ret_code == 0, label)
+
+    label = self.format('h2b: start warning')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE1), '-o', self.temp_sample, '-s', '1', '-p'], False)
+    self.res.print(ret_code != 0, label)
+
+    label = self.format('h2b: sample1 exec')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE1), '-o', self.temp_sample, '-s', '6', '-l', '47'])
+    self.res.print(ret_code != 0, label)
+
+    label = self.format('h2b: sample1 compare')
+    result = self.read_temp_file()
+    self.res.print(result.decode('utf-8') != RESULT1, label)
+    os.remove(self.temp_sample)
+
+    label = self.format('h2b: sample2 exec')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE2), '-o', self.temp_sample, '-l', '47'])
+    self.res.print(ret_code != 0, label)
+
+    label = self.format('h2b: sample2 compare')
+    result = self.read_temp_file()
+    self.res.print(result.decode('utf-8') != RESULT2, label)
+    os.remove(self.temp_sample)
+
+    label = self.format('h2b: sample3 exec')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.temp_sample, '-s', '1'])
+    self.res.print(ret_code != 0, label)
+
+    label = self.format('h2b: sample3 compare')
+    result = self.read_temp_file()
+    self.res.print(result.hex() != RESULT3, label)
+    os.remove(self.temp_sample)
+
+    label = self.format('h2b: sample4 exec')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE4), '-o', self.temp_sample, '-s', '1'], False)
+    self.res.print(ret_code == 0, label)
+    os.remove(self.temp_sample)
+
+    label = self.format('h2b: print exec')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.temp_sample, '-p'], False)
+    self.res.print(ret_code != 0, label)
+    os.remove(self.temp_sample)
+
+    label = self.format('h2b: extract exec')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE3), '-o', self.temp_sample, '-e'], False)
+    self.res.print(ret_code != 0, label)
+    os.remove(self.temp_sample)
+
+  def intelhex(self):
+    label = self.format('ihex: no dir')
+    ret_code = self.exec_process([self.file, '--ihex'], False)
+    self.res.print(ret_code == 0, label)
     
-    self.extra_limits()
-    self.extra_starts()
-  
+    label = self.format('ihex: invalid dir')
+    ret_code = self.exec_process([self.file, '--ihex', 'dir'], False)
+    self.res.print(ret_code == 0, label)
+
+    label = self.format('ihex: offset1 error')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE1_HEX), '-o', self.temp_bin1, '--offset', 'az'], False)
+    self.res.print(ret_code == 0, label)
+
+    label = self.format('ihex: offset2 error')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE1_HEX), '-o', self.temp_bin1, '--offset', '4294967295'], False)
+    self.res.print(ret_code == 0, label)
+
+    label = self.format('ihex: h2b ori hex1')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE1_HEX), '-o', self.temp_bin1, '--ihex', 'h2b'], False)
+    self.res.print(ret_code != 0, label)
+    label = self.format('ihex: h2b ori hex1 md5')
+    self.res.print(self.md5(self.get_sample(SAMPLE1_BIN)) != self.md5(self.temp_bin1), label)
+
+    label = self.format('ihex: b2h ori bin1')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE1_BIN), '-o', self.temp_hex, '--ihex', 'b2h', '--offset', '0x08000000', '--linear', '0x080002c5'], False)
+    self.res.print(ret_code != 0, label)
+
+    label = self.format('ihex: h2b gen hex1')
+    ret_code = self.exec_process([self.file, '-i', self.temp_hex, '-o', self.temp_bin2, '--ihex', 'h2b'], False)
+    self.res.print(ret_code != 0, label)
+    label = self.format('ihex: h2b gen bin1 md5')
+    self.res.print(self.md5(self.temp_bin1) != self.md5(self.temp_bin2), label)
+
+    label = self.format('ihex: h2b ori hex2')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE2_HEX), '-o', self.temp_bin1, '--ihex', 'h2b'], False)
+    self.res.print(ret_code != 0, label)
+    label = self.format('ihex: h2b ori hex2 md5')
+    self.res.print(self.md5(self.get_sample(SAMPLE2_BIN)) != self.md5(self.temp_bin1), label)
+
+    label = self.format('ihex: b2h ori bin2')
+    ret_code = self.exec_process([self.file, '-i', self.get_sample(SAMPLE2_BIN), '-o', self.temp_hex, '--ihex', 'b2h', '--offset', '0x08000000', '--linear', '0x080002c5', '--padding_width', "32"], False)
+    self.res.print(ret_code != 0, label)
+
+    label = self.format('ihex: h2b gen hex2')
+    ret_code = self.exec_process([self.file, '-i', self.temp_hex, '-o', self.temp_bin2, '--ihex', 'h2b'], False)
+    self.res.print(ret_code != 0, label)
+    label = self.format('ihex: h2b gen bin2 md5')
+    self.res.print(self.md5(self.temp_bin1) != self.md5(self.temp_bin2), label)
+
+    if os.path.exists(self.temp_hex):
+      os.remove(self.temp_hex)
+    if os.path.exists(self.temp_bin1):
+      os.remove(self.temp_bin1)
+    if os.path.exists(self.temp_bin2):
+      os.remove(self.temp_bin2)
+
+
   def print_end(self):
     print(f'Total of tests \033[1m{self.res.get_count():02d}\033[0m')
-    print(f'- \033[32mPASSED\033[0m \033[1m{self.res.get_passed():2d}\033[0m')
     print(f'- \033[31mFAILED\033[0m \033[1m{self.res.get_failed():2d}\033[0m')
 
 def main() -> int:
   parser = argparse.ArgumentParser()
   parser.add_argument('-f', '--file', help='Binary file.')
-  parser.add_argument('-e', '--extra', action='store_true', help='Extra tests.')
   args = parser.parse_args()
   if args.file == None:
     print('Unspecified file name')
@@ -209,9 +278,9 @@ def main() -> int:
     
   tu = TU(args.file)
   tu.generic()
-  tu.samples()
-  if args.extra:
-    tu.extra()
+  tu.files()
+  tu.h2b_samples()
+  tu.intelhex()
   tu.print_end()
   sample = tu.get_sample(SAMPLE_TEMP)
   if os.path.exists(sample):

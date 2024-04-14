@@ -67,11 +67,14 @@ An MS VSCode workspace file can be found at the following location .vscode/hex2b
 	* Supported distrib.: -DCMAKE_BUILD_TYPE=[debug|release]
 	* Default start value: cmake -DDEFSTART=[int value] (see the '-s, --start' option of the binary)
 	* Default limit value: cmake -DDEFLIMIT=[int value] (see the '-l, --limit' option of the binary)
+	* Default width value: cmake -DDEFWIDTH=[int value] (see the '--width' option of the binary)
 
 _You can also use cmake-gui to manage the options._
 		
 ## Example (with cmake -DDEFSTART=0 -DDEFLIMIT=0)
 _For Windows, remember to add .exe after the binary name._
+
+**Note: The limit, start, offset, length, width, linear arguments can be expressed in decimal or hexadecimal if they start with 0x.**
 
 <ins>Test 1:</ins>
 
@@ -89,6 +92,29 @@ _For Windows, remember to add .exe after the binary name._
 
 `hex2bin -i sample3.txt -o sample3.txt.new -s 1`
 
+<ins>Test 4:</ins>
+
+`hex2bin -i sample1.hex -o sample.bin.new --ihex h2b`
+
+<ins>Test 5:</ins>
+
+`hex2bin -i sample1.hex -o sample.bin.new --ihex h2b --offset 0x080002c5`
+
+<ins>Test 6:</ins>
+
+`hex2bin -i sample1.hex -o sample.bin.new --ihex b2h`
+
+<ins>Test 7:</ins>
+
+`hex2bin -i sample1.hex -o sample.bin.new --ihex b2h --offset 0x08000000`
+
+<ins>Test 8:</ins>
+
+`hex2bin -i sample1.hex -o sample.bin.new --ihex b2h --offset 0x08000000 --linear 0x080002c5`
+
+<ins>Test 9:</ins>
+
+`hex2bin -i sample2.bin -o sample.hex.new --ihex b2h --offset 0x08000000 --linear 0x080002c5 --padding_width 0x20`
 
 ## License
 

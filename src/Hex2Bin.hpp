@@ -1,4 +1,4 @@
-/*
+/**
  * @file Hex2Bin.hpp
  * @author Keidan (Kevin Billonneau)
  * @copyright GNU GENERAL PUBLIC LICENSE Version 3
@@ -7,9 +7,9 @@
 
 /* Includes -----------------------------------------------------------------*/
 #include <cstdint>
-#include <fstream>
 #include <vector>
 #include "config.h"
+#include "Files.hpp"
 
 /* Public defines -----------------------------------------------------------*/
 #ifndef DEFAULT_START
@@ -22,90 +22,56 @@
 /* Public class -------------------------------------------------------------*/
 namespace h2b
 {
-  enum class Hex2BinIsOpen : std::uint8_t
-  {
-    Success = 0,
-    Both = 1,
-    Input = 2,
-    Output = 3
-  };
-
-  enum class Hex2BinOpenResult : std::uint8_t
-  {
-    Success = 0,
-    Error = 1,
-    Already = 2,
-  };
-
   class Hex2Bin
   {
     public:
-      Hex2Bin() = default;
-
-      /**
-       * @brief Opens the input file.
-       * @param[in] path The file path.
-       * @retval Hex2BinOpenResult.
-       */
-      auto openInput(std::string_view path) -> Hex2BinOpenResult;
-
-      /**
-       * @brief Opens the output file.
-       * @param[in] path The file path.
-       * @retval Hex2BinOpenResult.
-       */
-      auto openOutput(std::string_view path) -> Hex2BinOpenResult;
-
-      /**
-       * @brief Closes the files.
-       */
-      auto close() -> void;
+      Hex2Bin(const std::unique_ptr<Files>& files);
 
       /**
        * @brief Sets the starting value.
+       * 
        * @param[in] value Integer value in string format.
        * @param[out] what The cause of the error (if the function returns false).
        * @retval False if error, otherwise true.
        */
-      auto setStart(std::string_view value, std::string& what) -> bool;
+      auto start(std::string_view value, std::string& what) -> bool;
 
       /**
        * @brief Tests whether the start value is valid or not.
+       * 
        * @retval True if it is valid, otherwise false.
        */
-      auto isValidStart() const -> bool;
+      auto isStart() const -> bool;
 
       /**
        * @brief Returns the start value.
+       * 
        * @retval std::uint32_t
        */
-      auto getStart() const -> std::uint32_t;
+      auto start() const -> std::uint32_t;
 
       /**
        * @brief Sets the limit value.
+       * 
        * @param[in] value Integer value in string format.
        * @param[out] what The cause of the error (if the function returns false).
        * @retval False if error, otherwise true.
        */
-      auto setLimit(std::string_view value, std::string& what) -> bool;
+      auto limit(std::string_view value, std::string& what) -> bool;
 
       /**
        * @brief Tests whether the limit value is valid or not.
+       * 
        * @retval True if it is valid, otherwise false.
        */
-      auto isValidLimit() const -> bool;
+      auto isLimit() const -> bool;
 
       /**
        * @brief Returns the limit value.
+       * 
        * @retval std::uint32_t
        */
-      auto getLimit() const -> std::uint32_t;
-
-      /**
-       * @brief Test if the files are open.
-       * @retval Hex2BinIsOpen.
-       */
-      auto isFilesOpen() const -> Hex2BinIsOpen;
+      auto limit() const -> std::uint32_t;
 
       /**
        * @brief Only extracts words from "start" to "limit".
@@ -120,18 +86,26 @@ namespace h2b
 
       /**
        * @brief Extracts and converts all printable characters.
+       * 
        * @retval Returns false on error, true else.
        */
       auto extractPrint() -> bool;
 
+      /**
+       * @brief Gets the files pointer.
+       * 
+       * @retval const std::unique_ptr<Files>&
+       */
+      auto files() const -> const std::unique_ptr<Files>&;
+
     private:
+      const std::unique_ptr<Files>& m_files;
       std::uint32_t m_start = DEFAULT_START;
       std::uint32_t m_limit = DEFAULT_LIMIT;
-      std::ofstream m_output{};
-      std::ifstream m_input{};
 
       /**
        * @brief Validates the line and displays an error message if the validation fails.
+       * 
        * @param[in] line The reference line.
        * @param[in] s The string to validate.
        * @retval bool
@@ -139,18 +113,8 @@ namespace h2b
       auto validateHexAndLogOnError(std::string_view line, std::string_view s) const -> bool;
 
       /**
-       * @brief Opens a file.
-       * @param[in,out] stream The file stream.
-       * @param[in] path The file path.
-       * @param[in] mode The opening mode.
-       * @retval False if error, otherwise true.
-       * @retval Hex2BinOpenResult.
-       */
-      template <class Stream>
-      auto openFile(Stream& stream, std::string_view path, std::ios_base::openmode mode) const -> Hex2BinOpenResult;
-
-      /**
        * @brief Extracts and without converting all printable characters (sub loop 1).
+       * 
        * @param[in] fragment A fragment of the input line.
        * @param[out] error Error?
        */
@@ -158,6 +122,7 @@ namespace h2b
 
       /**
        * @brief Extracts and without converting all printable characters (sub loop 2).
+       * 
        * @param[in] fragment A fragment of the input line.
        * @param[out] error Error?
        */

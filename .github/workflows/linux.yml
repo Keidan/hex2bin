@@ -92,7 +92,7 @@ jobs:
       - name: Run test
         shell: bash
         run: |
-            python test.py --file bin/hex2bin --extra
+            python test.py --file bin/hex2bin
       - name: Generate GCOV
         run: |
           cmake --build build --target gcov
@@ -108,7 +108,7 @@ jobs:
       - name: Run test
         shell: bash
         run: |
-            python test.py --file bin/hex2bin --extra
+            python test.py --file bin/hex2bin
       - name: Run build-wrapper
         run: |
           cmake -S . -B build -DDISTRIBUTION=debug -G "${{ env.CMAKE_GENERATOR }}"

@@ -1,4 +1,4 @@
-/*
+/**
  * @file Helper.hpp
  * @author Keidan (Kevin Billonneau)
  * @copyright GNU GENERAL PUBLIC LICENSE Version 3
@@ -12,6 +12,7 @@
 #include <regex>
 #include <exception>
 #include <algorithm>
+#include <sstream>
 
 /* Public defines -----------------------------------------------------------*/
 
@@ -24,7 +25,8 @@ namespace h2b
       virtual ~Helper() = default;
 
       /**
-       * @brief Splits a string according to the specified regex
+       * @brief Splits a string according to the specified regex.
+       * 
        * @param[in] in The input string.
        * @param[in] reg The regex.
        * @retval The result in a vector.
@@ -42,6 +44,7 @@ namespace h2b
 
       /**
        * @brief Returns a fragment of the input line.
+       * 
        * @param[in] line The input line.
        * @param[in] start Start index.
        * @param[in] limit Limit index.
@@ -60,6 +63,7 @@ namespace h2b
 
       /**
        * @brief Searches for a string in another.
+       * 
        * @param[in] ref The reference string.
        * @param[in] needle The string to search.
        * @param[in] ignoreCase True for case-insensitive.
@@ -74,6 +78,7 @@ namespace h2b
 
       /**
        * @brief Sets the value from a string.
+       * 
        * @param[out] output Output value.
        * @param[in] value Integer value in string format.
        * @param[out] what The cause of the error (if the function returns false).
@@ -84,7 +89,14 @@ namespace h2b
         try
         {
           auto sv = std::string(value);
-          auto val = std::stoi(sv);
+          std::int32_t val;
+          if(value.starts_with("0x"))
+          {
+            sv = sv.substr(2);
+            val = hex2int<std::int32_t>(sv);
+          }
+          else
+            val = std::stoi(sv);
           if(val < 0)
           {
             val = 0U;
@@ -102,6 +114,22 @@ namespace h2b
           return false;
         }
         return true;
+      }
+
+      /**
+       * @brief Converts a hexadecimal string to unsigned interger.
+       * 
+       * @param[in] hex Hexadecimal string.
+       * @retval T
+       */
+      template <typename T>
+      static auto hex2int(std::string_view hex) -> T
+      {
+        int t;
+        std::stringstream ss;
+        ss << std::hex << hex;
+        ss >> t;
+        return static_cast<T>(t);
       }
 
     private:
