@@ -301,38 +301,38 @@ TEST(IntelHexTest, ParseLine)
   EXPECT_EQ(1, line.checksum == 89);
 }
 
-TEST(IntelHexTest, ParseLineError1)
+TEST(IntelHexTest, ParseLineErrorSmall)
 {
   Line line{};
   auto b = IntelHex::parseLine(":10000000", line);
   EXPECT_EQ(0, b);
 }
 
-TEST(IntelHexTest, ParseLineError2)
+TEST(IntelHexTest, ParseLineErrorNotBeginWith)
 {
   Line line{};
   auto b = IntelHex::parseLine("0000000000", line);
   EXPECT_EQ(0, b);
 }
 
-TEST(IntelHexTest, ParseLineError3)
+TEST(IntelHexTest, ParseLineErrorDataNotPresent)
 {
   Line line{};
   auto b = IntelHex::parseLine(":0000000000", line);
   EXPECT_EQ(0, b);
 }
 
-TEST(IntelHexTest, ParseLineError4)
-{
-  Line line{};
-  auto b = IntelHex::parseLine(":00000000F6", line);
-  EXPECT_EQ(0, b);
-}
-
-TEST(IntelHexTest, ParseLineError5)
+TEST(IntelHexTest, ParseLineErrorInvalidChecksum)
 {
   Line line{};
   auto b = IntelHex::parseLine(":1000000000200020C5020008B9020008BB02000800", line);
+  EXPECT_EQ(0, b);
+}
+
+TEST(IntelHexTest, ParseLineErrorInvalidCode)
+{
+  Line line{};
+  auto b = IntelHex::parseLine(":100000FF00200020C5020008B9020008BB02000800", line);
   EXPECT_EQ(0, b);
 }
 
