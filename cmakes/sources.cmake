@@ -13,7 +13,7 @@ add_custom_target(
 
 set(hex2bin_src ${H2B_SRC_DIR}/Hex2Bin.cpp)
 set(intelhex_src ${H2B_SRC_DIR}/IntelHex.cpp)
-set(parameters_src ${H2B_SRC_DIR}/ihex/parameters.cpp)
+set(parameters_src ${H2B_SRC_DIR}/ihex/Parameters.cpp)
 set(files_src ${H2B_SRC_DIR}/Files.cpp)
 set(main_src ${H2B_SRC_DIR}/main.cpp)
 set(main_test_src ${H2B_SRC_DIR}/main_test.cpp)
