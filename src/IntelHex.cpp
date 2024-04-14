@@ -30,7 +30,6 @@
 #include <limits>
 #include <cctype>
 #include <array>
-#include <format>
 /* Usings -------------------------------------------------------------------*/
 using namespace h2b;
 
