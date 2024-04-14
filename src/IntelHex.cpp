@@ -33,6 +33,9 @@
 /* Usings -------------------------------------------------------------------*/
 using namespace h2b;
 
+using ihex::Line;
+using ihex::RecordType;
+
 static constexpr auto START_CHAR = ':';
 static constexpr std::size_t LL_LEN = 2U;
 static constexpr std::size_t AAAA_LEN = 4U;
@@ -52,154 +55,6 @@ static constexpr auto abs(T x)
 IntelHex::IntelHex(Files* files)
   : m_files(files)
 {
-}
-
-/**
- * @brief Sets the width (used for writing).
- * 
- * @param[in] value Integer value in string format.
- * @param[out] what The cause of the error (if the function returns false).
- * @retval False if error, otherwise true.
- */
-auto IntelHex::width(std::string_view value, std::string& what) -> bool
-{
-  auto ret = Helper::setValueFromstring(m_width, value, what);
-  if(ret)
-  {
-    if(!m_width)
-      what = "The value cannot be equal to 0.";
-    else if(m_width > 0xFF)
-      what = "The value cannot exceed 255 (0xFF).";
-    ret = what.empty();
-  }
-  return ret;
-}
-
-/**
- * @brief Gets the width (used for writing).
- * 
- * @retval std::uint32_t.
- */
-auto IntelHex::width() const -> std::uint32_t
-{
-  return m_width;
-}
-
-/**
- * @brief Sets the padding.
- * 
- * @param[in] value Integer value in string format.
- * @param[out] what The cause of the error (if the function returns false).
- * @retval False if error, otherwise true.
- */
-auto IntelHex::padding(std::string_view value, std::string& what) -> bool
-{
-  std::uint32_t padding;
-  auto ret = Helper::setValueFromstring(padding, value, what);
-  if(ret)
-  {
-    if(padding > 0xFF)
-      what = "The padding value cannot exceed 255 (0xFF).";
-    else
-      m_padding = static_cast<std::uint8_t>(padding);
-    ret = what.empty();
-  }
-  return ret;
-}
-
-/**
- * @brief Gets the padding.
- * 
- * @retval std::uint8_t.
- */
-auto IntelHex::padding() const -> std::uint8_t
-{
-  return m_padding;
-}
-
-/**
- * @brief Sets the padding width.
- * 
- * @param[in] value Integer value in string format.
- * @param[out] what The cause of the error (if the function returns false).
- * @retval False if error, otherwise true.
- */
-auto IntelHex::paddingWidth(std::string_view value, std::string& what) -> bool
-{
-  std::uint32_t padding;
-  auto ret = Helper::setValueFromstring(padding, value, what);
-  if(ret)
-  {
-    if(padding > 0xFF)
-      what = "The padding width value cannot exceed 255 (0xFF).";
-    else
-      m_paddingWidth = static_cast<std::uint8_t>(padding);
-    ret = what.empty();
-  }
-  return ret;
-}
-
-/**
- * @brief Gets the padding width.
- * 
- * @retval std::uint8_t.
- */
-auto IntelHex::paddingWidth() const -> std::uint8_t
-{
-  return m_paddingWidth;
-}
-
-/**
- * @brief Sets the address offset.
- * 
- * @param[in] value Integer value in string format.
- * @param[out] what The cause of the error (if the function returns false).
- * @retval False if error, otherwise true.
- */
-auto IntelHex::offset(std::string_view value, std::string& what) -> bool
-{
-  return Helper::setValueFromstring(m_addrOffset, value, what);
-}
-
-/**
- * @brief Gets the address offset.
- * 
- * @retval std::uint32_t.
- */
-auto IntelHex::offset() const -> std::uint32_t
-{
-  return m_addrOffset;
-}
-
-/**
- * @brief Sets the start linear.
- * 
- * @param[in] value Integer value in string format.
- * @param[out] what The cause of the error (if the function returns false).
- * @retval False if error, otherwise true.
- */
-auto IntelHex::linear(std::string_view value, std::string& what) -> bool
-{
-  auto r = Helper::setValueFromstring(m_startLinear, value, what);
-  return (m_startLinearFound = r);
-}
-
-/**
- * @brief Gets the start linear.
- * 
- * @retval std::uint32_t.
- */
-auto IntelHex::linear() const -> std::uint32_t
-{
-  return m_startLinear;
-}
-
-/**
- * @brief Use of the "extended segment" block instead of "extended linear" for the offset parameter.
- */
-auto IntelHex::segment() -> void
-{
-  m_useSegment = true;
 }
 
 /**
@@ -225,7 +80,7 @@ auto IntelHex::intel2bin(bool summary) -> bool
   std::uint32_t number = 0U;
   std::uint32_t writes = 0U;
   Line line{};
-  m_startLinearFound = false;
+  startLinearFound() = false;
   auto leave = false;
   while(!leave && m_files->getline(input))
   {
@@ -266,15 +121,15 @@ auto IntelHex::intel2bin(bool summary) -> bool
  */
 auto IntelHex::bin2intel(bool summary) -> bool
 {
-  if(m_paddingWidth)
+  if(paddingWidth())
     fetchPadding();
-  if(m_useSegment)
-    writeSegment(m_addrOffset);
+  if(useSegment())
+    writeSegment(addressOffset());
   else
-    writeAddress(m_addrOffset);
+    writeAddress(addressOffset());
   std::uint32_t writes;
   bool ret;
-  if(m_paddingWidth && !m_paddings.empty())
+  if(paddingWidth() && !m_paddings.empty())
     ret = writeDataWithPadding(writes);
   else
     ret = writeDataWithoutPadding(writes);
@@ -429,9 +284,9 @@ auto IntelHex::printSummaryH2B(std::uint32_t number, std::uint32_t writes) const
 {
   std::cout << "Intel HEX to binary." << std::endl;
   std::cout << std::dec << number << " lines parsed." << std::endl;
-  std::cout << "Address offset 0x" << std::hex << std::setfill('0') << std::setw(8) << m_addrOffset << "." << std::endl;
-  if(m_startLinearFound)
-    std::cout << "The main function is at address 0x" << std::hex << std::setfill('0') << std::setw(m_startLinearSize * 2) << m_startLinear << "." << std::endl;
+  std::cout << "Address offset 0x" << Helper::int2hex(addressOffset(), '0', 8) << "." << std::endl;
+  if(startLinearFound())
+    std::cout << "The main function is at address 0x" << Helper::int2hex(linear(), '0', m_startLinearSize * 2) << "." << std::endl;
   else
     std::cout << "The main function was not contained in the written data." << std::endl;
   std::cout << std::dec << writes << " bytes written." << std::endl;
@@ -462,7 +317,7 @@ auto IntelHex::extractDataFromString(std::string_view input, Line& line, std::si
 auto IntelHex::applyPadding(std::uint32_t length) -> void
 {
   for(std::uint32_t i = 0; i < length; i++)
-    m_files->output() << m_padding;
+    m_files->output() << padding();
 }
 
 /* H2B Process -----------------------------------------------------*/
@@ -479,13 +334,13 @@ auto IntelHex::processData(const Line& line, std::uint32_t number, std::uint32_t
 {
   auto length = line.length;
   std::uint32_t offset = 0U;
-  if(m_currentAddress < m_addrOffset)
+  if(m_currentAddress < addressOffset())
   {
     auto total = m_currentAddress + line.length;
-    if(total > m_addrOffset)
+    if(total > addressOffset())
     {
       /* we are in the current packet. */
-      offset = total - m_addrOffset;
+      offset = total - addressOffset();
       length -= offset;
     }
     else
@@ -493,15 +348,15 @@ auto IntelHex::processData(const Line& line, std::uint32_t number, std::uint32_t
 #if 1
       std::cerr << "Off-range address on line " <<  number;
       std::cerr << ", address: 0x" <<  Helper::int2hex(m_currentAddress);
-      std::cerr << ", offset: 0x" <<  Helper::int2hex(m_addrOffset) << std::endl;
+      std::cerr << ", offset: 0x" <<  Helper::int2hex(addressOffset()) << std::endl;
 #endif
       m_currentAddress += line.length;
       /* next packet*/
       return true;
     }
   }
-  else if(!m_addrOffset)
-    m_addrOffset = m_currentAddress;
+  else if(!addressOffset())
+    addressOffset() = m_currentAddress;
 
   std::vector<char> v;
   std::ranges::copy(line.data.begin(), line.data.end(), std::back_inserter(v));
@@ -552,17 +407,17 @@ auto IntelHex::processStartLinear(const Line& line, std::uint32_t number) -> voi
 {
   m_startLinearSize = static_cast<std::uint8_t>(line.data.size());
   if(1U == line.data.size())
-    m_startLinear = line.data.at(0);
+    linear() = line.data.at(0);
   else if(2U == line.data.size())
-    m_startLinear = (line.data.at(0) << 8U) | line.data.at(1U);
+    linear() = (line.data.at(0) << 8U) | line.data.at(1U);
   else if(4U == line.data.size())
-    m_startLinear = (line.data.at(0) << 24U) | (line.data.at(1) << 16U) | (line.data.at(2) << 8U) | line.data.at(3);
+    linear() = (line.data.at(0) << 24U) | (line.data.at(1) << 16U) | (line.data.at(2) << 8U) | line.data.at(3);
   else
   {
     std::cerr << "Line " << number << " contains a StartLinear field whose data is not supported." << std::endl;
     return;
   }
-  m_startLinearFound = true;
+  startLinearFound() = true;
 }
 
 /**
@@ -588,10 +443,10 @@ auto IntelHex::processEndOfFile(bool summary, std::uint32_t number, std::uint32_
 auto IntelHex::printSummaryB2H(std::uint32_t length) const -> void
 {
   std::cout << "Binary to Intel HEX." << std::endl;
-  std::cout << "Address offset 0x" << std::hex << std::setfill('0') << std::setw(8) << m_addrOffset << "." << std::endl;
-  if(m_startLinearFound)
-    std::cout << "The main function is at address 0x" << std::hex << std::setfill('0') << std::setw(m_startLinearSize * 2) << m_startLinear << "." << std::endl;
-  if(m_paddingWidth)
+  std::cout << "Address offset 0x" << Helper::int2hex(addressOffset(), '0', 8) << "." << std::endl;
+  if(startLinearFound())
+    std::cout << "The main function is at address 0x" << Helper::int2hex(linear(), '0', m_startLinearSize * 2) << "." << std::endl;
+  if(paddingWidth())
     std::cout << std::dec << m_paddings.size() << " padding found." << std::endl;
   std::cout << std::dec << length << " bytes written." << std::endl;
 }
@@ -628,7 +483,7 @@ auto IntelHex::fetchPadding() -> void
  */
 auto IntelHex::extactPaddingForFetch(std::uint8_t c, std::uint32_t i, std::uint32_t& pstart, std::uint32_t& plen) -> void
 {
-  if(c == m_padding)
+  if(c == padding())
   {
     if(!pstart)
       pstart = i;
@@ -636,7 +491,7 @@ auto IntelHex::extactPaddingForFetch(std::uint8_t c, std::uint32_t i, std::uint3
   }
   else
   {
-    if(plen >= m_paddingWidth)
+    if(plen >= paddingWidth())
       m_paddings[pstart] = plen;
     pstart = 0U;
     plen = 0U;
@@ -692,7 +547,7 @@ auto IntelHex::writeDataWithoutPadding(std::uint32_t& writes) -> bool
   std::array<char, BUFFER_SIZE> arr{};
   auto length = m_files->sizeIn();
   m_currentAddress = 0U;
-  m_fullAddress = m_addrOffset;
+  m_fullAddress = addressOffset();
   while(length > 0)
   {
     auto r = m_files->read(&arr[0], BUFFER_SIZE);
@@ -715,7 +570,7 @@ auto IntelHex::writeDataWithPadding(std::uint32_t& writes) -> bool
   std::array<char, BUFFER_SIZE> arr{};
   auto length = m_files->sizeIn();
   m_currentAddress = 0U;
-  m_fullAddress = m_addrOffset;
+  m_fullAddress = addressOffset();
 
   std::vector<std::uint32_t> keys;
 
@@ -758,7 +613,7 @@ auto IntelHex::writeDataWithPaddingPartial(std::uint32_t& writes, std::streamsiz
     length -= plen;
     m_currentAddress += plen;
     m_fullAddress += plen;
-    if(m_useSegment)
+    if(useSegment())
       writeSegment(m_fullAddress);
     else
       writeAddress(m_fullAddress);
@@ -777,16 +632,16 @@ auto IntelHex::writeDataWithPaddingPartial(std::uint32_t& writes, std::streamsiz
  */
 auto IntelHex::writeDataSegments(const char* data, std::uint32_t& writes, std::uint32_t reads, std::streamsize& length) -> void
 {
-  auto blocks = reads / m_width;
-  auto rem = reads % m_width;
+  auto blocks = reads / width();
+  auto rem = reads % width();
   length -= reads;
   writes += reads;
   std::uint32_t offset = 0;
   for(std::uint32_t i = 0; i < blocks; i++)
   {
     rewriteExtended();
-    writeDataSegment(data, m_width, offset);
-    offset += m_width;
+    writeDataSegment(data, width(), offset);
+    offset += width();
   }
   if(rem)
     writeDataSegment(data, rem, offset);
@@ -819,7 +674,7 @@ auto IntelHex::rewriteExtended() -> void
   if(ADDR_LIMIT == m_currentAddress)
   {
     m_fullAddress += ADDR_LIMIT;
-    if(m_useSegment)
+    if(useSegment())
       writeSegment(m_fullAddress);
     else
       writeAddress(m_fullAddress);
@@ -832,25 +687,25 @@ auto IntelHex::rewriteExtended() -> void
  */
 auto IntelHex::writeStartLinear() -> void
 {
-  if(m_startLinearFound)
+  if(startLinearFound())
   {
     Line line{};
     line.address = 0U;
     line.type = RecordType::StartLinear;
-    if(m_startLinear > 0xFFFFU)
+    if(linear() > 0xFFFFU)
     {
-      line.data.emplace_back(((m_startLinear & 0xFF000000U) >> 24));
-      line.data.emplace_back(((m_startLinear & 0x00FF0000U) >> 16));
-      line.data.emplace_back(((m_startLinear & 0x0000FF00U) >> 8));
-      line.data.emplace_back((m_startLinear & 0x000000FFU));
+      line.data.emplace_back(((linear() & 0xFF000000U) >> 24));
+      line.data.emplace_back(((linear() & 0x00FF0000U) >> 16));
+      line.data.emplace_back(((linear() & 0x0000FF00U) >> 8));
+      line.data.emplace_back((linear() & 0x000000FFU));
     }
-    else if(m_startLinear > 0xFFU)
+    else if(linear() > 0xFFU)
     {
-      line.data.emplace_back(((m_startLinear & 0x0000FF00U) >> 8));
-      line.data.emplace_back((m_startLinear & 0x000000FFU));
+      line.data.emplace_back(((linear() & 0x0000FF00U) >> 8));
+      line.data.emplace_back((linear() & 0x000000FFU));
     }
     else
-      line.data.emplace_back((m_startLinear & 0x000000FFU));
+      line.data.emplace_back((linear() & 0x000000FFU));
     line.length = static_cast<std::uint8_t>(line.data.size());
     line.checksum = evalCRC(line);
     m_files->output() << convertLine(line);

@@ -9,6 +9,7 @@ if(DEFINED IS_DEBUG AND IS_DEBUG EQUAL 1 AND NOT DEFINED WIN32)
   add_custom_command(TARGET gcov
     COMMAND gcov -b ${hex2bin_src}.gcno -o ${OBJECT_DIR}
     COMMAND gcov -b ${intelhex_src}.gcno -o ${OBJECT_DIR}
+    COMMAND gcov -b ${parameters_src}.gcno -o ${OBJECT_DIR}
     COMMAND gcov -b ${files_src}.gcno -o ${OBJECT_DIR}
     COMMAND gcov -b ${main_src}.gcno -o ${OBJECT_DIR}
     WORKING_DIRECTORY ${H2B_ROOT_BIN_DIR}/coverage

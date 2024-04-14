@@ -13,10 +13,11 @@ add_custom_target(
 
 set(hex2bin_src ${H2B_SRC_DIR}/Hex2Bin.cpp)
 set(intelhex_src ${H2B_SRC_DIR}/IntelHex.cpp)
+set(parameters_src ${H2B_SRC_DIR}/ihex/parameters.cpp)
 set(files_src ${H2B_SRC_DIR}/Files.cpp)
 set(main_src ${H2B_SRC_DIR}/main.cpp)
 set(main_test_src ${H2B_SRC_DIR}/main_test.cpp)
-set(common_src ${hex2bin_src} ${intelhex_src} ${files_src})
+set(common_src ${hex2bin_src} ${intelhex_src} ${parameters_src} ${files_src})
 set(bin_src ${common_src} ${main_src})
 if(WIN32)
   set(bin_src ${bin_src} ${H2B_SRC_DIR}/win32/getopt.c ${H2B_SRC_DIR}/win32/getopt_long.c ${H2B_SRC_DIR}/win32/getopt.h)

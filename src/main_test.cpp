@@ -26,6 +26,8 @@ using h2b::Hex2Bin;
 using h2b::IntelHex;
 using h2b::Helper;
 using h2b::Files;
+using h2b::ihex::Line;
+using h2b::ihex::RecordType;
 namespace fs = std::filesystem;
 
 /* Tests --------------------------------------------------------------------*/
@@ -248,7 +250,7 @@ TEST(IntelHexTest, AddressOffset)
   std::string what{};
   EXPECT_EQ(1, intelhex.offset("0x8000000", what) == true);
   EXPECT_EQ(1, what.empty() == true);
-  EXPECT_EQ(1, intelhex.offset() == 0x8000000);
+  EXPECT_EQ(1, intelhex.addressOffset() == 0x8000000);
 }
 
 TEST(IntelHexTest, Width)
@@ -290,21 +292,21 @@ TEST(IntelHexTest, PaddingWidth)
 TEST(IntelHexTest, ParseLine)
 {
   auto input = ":1000000000200020C5020008B9020008BB02000859";
-  IntelHex::Line line{};
+  Line line{};
   auto b = IntelHex::parseLine(input, line);
   EXPECT_EQ(1, b);
   EXPECT_EQ(1, line.length == 0x10);
   EXPECT_EQ(1, line.address == 0);
-  EXPECT_EQ(1, line.type == IntelHex::RecordType::Data);
+  EXPECT_EQ(1, line.type == RecordType::Data);
   EXPECT_EQ(1, line.data.size() == 16);
   EXPECT_EQ(1, line.checksum == 89);
 }
 
 TEST(IntelHexTest, ConvertLine)
 {
-  IntelHex::Line line{};
+  Line line{};
   line.address = 0x03AC;
-  line.type = IntelHex::RecordType::Data;
+  line.type = RecordType::Data;
   line.data.emplace_back(0x00);
   line.data.emplace_back(0x24);
   line.data.emplace_back(0xF4);
@@ -313,7 +315,7 @@ TEST(IntelHexTest, ConvertLine)
   line.checksum = IntelHex::evalCRC(line);
   auto convertData = IntelHex::convertLine(line);
   line = {};
-  line.type = IntelHex::RecordType::EndOfFile;
+  line.type = RecordType::EndOfFile;
   line.checksum = IntelHex::evalCRC(line);
   auto convertEoF = IntelHex::convertLine(line);
   EXPECT_EQ(1, convertData == ":0403AC000024F40035\n");
