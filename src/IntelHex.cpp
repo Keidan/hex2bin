@@ -380,10 +380,11 @@ auto IntelHex::processData(const Line& line, std::uint32_t number, std::uint32_t
  * @param[in] shiftL Shift position (low).
  * @retval std::uint32_t
  */
-auto IntelHex::processAddressOrSegment(const Line& line, std::uint32_t& prev, bool isSegment, std::uint8_t shiftH, std::uint8_t shiftL) -> std::uint32_t
+auto IntelHex::processAddressOrSegment(const Line& line, std::uint32_t& prev, bool isSegment, int shiftH, int shiftL) -> std::uint32_t
 {
   auto bck = prev;
   m_fullAddress &= ~prev;
+  
   if(!isSegment)
     prev = (line.data[0] << shiftH) | (line.data[1] << shiftL);
   else
@@ -409,9 +410,9 @@ auto IntelHex::processStartLinear(const Line& line, std::uint32_t number) -> voi
   if(1U == line.data.size())
     linear() = line.data.at(0);
   else if(2U == line.data.size())
-    linear() = (line.data.at(0) << 8U) | line.data.at(1U);
+    linear() = Helper::toU16(line.data.data());
   else if(4U == line.data.size())
-    linear() = (line.data.at(0) << 24U) | (line.data.at(1) << 16U) | (line.data.at(2) << 8U) | line.data.at(3);
+    linear() = Helper::toU32(line.data.data());
   else
   {
     std::cerr << "Line " << number << " contains a StartLinear field whose data is not supported." << std::endl;

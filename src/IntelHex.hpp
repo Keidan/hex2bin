@@ -162,7 +162,7 @@ namespace h2b
        * @param[in] shiftL Shift position (low).
        * @retval std::uint32_t
        */
-      auto processAddressOrSegment(const ihex::Line& line, std::uint32_t& prev, bool isSegment, std::uint8_t shiftH, std::uint8_t shiftL = 0) -> std::uint32_t;
+      auto processAddressOrSegment(const ihex::Line& line, std::uint32_t& prev, bool isSegment, int shiftH, int shiftL = 0) -> std::uint32_t;
 
       /**
        * @brief Processes the starts linear address.

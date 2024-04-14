@@ -150,6 +150,29 @@ namespace h2b
         ss << t;
         return ss.str();
       }
+
+      /**
+       * @brief uint8_t array to uint16_t
+       * 
+       * @param[in] bytes uint8_t array.
+       * @retval std::uint16_t
+       */
+      static auto toU16(const std::uint8_t* bytes) -> std::uint16_t
+      {
+        return std::to_integer<std::uint16_t>((std::byte{bytes[0]} << 8) | std::byte{bytes[1]});
+      }
+
+      /**
+       * @brief uint8_t array to uint32_t
+       * 
+       * @param[in] bytes uint8_t array.
+       * @retval std::uint32_t
+       */
+      static auto toU32(const std::uint8_t* bytes) -> std::uint32_t
+      {
+        return std::to_integer<std::uint32_t>((std::byte{bytes[0]} << 24) | (std::byte{bytes[1]} << 16) | (std::byte{bytes[2]} << 8) | std::byte{bytes[3]});
+      }
+
     private:
       Helper() = default;
   };
