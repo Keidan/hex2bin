@@ -71,7 +71,7 @@ namespace h2b
        * 
        * @retval std::uint32_t.
        */
-      auto width() -> std::uint32_t;
+      auto width() const -> std::uint32_t;
 
       /**
        * @brief Sets the padding.
@@ -87,7 +87,7 @@ namespace h2b
        * 
        * @retval std::uint8_t.
        */
-      auto padding() -> std::uint8_t;
+      auto padding() const -> std::uint8_t;
 
       /**
        * @brief Sets the padding width.
@@ -103,7 +103,7 @@ namespace h2b
        * 
        * @retval std::uint8_t.
        */
-      auto paddingWidth() -> std::uint8_t;
+      auto paddingWidth() const -> std::uint8_t;
 
       /**
        * @brief Sets the address offset.
@@ -119,7 +119,7 @@ namespace h2b
        * 
        * @retval std::uint32_t.
        */
-      auto offset() -> std::uint32_t;
+      auto offset() const -> std::uint32_t;
 
       /**
        * @brief Sets the start linear.
@@ -135,7 +135,7 @@ namespace h2b
        * 
        * @retval std::uint32_t.
        */
-      auto linear() -> std::uint32_t;
+      auto linear() const -> std::uint32_t;
 
       /**
        * @brief Convert intel to binary.

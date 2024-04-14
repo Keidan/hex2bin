@@ -80,7 +80,7 @@ auto IntelHex::width(std::string_view value, std::string& what) -> bool
  * 
  * @retval std::uint32_t.
  */
-auto IntelHex::width() -> std::uint32_t
+auto IntelHex::width() const -> std::uint32_t
 {
   return m_width;
 }
@@ -101,7 +101,7 @@ auto IntelHex::padding(std::string_view value, std::string& what) -> bool
     if(padding > 0xFF)
       what = "The padding value cannot exceed 255 (0xFF).";
     else
-      m_padding = padding;
+      m_padding = static_cast<std::uint8_t>(padding);
     ret = what.empty();
   }
   return ret;
@@ -112,7 +112,7 @@ auto IntelHex::padding(std::string_view value, std::string& what) -> bool
  * 
  * @retval std::uint8_t.
  */
-auto IntelHex::padding() -> std::uint8_t
+auto IntelHex::padding() const -> std::uint8_t
 {
   return m_padding;
 }
@@ -144,7 +144,7 @@ auto IntelHex::paddingWidth(std::string_view value, std::string& what) -> bool
  * 
  * @retval std::uint8_t.
  */
-auto IntelHex::paddingWidth() -> std::uint8_t
+auto IntelHex::paddingWidth() const -> std::uint8_t
 {
   return m_paddingWidth;
 }
@@ -166,7 +166,7 @@ auto IntelHex::offset(std::string_view value, std::string& what) -> bool
  * 
  * @retval std::uint32_t.
  */
-auto IntelHex::offset() -> std::uint32_t
+auto IntelHex::offset() const -> std::uint32_t
 {
   return m_addrOffset;
 }
@@ -189,7 +189,7 @@ auto IntelHex::linear(std::string_view value, std::string& what) -> bool
  * 
  * @retval std::uint32_t.
  */
-auto IntelHex::linear() -> std::uint32_t
+auto IntelHex::linear() const -> std::uint32_t
 {
   return m_startLinear;
 }
