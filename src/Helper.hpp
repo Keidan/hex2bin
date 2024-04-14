@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
-
+#include <cstddef>
 /* Public defines -----------------------------------------------------------*/
 
 /* Public class -------------------------------------------------------------*/
