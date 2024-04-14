@@ -349,7 +349,7 @@ auto IntelHex::convertLine(const Line& line) -> std::string
   std::stringstream ss;
   ss << ":";
   ss << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << line.data.size();
-  ss << std::uppercase << std::hex << std::setfill('0') << std::setw(4) << line.address;
+  ss << std::uppercase << std::hex << std::setfill('0') << std::setw(4) << address;
   ss << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << +static_cast<std::uint8_t>(line.type);
   for(const auto& dd : line.data)
     ss << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << +dd;

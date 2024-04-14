@@ -26,6 +26,7 @@
 /* Includes -----------------------------------------------------------------*/
 #include "Files.hpp"
 #include "config.h"
+#include <memory>
 #include <map>
 
 /* Public defines -----------------------------------------------------------*/
