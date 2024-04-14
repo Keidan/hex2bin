@@ -248,20 +248,10 @@ static auto handleIntelHex(const Context& context) -> int
 {
   using enum Direction;
   auto ret = EXIT_SUCCESS;
-  if(Intel2Bin == context.direction)
-  {
-    if(!g_intelHex->intel2bin())
-    {
-      ret = EXIT_FAILURE;
-    }
-  }
-  else if(Bin2Intel == context.direction)
-  {
-    if(!g_intelHex->bin2intel())
-    {
-      ret = EXIT_FAILURE;
-    }
-  }
+  if(Intel2Bin == context.direction && !g_intelHex->intel2bin())
+    ret = EXIT_FAILURE;
+  else if(Bin2Intel == context.direction && !g_intelHex->bin2intel())
+    ret = EXIT_FAILURE;
   return ret;
 }
 

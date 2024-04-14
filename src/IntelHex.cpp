@@ -30,6 +30,7 @@
 #include <limits>
 #include <cctype>
 #include <array>
+#include <format>
 /* Usings -------------------------------------------------------------------*/
 using namespace h2b;
 
@@ -43,7 +44,7 @@ static constexpr std::size_t MIN_LINE_SIZE = LL_LEN + AAAA_LEN + TT_LEN + CC_LEN
 static constexpr std::size_t BUFFER_SIZE = 4096;
 static constexpr std::uint32_t ADDR_LIMIT = (0xFFFFU + 1);
 
-template<typename T>
+template <typename T>
 static constexpr auto abs(T x)
 {
   return x < 0 ? -x : x;
@@ -133,7 +134,7 @@ auto IntelHex::paddingWidth(std::string_view value, std::string& what) -> bool
     if(padding > 0xFF)
       what = "The padding width value cannot exceed 255 (0xFF).";
     else
-      m_paddingWidth = padding;
+      m_paddingWidth = static_cast<std::uint8_t>(padding);
     ret = what.empty();
   }
   return ret;
@@ -226,31 +227,33 @@ auto IntelHex::intel2bin(bool summary) -> bool
   std::uint32_t writes = 0U;
   Line line{};
   m_startLinearFound = false;
-  while(m_files->getline(input))
+  auto leave = false;
+  while(!leave && m_files->getline(input))
   {
     number++;
     if(!parseLine(input, line, number))
-      break;
-    if(ExtendedLinear == line.type && !line.data.empty())
+      leave = true;
+    else
     {
-      m_currentAddress = processAddressOrSegment(line, m_prevAddress, false, 24, 16);
-    }
-    else if(ExtendedSegment == line.type && !line.data.empty())
-    {
-      m_currentAddress = processAddressOrSegment(line, m_prevAddress, true, 8);
-    }
-    else if(Data == line.type && !line.data.empty())
-    {
-      if(!processData(line, number, writes))
-        break;
-      m_currentAddress += line.length;
-    }
-    else if(StartLinear == line.type && !line.data.empty())
-      processStartLinear(line, number);
-    else if(EndOfFile == line.type)
-    {
-      processEndOfFile(summary, number, writes);
-      return true;
+      if(ExtendedLinear == line.type && !line.data.empty())
+      {
+        m_currentAddress = processAddressOrSegment(line, m_prevAddress, false, 24, 16);
+      }
+      else if(ExtendedSegment == line.type && !line.data.empty())
+      {
+        m_currentAddress = processAddressOrSegment(line, m_prevSegment, true, 8);
+      }
+      else if(Data == line.type && !line.data.empty())
+      {
+        leave = !processData(line, number, writes);
+      }
+      else if(StartLinear == line.type && !line.data.empty())
+        processStartLinear(line, number);
+      else if(EndOfFile == line.type)
+      {
+        processEndOfFile(summary, number, writes);
+        return true;
+      }
     }
   }
   return false;
@@ -347,12 +350,12 @@ auto IntelHex::convertLine(const Line& line) -> std::string
     address = 0U;
   std::stringstream ss;
   ss << ":";
-  ss << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << line.data.size();
-  ss << std::uppercase << std::hex << std::setfill('0') << std::setw(4) << address;
-  ss << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << +static_cast<std::uint8_t>(line.type);
+  ss << std::format("{0:02X}", line.data.size());
+  ss << std::format("{0:04X}", address);
+  ss << std::format("{0:02X}", +static_cast<std::uint8_t>(line.type));
   for(const auto& dd : line.data)
-    ss << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << +dd;
-  ss << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << +line.checksum;
+    ss << std::format("{0:02X}", +dd);
+  ss << std::format("{0:02X}", +line.checksum);
   ss << "\n";
   return ss.str();
 }
@@ -365,7 +368,7 @@ auto IntelHex::convertLine(const Line& line) -> std::string
  */
 auto IntelHex::evalCRC(const Line& line) -> std::uint8_t
 {
-  std::uint8_t sum = line.length;
+  auto sum = line.length;
   sum += static_cast<std::uint8_t>(line.type) + (line.address & 0xFFU) + ((line.address >> 8) & 0xFFU);
   for(const auto& c : line.data)
     sum += c;
@@ -423,7 +426,7 @@ auto IntelHex::parseLineGetType(Line& line, std::uint32_t number, std::uint8_t t
  * @param[in] number Number of lines.
  * @param[in] writes Number of written data.
  */
-auto IntelHex::printSummaryH2B(std::uint32_t number, std::uint32_t writes) -> void
+auto IntelHex::printSummaryH2B(std::uint32_t number, std::uint32_t writes) const -> void
 {
   std::cout << "Intel HEX to binary." << std::endl;
   std::cout << std::dec << number << " lines parsed." << std::endl;
@@ -464,6 +467,7 @@ auto IntelHex::applyPadding(std::uint32_t length) -> void
 }
 
 /* H2B Process -----------------------------------------------------*/
+
 /**
  * @brief Write data (if present) to output file.
  * 
@@ -488,21 +492,26 @@ auto IntelHex::processData(const Line& line, std::uint32_t number, std::uint32_t
     else
     {
 #if 1
-      std::cerr << "Off-range address on line " << std::dec << number;
-      std::cerr << ", address: 0x" << std::hex << m_currentAddress;
-      std::cerr << ", offset: 0x" << std::hex << m_addrOffset << std::endl;
+      std::cerr << std::format("Off-range address on line {}", number);
+      std::cerr << std::format(", address: 0x{0:X}", m_currentAddress);
+      std::cerr << std::format(", offset: 0x{0:X}", m_addrOffset) << std::endl;
 #endif
+      m_currentAddress += line.length;
       /* next packet*/
       return true;
     }
   }
   else if(!m_addrOffset)
     m_addrOffset = m_currentAddress;
-  if(!m_files->output().write(reinterpret_cast<const char*>(line.data.data() + offset), length))
+
+  std::vector<char> v;
+  std::ranges::copy(line.data.begin(), line.data.end(), std::back_inserter(v));
+  if(!m_files->output().write(v.data() + offset, length))
   {
     std::cerr << "Unable to write line " << std::dec << number << " to output file." << std::endl;
     return false;
   }
+  m_currentAddress += line.length;
   writes += length;
   return true;
 }
@@ -605,23 +614,34 @@ auto IntelHex::fetchPadding() -> void
     auto reads = static_cast<std::uint32_t>(r);
     length -= reads;
     for(std::uint32_t i = 0; i < r; i++)
-    {
-      if(arr[i] == static_cast<char>(m_padding))
-      {
-        if(!pstart)
-          pstart = i;
-        plen++;
-      }
-      else
-      {
-        if(plen >= m_paddingWidth)
-          m_paddings[pstart] = plen;
-        pstart = 0U;
-        plen = 0U;
-      }
-    }
+      extactPaddingForFetch(arr[i], i, pstart, plen);
   }
   m_files->rewindIn();
+}
+
+/**
+ * @brief Extracts padding info.
+ * 
+ * @param[in] c The current char.
+ * @param[in] i The index.
+ * @param[out] pstart Padding start.
+ * @param[out] plen Padding length.
+ */
+auto IntelHex::extactPaddingForFetch(std::uint8_t c, std::uint32_t i, std::uint32_t& pstart, std::uint32_t& plen) -> void
+{
+  if(c == m_padding)
+  {
+    if(!pstart)
+      pstart = i;
+    plen++;
+  }
+  else
+  {
+    if(plen >= m_paddingWidth)
+      m_paddings[pstart] = plen;
+    pstart = 0U;
+    plen = 0U;
+  }
 }
 
 /* B2H Writes ------------------------------------------------------*/
@@ -699,7 +719,7 @@ auto IntelHex::writeDataWithPadding(std::uint32_t& writes) -> bool
   m_fullAddress = m_addrOffset;
 
   std::vector<std::uint32_t> keys;
-  
+
   for(const auto& [key, value] : m_paddings)
     keys.push_back(key);
   std::ranges::sort(keys);
@@ -715,29 +735,35 @@ auto IntelHex::writeDataWithPadding(std::uint32_t& writes) -> bool
     }
     else
     {
-      auto start = keys[next];
-      if(writes < start)
-      {
-        auto r = m_files->read(&arr[0], start);
-        if(!r)
-          return false;
-        writeDataSegments(&arr[0], writes, static_cast<std::uint32_t>(r), length);
-      }
-      else
-      {
-        next++;
-        auto plen = m_paddings[start];
-        m_files->advanceIn(plen);
-        length -= plen;
-        m_currentAddress += plen;
-        m_fullAddress += plen;
-        if(m_useSegment)
-          writeSegment(m_fullAddress);
-        else
-          writeAddress(m_fullAddress);
-        m_currentAddress = 0U;
-      }
+      if(!writeDataWithPaddingPartial(writes, length, next, &arr[0], keys[next]))
+        return false;
     }
+  }
+  return true;
+}
+
+auto IntelHex::writeDataWithPaddingPartial(std::uint32_t& writes, std::streamsize& length, std::uint32_t& next, char* data, std::uint32_t start) -> bool
+{
+  if(writes < start)
+  {
+    auto r = m_files->read(data, start);
+    if(!r)
+      return false;
+    writeDataSegments(data, writes, static_cast<std::uint32_t>(r), length);
+  }
+  else
+  {
+    next++;
+    auto plen = m_paddings[start];
+    m_files->advanceIn(plen);
+    length -= plen;
+    m_currentAddress += plen;
+    m_fullAddress += plen;
+    if(m_useSegment)
+      writeSegment(m_fullAddress);
+    else
+      writeAddress(m_fullAddress);
+    m_currentAddress = 0U;
   }
   return true;
 }

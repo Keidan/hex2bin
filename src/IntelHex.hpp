@@ -232,7 +232,7 @@ namespace h2b
        * @param[in] number Number of lines.
        * @param[in] length Number of written data.
        */
-      auto printSummaryH2B(std::uint32_t number, std::uint32_t length) -> void;
+      auto printSummaryH2B(std::uint32_t number, std::uint32_t length) const -> void;
 
       /**
        * @brief Extracting data from a string.
@@ -301,6 +301,16 @@ namespace h2b
        * @brief Fetches the various paddings found in the file.
        */
       auto fetchPadding() -> void;
+
+      /**
+       * @brief Extracts padding info.
+       * 
+       * @param[in] c The current char.
+       * @param[in] i The index.
+       * @param[out] pstart Padding start.
+       * @param[out] plen Padding length.
+       */
+      auto extactPaddingForFetch(std::uint8_t c, std::uint32_t i, std::uint32_t& pstart, std::uint32_t& plen) -> void;
       /* B2H Writes ------------------------------------------------------*/
       /**
        * @brief Writes the address.
@@ -331,6 +341,7 @@ namespace h2b
        * @retval false on error.
        */
       auto writeDataWithPadding(std::uint32_t& writes) -> bool;
+      auto writeDataWithPaddingPartial(std::uint32_t& writes, std::streamsize& length, std::uint32_t& next, char* data, std::uint32_t start) -> bool;
 
       /**
        * @brief Write data segments to output file.
