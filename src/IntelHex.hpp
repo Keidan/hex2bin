@@ -55,7 +55,7 @@ namespace h2b
           std::uint8_t checksum = 0;
       };
 
-      IntelHex(const std::unique_ptr<Files>& files);
+      explicit IntelHex(const std::unique_ptr<Files>& files);
 
       /**
        * @brief Sets the width (used for writing).
