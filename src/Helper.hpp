@@ -132,6 +132,22 @@ namespace h2b
         return static_cast<T>(t);
       }
 
+      /**
+       * @brief Converts an integer to a hexadecimal string.
+       * 
+       * @param[in] t integer.
+       * @retval std::string
+       */
+      template <typename T>
+      static auto int2hex(T t, char fill = '0', int width = 1) -> std::string
+      {
+        std::stringstream ss;
+        ss << std::hex << hex;
+        ss << std::setfill(fill);
+        ss << std::setw(width);
+        ss << t;
+        return ss.str();
+      }
     private:
       Helper() = default;
   };

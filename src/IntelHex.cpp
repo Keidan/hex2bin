@@ -350,12 +350,12 @@ auto IntelHex::convertLine(const Line& line) -> std::string
     address = 0U;
   std::stringstream ss;
   ss << ":";
-  ss << std::format("{0:02X}", line.data.size());
-  ss << std::format("{0:04X}", address);
-  ss << std::format("{0:02X}", +static_cast<std::uint8_t>(line.type));
+  ss << Helper::int2hex(line.data.size(), '0', 2);
+  ss << Helper::int2hex(address, '0', 4);
+  ss << Helper::int2hex(+static_cast<std::uint8_t>(line.type), '0', 2);
   for(const auto& dd : line.data)
-    ss << std::format("{0:02X}", +dd);
-  ss << std::format("{0:02X}", +line.checksum);
+    ss << Helper::int2hex(+dd, '0', 2);
+  ss << Helper::int2hex(+line.checksum, '0', 2);
   ss << "\n";
   return ss.str();
 }
@@ -492,9 +492,9 @@ auto IntelHex::processData(const Line& line, std::uint32_t number, std::uint32_t
     else
     {
 #if 1
-      std::cerr << std::format("Off-range address on line {}", number);
-      std::cerr << std::format(", address: 0x{0:X}", m_currentAddress);
-      std::cerr << std::format(", offset: 0x{0:X}", m_addrOffset) << std::endl;
+      std::cerr << "Off-range address on line " <<  number;
+      std::cerr << ", address: 0x" <<  Helper::int2hex(m_currentAddress);
+      std::cerr << ", offset: 0x" <<  Helper::int2hex(m_addrOffset) << std::endl;
 #endif
       m_currentAddress += line.length;
       /* next packet*/
