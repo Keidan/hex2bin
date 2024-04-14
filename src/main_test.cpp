@@ -291,15 +291,49 @@ TEST(IntelHexTest, PaddingWidth)
 
 TEST(IntelHexTest, ParseLine)
 {
-  auto input = ":1000000000200020C5020008B9020008BB02000859";
   Line line{};
-  auto b = IntelHex::parseLine(input, line);
+  auto b = IntelHex::parseLine(":1000000000200020C5020008B9020008BB02000859", line);
   EXPECT_EQ(1, b);
   EXPECT_EQ(1, line.length == 0x10);
   EXPECT_EQ(1, line.address == 0);
   EXPECT_EQ(1, line.type == RecordType::Data);
   EXPECT_EQ(1, line.data.size() == 16);
   EXPECT_EQ(1, line.checksum == 89);
+}
+
+TEST(IntelHexTest, ParseLineError1)
+{
+  Line line{};
+  auto b = IntelHex::parseLine(":10000000", line);
+  EXPECT_EQ(0, b);
+}
+
+TEST(IntelHexTest, ParseLineError2)
+{
+  Line line{};
+  auto b = IntelHex::parseLine("0000000000", line);
+  EXPECT_EQ(0, b);
+}
+
+TEST(IntelHexTest, ParseLineError3)
+{
+  Line line{};
+  auto b = IntelHex::parseLine(":0000000000", line);
+  EXPECT_EQ(0, b);
+}
+
+TEST(IntelHexTest, ParseLineError4)
+{
+  Line line{};
+  auto b = IntelHex::parseLine(":00000000F6", line);
+  EXPECT_EQ(0, b);
+}
+
+TEST(IntelHexTest, ParseLineError5)
+{
+  Line line{};
+  auto b = IntelHex::parseLine(":1000000000200020C5020008B9020008BB02000800", line);
+  EXPECT_EQ(0, b);
 }
 
 TEST(IntelHexTest, ConvertLine)
