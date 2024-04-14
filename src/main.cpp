@@ -335,7 +335,7 @@ static auto decodeIntelHex(std::string_view optionArg) -> Direction
 {
   if("h2b" != optionArg && "b2h" != optionArg)
   {
-    std::cerr << "Invalid ihex value: Only \"h2b\" or \"b2h\" values allowed" << std::endl;
+    std::cerr << R"(Invalid ihex value: Only "h2b" or "b2h" values allowed.)" << std::endl;
     usage(EXIT_FAILURE);
   }
   using enum Direction;
