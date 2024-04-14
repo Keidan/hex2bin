@@ -49,7 +49,7 @@ static constexpr auto abs(T x)
   return x < 0 ? -x : x;
 }
 
-IntelHex::IntelHex(const std::unique_ptr<Files>& files)
+IntelHex::IntelHex(Files* files)
   : m_files(files)
 {
 }
@@ -205,9 +205,9 @@ auto IntelHex::segment() -> void
 /**
  * @brief Gets the files pointer.
  * 
- * @retval const std::unique_ptr<Files>&
+ * @retval Files*
  */
-auto IntelHex::files() const -> const std::unique_ptr<Files>&
+auto IntelHex::files() const -> Files*
 {
   return m_files;
 }
@@ -577,7 +577,7 @@ auto IntelHex::processEndOfFile(bool summary, std::uint32_t number, std::uint32_
  * 
  * @param[in] length Number of written data.
  */
-auto IntelHex::printSummaryB2H(std::uint32_t length) -> void
+auto IntelHex::printSummaryB2H(std::uint32_t length) const -> void
 {
   std::cout << "Binary to Intel HEX." << std::endl;
   std::cout << "Address offset 0x" << std::hex << std::setfill('0') << std::setw(8) << m_addrOffset << "." << std::endl;
@@ -699,8 +699,9 @@ auto IntelHex::writeDataWithPadding(std::uint32_t& writes) -> bool
   m_fullAddress = m_addrOffset;
 
   std::vector<std::uint32_t> keys;
-  for(const auto& it : m_paddings)
-    keys.push_back(it.first);
+  
+  for(const auto& [key, value] : m_paddings)
+    keys.push_back(key);
   std::ranges::sort(keys);
   std::uint32_t next = 0;
   while(length > 0)

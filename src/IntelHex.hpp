@@ -26,7 +26,6 @@
 /* Includes -----------------------------------------------------------------*/
 #include "Files.hpp"
 #include "config.h"
-#include <memory>
 #include <map>
 
 /* Public defines -----------------------------------------------------------*/
@@ -55,7 +54,7 @@ namespace h2b
           std::uint8_t checksum = 0;
       };
 
-      explicit IntelHex(const std::unique_ptr<Files>& files);
+      explicit IntelHex(Files* files);
 
       /**
        * @brief Sets the width (used for writing).
@@ -156,9 +155,9 @@ namespace h2b
       /**
        * @brief Gets the files pointer.
        * 
-       * @retval const std::unique_ptr<Files>&
+       * @retval Files*
        */
-      auto files() const -> const std::unique_ptr<Files>&;
+      auto files() const -> Files*;
 
       /**
        * @brief Parses a line.
@@ -192,7 +191,7 @@ namespace h2b
       auto segment() -> void;
 
     private:
-      const std::unique_ptr<Files>& m_files;
+      Files* m_files;
       std::uint32_t m_addrOffset = 0U;
       std::uint32_t m_width = DEFAULT_WIDTH;
       std::uint32_t m_startLinear = 0U;
@@ -296,7 +295,7 @@ namespace h2b
        * 
        * @param[in] length Number of written data.
        */
-      auto printSummaryB2H(std::uint32_t length) -> void;
+      auto printSummaryB2H(std::uint32_t length) const -> void;
 
       /**
        * @brief Fetches the various paddings found in the file.

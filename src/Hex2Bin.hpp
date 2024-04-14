@@ -26,7 +26,7 @@ namespace h2b
   class Hex2Bin
   {
     public:
-      explicit Hex2Bin(const std::unique_ptr<Files>& files);
+      explicit Hex2Bin(Files* files);
 
       /**
        * @brief Sets the starting value.
@@ -97,10 +97,10 @@ namespace h2b
        * 
        * @retval const std::unique_ptr<Files>&
        */
-      auto files() const -> const std::unique_ptr<Files>&;
+      auto files() const -> Files*;
 
     private:
-      const std::unique_ptr<Files>& m_files;
+      Files* m_files;
       std::uint32_t m_start = DEFAULT_START;
       std::uint32_t m_limit = DEFAULT_LIMIT;
 
