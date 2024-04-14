@@ -702,7 +702,7 @@ auto IntelHex::writeDataWithPadding(std::uint32_t& writes) -> bool
   std::vector<std::uint32_t> keys;
   for(const auto& it : m_paddings)
     keys.push_back(it.first);
-  std::sort(keys.begin(), keys.end());
+  std::ranges::sort(keys);
   std::uint32_t next = 0;
   while(length > 0)
   {
