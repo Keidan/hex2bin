@@ -143,6 +143,7 @@ namespace h2b
       static auto int2hex(T t, char fill = '0', int width = 1) -> std::string
       {
         std::stringstream ss;
+        ss << std::uppercase;
         ss << std::hex;
         ss << std::setfill(fill);
         ss << std::setw(width);

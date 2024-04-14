@@ -101,13 +101,11 @@ TEST(Hex2BinTest, OpenOutput)
   EXPECT_EQ(1, oretInput == InputClosed);
 }
 
-TEST(Hex2BinTest, OpenFiles)
+static auto testOpenFiles(std::string_view fileIn, std::string_view fileOut) -> void
 {
   using enum Files::OpenResult;
   using enum Files::OpenStatus;
   Files files;
-  const auto fileIn = SAMPLE1;
-  const auto fileOut = SAMPLE_TEMP;
   const auto oretBoth = files.isFilesOpen();
   const auto retIn = files.openInput(fileIn);
   const auto oretOutput = files.isFilesOpen();
@@ -120,32 +118,32 @@ TEST(Hex2BinTest, OpenFiles)
   EXPECT_EQ(1, oretBoth == AllClosed);
   EXPECT_EQ(1, oretOutput == OutputClosed);
   EXPECT_EQ(1, oretSuccess == AllOpened);
+
+}
+
+TEST(Hex2BinTest, OpenFiles)
+{
+  testOpenFiles(SAMPLE1, SAMPLE_TEMP);
 }
 
 TEST(Hex2BinTest, Start)
 {
   Hex2Bin hex2bin{nullptr};
-  const auto svalue = "32";
-  const auto value = 32U;
   std::string what{};
-
-  EXPECT_EQ(1, hex2bin.start(svalue, what) == true);
+  EXPECT_EQ(1, hex2bin.start("32", what) == true);
   EXPECT_EQ(1, what.empty() == true);
   EXPECT_EQ(1, hex2bin.isStart() == true);
-  EXPECT_EQ(1, hex2bin.start() == value);
+  EXPECT_EQ(1, hex2bin.start() == 32U);
 }
 
 TEST(Hex2BinTest, Limit)
 {
   Hex2Bin hex2bin{nullptr};
-  const auto svalue = "16";
-  const auto value = 16U;
   std::string what{};
-
-  EXPECT_EQ(1, hex2bin.limit(svalue, what) == true);
+  EXPECT_EQ(1, hex2bin.limit("16", what) == true);
   EXPECT_EQ(1, what.empty() == true);
   EXPECT_EQ(1, hex2bin.isLimit() == true);
-  EXPECT_EQ(1, hex2bin.limit() == value);
+  EXPECT_EQ(1, hex2bin.limit() == 16U);
 }
 
 static auto testExtractNoPrintWithStart(Hex2Bin& hex2bin, std::string_view sstart, std::string_view fileIn, std::string_view fileOut) -> void
@@ -176,10 +174,8 @@ TEST(Hex2BinTest, ExtractNoPrintSample1)
   Files files{};
   Hex2Bin hex2bin{&files};
   std::string what{};
-
   EXPECT_EQ(1, hex2bin.limit("47", what) == true);
   EXPECT_EQ(1, what.empty() == true);
-
   testExtractNoPrintWithStart(hex2bin, "6", SAMPLE1, SAMPLE_TEMP);
 }
 
@@ -189,12 +185,11 @@ TEST(Hex2BinTest, ExtractNoPrintSample2)
   using enum Files::OpenStatus;
   Files files{};
   Hex2Bin hex2bin{&files};
-  const auto slimit = "47";
   const auto fileIn = SAMPLE2;
   const auto fileOut = SAMPLE_TEMP;
   std::string what{};
 
-  EXPECT_EQ(1, hex2bin.limit(slimit, what) == true);
+  EXPECT_EQ(1, hex2bin.limit("47", what) == true);
   EXPECT_EQ(1, what.empty() == true);
   EXPECT_EQ(1, hex2bin.isLimit() == true);
 
@@ -244,78 +239,52 @@ TEST(IntelHexTest, OpenOutput)
 
 TEST(IntelHexTest, OpenFiles)
 {
-  using enum Files::OpenResult;
-  using enum Files::OpenStatus;
-  Files files;
-  const auto fileIn = SAMPLE1;
-  const auto fileOut = SAMPLE_BIN_TEMP;
-  const auto oretBoth = files.isFilesOpen();
-  const auto retIn = files.openInput(fileIn);
-  const auto oretOutput = files.isFilesOpen();
-  const auto retOut = files.openOutput(fileOut);
-  const auto oretSuccess = files.isFilesOpen();
-  cleanup(files, fileOut);
-
-  EXPECT_EQ(1, retIn == Success);
-  EXPECT_EQ(1, retOut == Success);
-  EXPECT_EQ(1, oretBoth == AllClosed);
-  EXPECT_EQ(1, oretOutput == OutputClosed);
-  EXPECT_EQ(1, oretSuccess == AllOpened);
+  testOpenFiles(SAMPLE1, SAMPLE_BIN_TEMP);
 }
 
 TEST(IntelHexTest, AddressOffset)
 {
   IntelHex intelhex{nullptr};
-  const auto svalue = "0x8000000";
-  const auto value = 0x8000000;
   std::string what{};
-  EXPECT_EQ(1, intelhex.offset(svalue, what) == true);
+  EXPECT_EQ(1, intelhex.offset("0x8000000", what) == true);
   EXPECT_EQ(1, what.empty() == true);
-  EXPECT_EQ(1, intelhex.offset() == value);
+  EXPECT_EQ(1, intelhex.offset() == 0x8000000);
 }
 
 TEST(IntelHexTest, Width)
 {
   IntelHex intelhex{nullptr};
-  const auto svalue = "0x10";
-  const auto value = 0x10;
   std::string what{};
-  EXPECT_EQ(1, intelhex.width(svalue, what) == true);
+  EXPECT_EQ(1, intelhex.width("0x10", what) == true);
   EXPECT_EQ(1, what.empty() == true);
-  EXPECT_EQ(1, intelhex.width() == value);
+  EXPECT_EQ(1, intelhex.width() == 0x10);
 }
 
 TEST(IntelHexTest, Linear)
 {
   IntelHex intelhex{nullptr};
-  const auto svalue = "0x80002C5";
-  const auto value = 0x80002C5;
   std::string what{};
-  EXPECT_EQ(1, intelhex.linear(svalue, what) == true);
+  EXPECT_EQ(1, intelhex.linear("0x80002C5", what) == true);
   EXPECT_EQ(1, what.empty() == true);
-  EXPECT_EQ(1, intelhex.linear() == value);
+  EXPECT_EQ(1, intelhex.linear() == 0x80002C5);
 }
 
 TEST(IntelHexTest, Padding)
 {
   IntelHex intelhex{nullptr};
-  const auto svalue = "0x22";
-  const auto value = 0x22;
   std::string what{};
-  EXPECT_EQ(1, intelhex.padding(svalue, what) == true);
+  EXPECT_EQ(1, intelhex.padding("0x22", what) == true);
   EXPECT_EQ(1, what.empty() == true);
-  EXPECT_EQ(1, intelhex.padding() == value);
+  EXPECT_EQ(1, intelhex.padding() == 0x22);
 }
 
 TEST(IntelHexTest, PaddingWidth)
 {
   IntelHex intelhex{nullptr};
-  const auto svalue = "10";
-  const auto value = 10;
   std::string what{};
-  EXPECT_EQ(1, intelhex.paddingWidth(svalue, what) == true);
+  EXPECT_EQ(1, intelhex.paddingWidth("10", what) == true);
   EXPECT_EQ(1, what.empty() == true);
-  EXPECT_EQ(1, intelhex.paddingWidth() == value);
+  EXPECT_EQ(1, intelhex.paddingWidth() == 10);
 }
 
 TEST(IntelHexTest, ParseLine)
