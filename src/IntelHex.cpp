@@ -322,7 +322,6 @@ auto IntelHex::parseLine(std::string_view input, Line& line, std::uint32_t numbe
     extractDataFromString(input, line, offset);
   }
   line.checksum = Helper::hex2int<std::uint8_t>(input.substr(offset, CC_LEN));
-  offset += CC_LEN;
 
   /* Validate checksum. */
   auto sum = evalCRC(line);
