@@ -695,18 +695,18 @@ auto IntelHex::writeStartLinear() -> void
     line.type = RecordType::StartLinear;
     if(linear() > 0xFFFFU)
     {
-      line.data.emplace_back(((linear() & 0xFF000000U) >> 24));
-      line.data.emplace_back(((linear() & 0x00FF0000U) >> 16));
-      line.data.emplace_back(((linear() & 0x0000FF00U) >> 8));
-      line.data.emplace_back((linear() & 0x000000FFU));
+      line.data.emplace_back((linear() & 0xFF000000U) >> 24);
+      line.data.emplace_back((linear() & 0x00FF0000U) >> 16);
+      line.data.emplace_back((linear() & 0x0000FF00U) >> 8);
+      line.data.emplace_back(linear() & 0x000000FFU);
     }
     else if(linear() > 0xFFU)
     {
-      line.data.emplace_back(((linear() & 0x0000FF00U) >> 8));
-      line.data.emplace_back((linear() & 0x000000FFU));
+      line.data.emplace_back((linear() & 0x0000FF00U) >> 8);
+      line.data.emplace_back(linear() & 0x000000FFU);
     }
     else
-      line.data.emplace_back((linear() & 0x000000FFU));
+      line.data.emplace_back(linear() & 0x000000FFU);
     line.length = static_cast<std::uint8_t>(line.data.size());
     line.checksum = evalCRC(line);
     m_files->output() << convertLine(line);
