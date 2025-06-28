@@ -176,7 +176,7 @@ auto Hex2Bin::extractPrint() -> bool
   for(i = 0U; i < length; i += 2U)
   {
     std::string cc{static_cast<char>(buf[i]), static_cast<char>(buf[i + 1U]), 0};
-    m_files->output() << static_cast<char>(std::stol(cc.c_str(), nullptr, 16U));
+    m_files->output() << static_cast<char>(std::stol(cc, nullptr, 16U));
   }
   m_files->flush();
   return true;
