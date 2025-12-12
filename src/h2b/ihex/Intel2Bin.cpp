@@ -237,7 +237,7 @@ auto Intel2Bin::processData(const Line& line, std::uint32_t number, std::uint32_
     m_params.addressOffset() = m_currentAddress;
 
   std::vector<char> v;
-  std::ranges::copy(line.data.begin(), line.data.end(), std::back_inserter(v));
+  std::ranges::copy(line.data, std::back_inserter(v));
   if(!m_files->output().write(v.data() + offset, length))
   {
     std::cerr << "Unable to write line " << std::dec << number << " to output file." << std::endl;
