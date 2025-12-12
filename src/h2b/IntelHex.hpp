@@ -38,7 +38,7 @@ namespace h2b
   class IntelHex : public ihex::Parameters
   {
     public:
-      explicit IntelHex(const std::unique_ptr<utils::Files>& files);
+      explicit IntelHex(utils::Files* files);
 
       /**
        * @brief Convert intel to binary.
@@ -56,15 +56,8 @@ namespace h2b
        */
       auto bin2intel(bool summary = true) -> bool;
 
-      /**
-       * @brief Gets the files pointer.
-       * 
-       * @retval const std::unique_ptr<utils::Files>&
-       */
-      auto files() const -> const std::unique_ptr<utils::Files>&;
-
     private:
-      const std::unique_ptr<utils::Files>& m_files;
+      utils::Files* m_files;
       ihex::Bin2Intel m_bin2Intel;
       ihex::Intel2Bin m_intel2Bin;
   };

@@ -40,7 +40,7 @@ using h2b::utils::Helper;
 
 /* Public functions ---------------------------------------------------------*/
 
-Bin2Intel::Bin2Intel(const std::unique_ptr<utils::Files>& files, const Parameters& params)
+Bin2Intel::Bin2Intel(utils::Files* files, const Parameters& params)
   : m_files(files)
   , m_params(params)
 {

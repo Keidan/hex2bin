@@ -20,7 +20,7 @@ static constexpr auto* HEX = "0123456789abcdef\0";
 
 /* Public functions ---------------------------------------------------------*/
 
-Hex2Bin::Hex2Bin(const std::unique_ptr<utils::Files>& files)
+Hex2Bin::Hex2Bin(utils::Files* files)
   : m_files(files)
 {
 }
@@ -183,16 +183,6 @@ auto Hex2Bin::extractPrint() -> bool
   }
   m_files->flush();
   return true;
-}
-
-/**
- * @brief Gets the files pointer.
- * 
- * @retval const std::unique_ptr<utils::Files>&
- */
-auto Hex2Bin::files() const -> const std::unique_ptr<utils::Files>&
-{
-  return m_files;
 }
 
 /* Private functions --------------------------------------------------------*/

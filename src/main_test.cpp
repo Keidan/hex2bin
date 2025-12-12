@@ -149,7 +149,7 @@ TEST(Hex2BinTest, Limit)
   EXPECT_EQ(1, hex2bin.limit() == 16U);
 }
 
-static auto testExtractNoPrintWithStart(Hex2Bin& hex2bin, std::string_view sstart, std::string_view fileIn, std::string_view fileOut) -> void
+static auto testExtractNoPrintWithStart(Hex2Bin& hex2bin, Files& files, std::string_view sstart, std::string_view fileIn, std::string_view fileOut) -> void
 {
   using enum Files::OpenResult;
   using enum Files::OpenStatus;
@@ -159,12 +159,11 @@ static auto testExtractNoPrintWithStart(Hex2Bin& hex2bin, std::string_view sstar
   EXPECT_EQ(1, what.empty() == true);
   EXPECT_EQ(1, hex2bin.isStart() == true);
 
-  const auto& files = hex2bin.files();
-  const auto retIn = files->openInput(fileIn);
-  const auto retOut = files->openOutput(fileOut);
-  const auto oret = files->isFilesOpen();
+  const auto retIn = files.openInput(fileIn);
+  const auto retOut = files.openOutput(fileOut);
+  const auto oret = files.isFilesOpen();
   const auto eret = hex2bin.extractNoPrint();
-  cleanup(*files, fileOut);
+  cleanup(files, fileOut);
 
   EXPECT_EQ(1, retIn == Success);
   EXPECT_EQ(1, retOut == Success);
@@ -174,20 +173,20 @@ static auto testExtractNoPrintWithStart(Hex2Bin& hex2bin, std::string_view sstar
 
 TEST(Hex2BinTest, ExtractNoPrintSample1)
 {
-  auto files = std::make_unique<Files>();
-  Hex2Bin hex2bin{files};
+  Files files{};
+  Hex2Bin hex2bin{&files};
   std::string what{};
   EXPECT_EQ(1, hex2bin.limit("47", what) == true);
   EXPECT_EQ(1, what.empty() == true);
-  testExtractNoPrintWithStart(hex2bin, "6", SAMPLE1, SAMPLE_TEMP);
+  testExtractNoPrintWithStart(hex2bin, files, "6", SAMPLE1, SAMPLE_TEMP);
 }
 
 TEST(Hex2BinTest, ExtractNoPrintSample2)
 {
   using enum Files::OpenResult;
   using enum Files::OpenStatus;
-  auto files = std::make_unique<Files>();
-  Hex2Bin hex2bin{files};
+  Files files{};
+  Hex2Bin hex2bin{&files};
   const auto fileIn = SAMPLE2;
   const auto fileOut = SAMPLE_TEMP;
   std::string what{};
@@ -196,11 +195,11 @@ TEST(Hex2BinTest, ExtractNoPrintSample2)
   EXPECT_EQ(1, what.empty() == true);
   EXPECT_EQ(1, hex2bin.isLimit() == true);
 
-  const auto retIn = files->openInput(fileIn);
-  const auto retOut = files->openOutput(fileOut);
-  const auto oret = files->isFilesOpen();
+  const auto retIn = files.openInput(fileIn);
+  const auto retOut = files.openOutput(fileOut);
+  const auto oret = files.isFilesOpen();
   const auto eret = hex2bin.extractNoPrint();
-  cleanup(*files, fileOut);
+  cleanup(files, fileOut);
 
   EXPECT_EQ(1, retIn == Success);
   EXPECT_EQ(1, retOut == Success);
@@ -210,9 +209,9 @@ TEST(Hex2BinTest, ExtractNoPrintSample2)
 
 TEST(Hex2BinTest, ExtractNoPrintSample3)
 {
-  auto files = std::make_unique<Files>();
-  Hex2Bin hex2bin{files};
-  testExtractNoPrintWithStart(hex2bin, "1", SAMPLE3, SAMPLE_TEMP);
+  Files files{};
+  Hex2Bin hex2bin{&files};
+  testExtractNoPrintWithStart(hex2bin, files, "1", SAMPLE3, SAMPLE_TEMP);
 }
 
 /* -------- */
@@ -357,16 +356,15 @@ TEST(IntelHexTest, ConvertLine)
   EXPECT_EQ(1, convertEoF == ":00000001FF\n");
 }
 
-static auto testIntelToBin(IntelHex& intelhex, std::string_view fileIn, std::string_view fileOut) -> void
+static auto testIntelToBin(IntelHex& intelhex, Files& files, std::string_view fileIn, std::string_view fileOut) -> void
 {
   using enum Files::OpenResult;
   using enum Files::OpenStatus;
-  const auto& files = intelhex.files();
-  const auto retIn = files->openInput(fileIn);
-  const auto retOut = files->openOutput(fileOut);
-  const auto oret = files->isFilesOpen();
+  const auto retIn = files.openInput(fileIn);
+  const auto retOut = files.openOutput(fileOut);
+  const auto oret = files.isFilesOpen();
   auto eret = intelhex.intel2bin(false);
-  cleanup(*files, fileOut);
+  cleanup(files, fileOut);
   EXPECT_EQ(1, retIn == Success);
   EXPECT_EQ(1, retOut == Success);
   EXPECT_EQ(1, oret == AllOpened);
@@ -375,28 +373,27 @@ static auto testIntelToBin(IntelHex& intelhex, std::string_view fileIn, std::str
 
 TEST(IntelHexTest, IntelToBin1)
 {
-  auto files = std::make_unique<Files>();
-  IntelHex intelhex{files};
-  testIntelToBin(intelhex, SAMPLE1_HEX, SAMPLE_BIN_TEMP);
+  Files files{};
+  IntelHex intelhex{&files};
+  testIntelToBin(intelhex, files, SAMPLE1_HEX, SAMPLE_BIN_TEMP);
 }
 
 TEST(IntelHexTest, IntelToBin2)
 {
-  auto files = std::make_unique<Files>();
-  IntelHex intelhex{files};
-  testIntelToBin(intelhex, SAMPLE2_HEX, SAMPLE_BIN_TEMP);
+  Files files{};
+  IntelHex intelhex{&files};
+  testIntelToBin(intelhex, files, SAMPLE2_HEX, SAMPLE_BIN_TEMP);
 }
 
-static auto testBinToIntel(IntelHex& intelhex, std::string_view fileIn, std::string_view fileOut) -> void
+static auto testBinToIntel(IntelHex& intelhex, Files& files, std::string_view fileIn, std::string_view fileOut) -> void
 {
   using enum Files::OpenResult;
   using enum Files::OpenStatus;
-  const auto& files = intelhex.files();
-  const auto retIn = files->openInput(fileIn);
-  const auto retOut = files->openOutput(fileOut);
-  const auto oret = files->isFilesOpen();
+  const auto retIn = files.openInput(fileIn);
+  const auto retOut = files.openOutput(fileOut);
+  const auto oret = files.isFilesOpen();
   auto eret = intelhex.bin2intel(false);
-  cleanup(*files, fileOut);
+  cleanup(files, fileOut);
   EXPECT_EQ(1, retIn == Success);
   EXPECT_EQ(1, retOut == Success);
   EXPECT_EQ(1, oret == AllOpened);
@@ -405,14 +402,14 @@ static auto testBinToIntel(IntelHex& intelhex, std::string_view fileIn, std::str
 
 TEST(IntelHexTest, BinToIntel1)
 {
-  auto files = std::make_unique<Files>();
-  IntelHex intelhex{files};
-  testBinToIntel(intelhex, SAMPLE1_BIN, SAMPLE_HEX_TEMP);
+  Files files{};
+  IntelHex intelhex{&files};
+  testBinToIntel(intelhex, files, SAMPLE1_BIN, SAMPLE_HEX_TEMP);
 }
 TEST(IntelHexTest, BinToIntel2)
 {
-  auto files = std::make_unique<Files>();
-  IntelHex intelhex{files};
+  Files files{};
+  IntelHex intelhex{&files};
   std::string what{};
   intelhex.offset("0x08000000", what);
   EXPECT_EQ(1, what.empty() == true);
@@ -420,7 +417,7 @@ TEST(IntelHexTest, BinToIntel2)
   EXPECT_EQ(1, what.empty() == true);
   intelhex.paddingWidth("0x20", what);
   EXPECT_EQ(1, what.empty() == true);
-  testBinToIntel(intelhex, SAMPLE2_BIN, SAMPLE_HEX_TEMP);
+  testBinToIntel(intelhex, files, SAMPLE2_BIN, SAMPLE_HEX_TEMP);
 }
 
 /* Public function ----------------------------------------------------------*/

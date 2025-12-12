@@ -26,7 +26,7 @@ namespace h2b
   class Hex2Bin
   {
     public:
-      explicit Hex2Bin(const std::unique_ptr<utils::Files>& files);
+      explicit Hex2Bin(utils::Files* files);
       virtual ~Hex2Bin() = default;
 
       /**
@@ -93,15 +93,8 @@ namespace h2b
        */
       auto extractPrint() -> bool;
 
-      /**
-       * @brief Gets the files pointer.
-       * 
-       * @retval const std::unique_ptr<Files>&
-       */
-      auto files() const -> const std::unique_ptr<utils::Files>&;
-
     private:
-      const std::unique_ptr<utils::Files>& m_files;
+      utils::Files* m_files;
       std::uint32_t m_start = DEFAULT_START;
       std::uint32_t m_limit = DEFAULT_LIMIT;
 

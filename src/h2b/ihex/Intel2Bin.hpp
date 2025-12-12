@@ -36,7 +36,7 @@ namespace h2b::ihex
   class Intel2Bin
   {
     public:
-      explicit Intel2Bin(const std::unique_ptr<utils::Files>& files, Parameters& params);
+      explicit Intel2Bin(utils::Files* files, Parameters& params);
       virtual ~Intel2Bin() = default;
 
       /**
@@ -139,7 +139,7 @@ namespace h2b::ihex
       auto processEndOfFile(bool summary, std::uint32_t number, std::uint32_t length) -> void;
 
     private:
-      const std::unique_ptr<utils::Files>& m_files;
+      utils::Files* m_files;
       Parameters& m_params;
       std::uint8_t m_startLinearSize = 0U;
       std::uint32_t m_currentAddress = 0U;

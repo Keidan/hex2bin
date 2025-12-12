@@ -37,7 +37,7 @@ namespace h2b::ihex
   class Bin2Intel
   {
     public:
-      explicit Bin2Intel(const std::unique_ptr<utils::Files>& m_files, const Parameters& params);
+      explicit Bin2Intel(utils::Files* m_files, const Parameters& params);
       virtual ~Bin2Intel() = default;
 
       /**
@@ -136,7 +136,7 @@ namespace h2b::ihex
       auto paddings() const -> const std::map<std::uint32_t, std::uint32_t>&;
 
     private:
-      const std::unique_ptr<utils::Files>& m_files;
+      utils::Files* m_files;
       const Parameters& m_params;
       std::uint32_t m_currentAddress = 0U;
       std::uint32_t m_fullAddress = 0U;

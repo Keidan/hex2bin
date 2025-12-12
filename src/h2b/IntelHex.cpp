@@ -41,21 +41,11 @@ using ihex::RecordType;
 /* Constants ----------------------------------------------------------------*/
 
 /* Public functions ---------------------------------------------------------*/
-IntelHex::IntelHex(const std::unique_ptr<Files>& files)
+IntelHex::IntelHex(Files* files)
   : m_files(files)
   , m_bin2Intel(files, *this)
   , m_intel2Bin(files, *this)
 {
-}
-
-/**
- * @brief Gets the files pointer.
- * 
- * @retval const std::unique_ptr<utils::Files>&
- */
-auto IntelHex::files() const -> const std::unique_ptr<Files>&
-{
-  return m_files;
 }
 
 /**

@@ -46,7 +46,7 @@ static constexpr auto abs(T x)
 
 /* Public functions ---------------------------------------------------------*/
 
-Intel2Bin::Intel2Bin(const std::unique_ptr<utils::Files>& files, Parameters& params)
+Intel2Bin::Intel2Bin(utils::Files* files, Parameters& params)
   : m_files(files)
   , m_params(params)
 {

@@ -75,9 +75,9 @@ static const std::vector<struct option> g_longOptions = {
   {"padding_width", 1, nullptr, '6'},
   {        nullptr, 0, nullptr,   0},
 };
-static const std::unique_ptr<h2b::utils::Files> g_files = std::make_unique<h2b::utils::Files>();
-static const std::unique_ptr<h2b::Hex2Bin> g_hex2bin = std::make_unique<h2b::Hex2Bin>(g_files);
-static const std::unique_ptr<h2b::IntelHex> g_intelHex = std::make_unique<h2b::IntelHex>(g_files);
+static h2b::utils::Files g_files{};
+static const std::unique_ptr<h2b::Hex2Bin> g_hex2bin = std::make_unique<h2b::Hex2Bin>(&g_files);
+static const std::unique_ptr<h2b::IntelHex> g_intelHex = std::make_unique<h2b::IntelHex>(&g_files);
 
 /* Static forward -----------------------------------------------------------*/
 static auto usage(int32_t xcode) -> void;
@@ -132,7 +132,7 @@ static NO_RETURN void signalHook(const int s)
  */
 static auto shutdownHook() -> void
 {
-  g_files->close();
+  g_files.close();
 }
 /**
  * @brief usage function.
@@ -262,7 +262,7 @@ static auto handleIntelHex(const Context& context) -> int
 static auto validateFiles() -> void
 {
   using enum Files::OpenStatus;
-  if(const auto isOpen = g_files->isFilesOpen(); AllOpened != isOpen)
+  if(const auto isOpen = g_files.isFilesOpen(); AllOpened != isOpen)
   {
     if(AllClosed == isOpen)
     {
@@ -290,7 +290,7 @@ static auto validateFiles() -> void
 static auto decodeArgInputOrOutput(std::string_view optionArg, const bool isInput) -> void
 {
   using enum Files::OpenResult;
-  const auto openResult = isInput ? g_files->openInput(optionArg) : g_files->openOutput(optionArg);
+  const auto openResult = isInput ? g_files.openInput(optionArg) : g_files.openOutput(optionArg);
 
   if(Error == openResult)
   {
