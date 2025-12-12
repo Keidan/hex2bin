@@ -19,6 +19,8 @@ string(REGEX MATCH "VERSION_MAJOR ([0-9]*)" _ ${ver})
 set(VERSION_MAJOR ${CMAKE_MATCH_1})
 string(REGEX MATCH "VERSION_MINOR ([0-9]*)" _ ${ver})
 set(VERSION_MINOR ${CMAKE_MATCH_1})
+string(REGEX MATCH "VERSION_RELEASE ([0-9]*)" _ ${ver})
+set(VERSION_RELEASE ${CMAKE_MATCH_1})
 
 # export options
 #set(DISTRIBUTION "" CACHE STRING "Distribution type (release or debug)")
@@ -64,7 +66,7 @@ if(DEFWIDTH GREATER 255)
 endif()
 
 # Information
-message(STATUS "-- Version: ${VERSION_MAJOR}.${VERSION_MINOR}")
+message(STATUS "-- Version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_RELEASE}")
 message(STATUS "-- Distrib.: ${DISTRIBUTION}")
 message(STATUS "-- Default start value: ${DEFSTART}")
 message(STATUS "-- Default limit value: ${DEFLIMIT}")

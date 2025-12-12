@@ -32,18 +32,23 @@ def main() -> int:
     
   major = ""
   minor = ""
-  result = re.search(r"VERSION_MAJOR ([\d]*)\nVERSION_MINOR ([\d]*)", read_file(version))
+  release = ""
+  result = re.search(r"VERSION_MAJOR ([\d]*)\nVERSION_MINOR ([\d]*)\nVERSION_RELEASE ([\d]*)", read_file(version))
   major = result.group(1)
   minor = result.group(2)
+  release = result.group(3)
   if len(major) == 0:
     print("Major version number not found")
     return 1
   if len(minor) == 0:
     print("Minor version number not found")
     return 1
-  vers = major + "." + minor
+  if len(release) == 0:
+    print("Release version number not found")
+    return 1
+  vers = major + "." + minor + "." + release
   content = read_file(sonar_project)
-  result = re.search(r"([\s\S]+sonar\.projectVersion=)[\d]*\.[\d]*([\s\S]+)", content)
+  result = re.search(r"([\s\S]+sonar\.projectVersion=)\d+(?:\.\d+){0,2}([\s\S]+)", content)
   new_content = result.group(1) + vers + result.group(2)
 
   if new_content != content:
