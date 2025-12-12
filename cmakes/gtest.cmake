@@ -1,36 +1,39 @@
 if(DEFINED IS_DEBUG AND IS_DEBUG EQUAL 1)
-  # Download and unpack googletest at configure time
-  configure_file(${PROJECT_SOURCE_DIR}/cmakes/CMakeLists.txt.in ${PROJECT_SOURCE_DIR}/googletest/download/CMakeLists.txt)
-  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-    RESULT_VARIABLE result
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/googletest/download )
-  if(result)
-    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+
+  include(FetchContent)
+  # Download and prepare googletest
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG main
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/googletest
+  )
+  # Download and configure Googletest
+  FetchContent_GetProperties(googletest)
+  if(NOT googletest_POPULATED)
+      FetchContent_Populate(googletest)
   endif()
-  execute_process(COMMAND ${CMAKE_COMMAND} --build .
-    RESULT_VARIABLE result
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/googletest/download )
-  if(result)
-    message(FATAL_ERROR "Build step for googletest failed: ${result}")
-  endif()
 
-  # Prevent overriding the parent project's compiler/linker
-  # settings on Windows
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-  # Add googletest directly to our build. This defines
-  # the gtest and gtest_main targets.
-  add_subdirectory(${PROJECT_SOURCE_DIR}/googletest/src
-                   ${PROJECT_SOURCE_DIR}/googletest/build
-                   EXCLUDE_FROM_ALL)
-
-  set(bin_src ${common_src} ${main_test_src})
-  set(gtest ${H2B_PROJECT_NAME}_gtest)
-  add_executable(${gtest} ${bin_src})
-  # Now simply link against gtest or gtest_main as needed. Eg
-  target_link_libraries(${gtest} gtest_main)
+  # Add GoogleTest to the build
+  add_subdirectory(
+    ${PROJECT_SOURCE_DIR}/googletest
+    ${CMAKE_BINARY_DIR}/googletest
+    EXCLUDE_FROM_ALL
+  )
   if(MSVC)
-    set_target_properties(${gtest} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${H2B_OUTPUT_BINARY_DIR} )
-  endif(MSVC)
-  add_test(NAME ${H2B_PROJECT_NAME}_test COMMAND ${gtest})
+    # Force MSVC to use the same runtime as the parent project
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+  endif()
+
+  # Creates the test executable
+  set(bin_src ${common_src} ${main_test_src})
+  set(gtest_exe ${H2B_PROJECT_NAME}_gtest)
+  add_executable(${gtest_exe} ${bin_src})
+  target_link_libraries(${gtest_exe} gtest_main)
+
+  if(MSVC)
+    set_target_properties(${gtest_exe} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${H2B_OUTPUT_BINARY_DIR})
+  endif()
+
+  add_test(NAME ${H2B_PROJECT_NAME}_test COMMAND ${gtest_exe})
 endif()

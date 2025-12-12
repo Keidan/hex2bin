@@ -263,6 +263,7 @@ class TU:
 
   def print_end(self):
     print(f'Total of tests \033[1m{self.res.get_count():02d}\033[0m')
+    print(f'- \033[32mPASSED\033[0m \033[1m{self.res.get_passed():2d}\033[0m')
     print(f'- \033[31mFAILED\033[0m \033[1m{self.res.get_failed():2d}\033[0m')
 
 def main() -> int:

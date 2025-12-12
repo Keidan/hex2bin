@@ -32,7 +32,7 @@ jobs:
             python --version
       - name: Configure for debug
         shell: bash
-        run: cmake -S . -B build -DDISTRIBUTION=debug -G "${{ env.CMAKE_GENERATOR }}"
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=debug -G "${{ env.CMAKE_GENERATOR }}"
       - name: Build debug
         shell: bash
         run: cmake --build build
@@ -46,7 +46,7 @@ jobs:
             python test.py --file bin/hex2bin.exe
       - name: Configure for release
         shell: bash
-        run: cmake -S . -B build -DDISTRIBUTION=release -G "${{ env.CMAKE_GENERATOR }}"
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=release -G "${{ env.CMAKE_GENERATOR }}"
       - name: Build release
         shell: bash
         run: cmake --build build

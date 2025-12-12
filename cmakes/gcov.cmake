@@ -1,5 +1,5 @@
 
-if(DEFINED IS_DEBUG AND IS_DEBUG EQUAL 1 AND NOT DEFINED WIN32)
+if(DEFINED IS_DEBUG AND IS_DEBUG EQUAL 1 AND NOT DEFINED MSVC)
   set(OBJECT_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/${CMAKE_PROJECT_NAME}.dir)
   # Create the gcov target. Run coverage tests with 'make gcov'
   add_custom_target(gcov
@@ -7,10 +7,11 @@ if(DEFINED IS_DEBUG AND IS_DEBUG EQUAL 1 AND NOT DEFINED WIN32)
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   )
   add_custom_command(TARGET gcov
-    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/ihex/Parameters.cpp.gcno -o ${OBJECT_DIR}/src/ihex/
-    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/Files.cpp.gcno -o ${OBJECT_DIR}/src/
-    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/Hex2Bin.cpp.gcno -o ${OBJECT_DIR}/src/
-    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/IntelHex.cpp.gcno -o ${OBJECT_DIR}/src/
+    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/h2b/ihex/Bin2Intel.cpp.gcno -o ${OBJECT_DIR}/src/h2b/ihex/
+    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/h2b/ihex/Intel2Bin.cpp.gcno -o ${OBJECT_DIR}/src/h2b/ihex/
+    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/h2b/utils/Files.cpp.gcno -o ${OBJECT_DIR}/src/h2b/utils/
+    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/h2b/Hex2Bin.cpp.gcno -o ${OBJECT_DIR}/src/h2b/
+    COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/h2b/IntelHex.cpp.gcno -o ${OBJECT_DIR}/src/h2b/
     COMMAND gcov -b ${CMAKE_SOURCE_DIR}/src/main.cpp.gcno -o ${OBJECT_DIR}/src/
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/coverage
   )

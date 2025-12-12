@@ -7,9 +7,9 @@ message(STATUS "Default limit value: cmake -DDEFLIMIT=[int value] (see the '-l, 
 message(STATUS "Default width value: cmake -DDEFWIDTH=[int value] (see the '--width' option of the binary)")
 
 # Python for update_sonar_version.py
-find_package(Python COMPONENTS Interpreter)
+find_package(Python3 COMPONENTS Interpreter)
 
-if(NOT DEFINED Python_EXECUTABLE OR Python_EXECUTABLE STREQUAL "")
+if(NOT DEFINED Python3_EXECUTABLE OR Python3_EXECUTABLE STREQUAL "")
   message(FATAL_ERROR "Python interpreter not found!")
 endif()
 
@@ -21,8 +21,8 @@ string(REGEX MATCH "VERSION_MINOR ([0-9]*)" _ ${ver})
 set(VERSION_MINOR ${CMAKE_MATCH_1})
 
 # export options
-set(DISTRIBUTION "" CACHE STRING "Distribution type (release or debug)")
-set(CMAKE_BUILD_TYPE "" CACHE STRING "Distribution type (release or debug)")
+#set(DISTRIBUTION "" CACHE STRING "Distribution type (release or debug)")
+#set(CMAKE_BUILD_TYPE "" CACHE STRING "Distribution type (release or debug)")
 set(DEFSTART "0" CACHE STRING "Default start value (see the '-s, --start' option of the binary)")
 set(DEFLIMIT "0" CACHE STRING "Default limit value (see the '-l, --limit' option of the binary)")
 set(DEFWIDTH "16" CACHE STRING "Default width value (see the '--width' option of the binary)")
@@ -46,7 +46,7 @@ elseif (DISTRIBUTION STREQUAL "debug")
 endif()
 
 if(NOT DEFSTART MATCHES "^[0-9]+$")
-ccmessage(FATAL_ERROR "DEFSTART must be a valid integer: '${DEFSTART}'")
+ message(FATAL_ERROR "DEFSTART must be a valid integer: '${DEFSTART}'")
 endif()
 
 if(NOT DEFLIMIT MATCHES "^[0-9]+$")

@@ -9,12 +9,12 @@
 #include <cstdint>
 #include <fstream>
 #include <vector>
-#include "config.h"
+#include <config.h>
 
 /* Public defines -----------------------------------------------------------*/
 
 /* Public class -------------------------------------------------------------*/
-namespace h2b
+namespace h2b::utils
 {
   class Files
   {
@@ -35,6 +35,7 @@ namespace h2b
       };
 
       Files() = default;
+      virtual ~Files() = default;
 
       /**
        * @brief Opens the input file.
@@ -116,6 +117,7 @@ namespace h2b
        * @param[out] output Where to store read data.
        */
       auto getline(std::string& output) -> std::istream&;
+
     private:
       std::ofstream m_output{};
       std::ifstream m_input{};
@@ -132,4 +134,4 @@ namespace h2b
       template <class Stream>
       auto openFile(Stream& stream, std::string_view path, std::ios_base::openmode mode) const -> OpenResult;
   };
-} // namespace h2b
+} // namespace h2b::utils

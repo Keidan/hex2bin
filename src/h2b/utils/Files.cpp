@@ -4,8 +4,8 @@
  * @copyright GNU GENERAL PUBLIC LICENSE Version 3
  */
 /* Includes -----------------------------------------------------------------*/
-#include "Files.hpp"
-#include "Helper.hpp"
+#include <h2b/utils/Files.hpp>
+#include <h2b/utils/Helper.hpp>
 #include <iostream>
 #include <fstream>
 #include <limits>
@@ -13,7 +13,7 @@
 #include <string>
 
 /* Usings -------------------------------------------------------------------*/
-using namespace h2b;
+using namespace h2b::utils;
 /* Constants ----------------------------------------------------------------*/
 
 /* Public functions ---------------------------------------------------------*/

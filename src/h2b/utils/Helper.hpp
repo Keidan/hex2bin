@@ -18,7 +18,7 @@
 /* Public defines -----------------------------------------------------------*/
 
 /* Public class -------------------------------------------------------------*/
-namespace h2b
+namespace h2b::utils
 {
   class Helper
   {
@@ -55,9 +55,7 @@ namespace h2b
       {
         auto len = line.size();
         if(len < start)
-        {
           len = 0UL;
-        }
         const auto lim = (limit == 0 || limit > len) ? len : limit;
         return std::string(line.substr(std::min(start, static_cast<std::uint32_t>(len)), lim));
       }
@@ -176,4 +174,4 @@ namespace h2b
     private:
       Helper() = default;
   };
-} // namespace h2b
+} // namespace h2b::utils

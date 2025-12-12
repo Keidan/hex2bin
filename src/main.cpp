@@ -7,27 +7,27 @@
 #include <iostream>
 #include <cstring>
 #include <csignal>
-#ifndef WIN32
+#if !defined(WIN32) and !defined(WIN64)
 #  include <getopt.h>
 #else
 #  include <Windows.h>
-#  include "win32/getopt.h"
+#  include <win32/getopt.h>
 #endif
 #include <cerrno>
 #include <functional>
 #include <memory>
-#include "Hex2Bin.hpp"
-#include "IntelHex.hpp"
+#include <h2b/Hex2Bin.hpp>
+#include <h2b/IntelHex.hpp>
 
 /* Defines-------------------------------------------------------------------*/
-#ifndef WIN32
+#if !defined(WIN32) and !defined(WIN64)
 #  define NO_RETURN __attribute__((noreturn))
 #else
 #  define NO_RETURN
 #endif /* WIN32 */
 
 /* Usings--------------------------------------------------------------------*/
-using h2b::Files;
+using h2b::utils::Files;
 using h2b::IntelHex;
 
 /* Private structures--------------------------------------------------------*/
@@ -75,9 +75,9 @@ static const std::vector<struct option> g_longOptions = {
   {"padding_width", 1, nullptr, '6'},
   {        nullptr, 0, nullptr,   0},
 };
-static h2b::Files g_files{};
-static const std::unique_ptr<h2b::Hex2Bin> g_hex2bin = std::make_unique<h2b::Hex2Bin>(&g_files);
-static const std::unique_ptr<h2b::IntelHex> g_intelHex = std::make_unique<h2b::IntelHex>(&g_files);
+static const std::unique_ptr<h2b::utils::Files> g_files = std::make_unique<h2b::utils::Files>();
+static const std::unique_ptr<h2b::Hex2Bin> g_hex2bin = std::make_unique<h2b::Hex2Bin>(g_files);
+static const std::unique_ptr<h2b::IntelHex> g_intelHex = std::make_unique<h2b::IntelHex>(g_files);
 
 /* Static forward -----------------------------------------------------------*/
 static auto usage(int32_t xcode) -> void;
@@ -97,7 +97,7 @@ static auto handleArguments(int argc, char** argv, Context& context) -> void;
 auto main(int argc, char** argv) -> int
 {
   Context context{};
-#ifndef WIN32
+#if !defined(WIN32) and !defined(WIN64)
   struct sigaction sa;
 
   std::memset(&sa, 0, sizeof(struct sigaction));
@@ -132,7 +132,7 @@ static NO_RETURN void signalHook(const int s)
  */
 static auto shutdownHook() -> void
 {
-  g_files.close();
+  g_files->close();
 }
 /**
  * @brief usage function.
@@ -262,7 +262,7 @@ static auto handleIntelHex(const Context& context) -> int
 static auto validateFiles() -> void
 {
   using enum Files::OpenStatus;
-  if(const auto isOpen = g_files.isFilesOpen(); AllOpened != isOpen)
+  if(const auto isOpen = g_files->isFilesOpen(); AllOpened != isOpen)
   {
     if(AllClosed == isOpen)
     {
@@ -290,7 +290,7 @@ static auto validateFiles() -> void
 static auto decodeArgInputOrOutput(std::string_view optionArg, const bool isInput) -> void
 {
   using enum Files::OpenResult;
-  const auto openResult = isInput ? g_files.openInput(optionArg) : g_files.openOutput(optionArg);
+  const auto openResult = isInput ? g_files->openInput(optionArg) : g_files->openOutput(optionArg);
 
   if(Error == openResult)
   {

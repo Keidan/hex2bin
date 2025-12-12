@@ -4,10 +4,10 @@
  * @copyright GNU GENERAL PUBLIC LICENSE Version 3
  */
 /* Includes -----------------------------------------------------------------*/
-#include "Hex2Bin.hpp"
-#include "IntelHex.hpp"
-#include "Helper.hpp"
-#include "gtest/gtest.h"
+#include <h2b/Hex2Bin.hpp>
+#include <h2b/IntelHex.hpp>
+#include <h2b/utils/Helper.hpp>
+#include <gtest/gtest.h>
 #include <filesystem>
 
 /* Private defines ----------------------------------------------------------*/
@@ -24,8 +24,10 @@ static constexpr auto* SAMPLE_BIN_TEMP = "samples/sample.bin.temp";
 
 using h2b::Hex2Bin;
 using h2b::IntelHex;
-using h2b::Helper;
-using h2b::Files;
+using h2b::ihex::Intel2Bin;
+using h2b::ihex::Tools;
+using h2b::utils::Helper;
+using h2b::utils::Files;
 using h2b::ihex::Line;
 using h2b::ihex::RecordType;
 namespace fs = std::filesystem;
@@ -120,7 +122,6 @@ static auto testOpenFiles(std::string_view fileIn, std::string_view fileOut) -> 
   EXPECT_EQ(1, oretBoth == AllClosed);
   EXPECT_EQ(1, oretOutput == OutputClosed);
   EXPECT_EQ(1, oretSuccess == AllOpened);
-
 }
 
 TEST(Hex2BinTest, OpenFiles)
@@ -173,8 +174,8 @@ static auto testExtractNoPrintWithStart(Hex2Bin& hex2bin, std::string_view sstar
 
 TEST(Hex2BinTest, ExtractNoPrintSample1)
 {
-  Files files{};
-  Hex2Bin hex2bin{&files};
+  auto files = std::make_unique<Files>();
+  Hex2Bin hex2bin{files};
   std::string what{};
   EXPECT_EQ(1, hex2bin.limit("47", what) == true);
   EXPECT_EQ(1, what.empty() == true);
@@ -185,8 +186,8 @@ TEST(Hex2BinTest, ExtractNoPrintSample2)
 {
   using enum Files::OpenResult;
   using enum Files::OpenStatus;
-  Files files{};
-  Hex2Bin hex2bin{&files};
+  auto files = std::make_unique<Files>();
+  Hex2Bin hex2bin{files};
   const auto fileIn = SAMPLE2;
   const auto fileOut = SAMPLE_TEMP;
   std::string what{};
@@ -195,11 +196,11 @@ TEST(Hex2BinTest, ExtractNoPrintSample2)
   EXPECT_EQ(1, what.empty() == true);
   EXPECT_EQ(1, hex2bin.isLimit() == true);
 
-  const auto retIn = files.openInput(fileIn);
-  const auto retOut = files.openOutput(fileOut);
-  const auto oret = files.isFilesOpen();
+  const auto retIn = files->openInput(fileIn);
+  const auto retOut = files->openOutput(fileOut);
+  const auto oret = files->isFilesOpen();
   const auto eret = hex2bin.extractNoPrint();
-  cleanup(files, fileOut);
+  cleanup(*files, fileOut);
 
   EXPECT_EQ(1, retIn == Success);
   EXPECT_EQ(1, retOut == Success);
@@ -209,8 +210,8 @@ TEST(Hex2BinTest, ExtractNoPrintSample2)
 
 TEST(Hex2BinTest, ExtractNoPrintSample3)
 {
-  Files files{};
-  Hex2Bin hex2bin{&files};
+  auto files = std::make_unique<Files>();
+  Hex2Bin hex2bin{files};
   testExtractNoPrintWithStart(hex2bin, "1", SAMPLE3, SAMPLE_TEMP);
 }
 
@@ -292,7 +293,7 @@ TEST(IntelHexTest, PaddingWidth)
 TEST(IntelHexTest, ParseLine)
 {
   Line line{};
-  auto b = IntelHex::parseLine(":1000000000200020C5020008B9020008BB02000859", line);
+  auto b = Intel2Bin::parseLine(":1000000000200020C5020008B9020008BB02000859", line);
   EXPECT_EQ(1, b);
   EXPECT_EQ(1, line.length == 0x10);
   EXPECT_EQ(1, line.address == 0);
@@ -304,35 +305,35 @@ TEST(IntelHexTest, ParseLine)
 TEST(IntelHexTest, ParseLineErrorSmall)
 {
   Line line{};
-  auto b = IntelHex::parseLine(":10000000", line);
+  auto b = Intel2Bin::parseLine(":10000000", line);
   EXPECT_EQ(0, b);
 }
 
 TEST(IntelHexTest, ParseLineErrorNotBeginWith)
 {
   Line line{};
-  auto b = IntelHex::parseLine("0000000000", line);
+  auto b = Intel2Bin::parseLine("0000000000", line);
   EXPECT_EQ(0, b);
 }
 
 TEST(IntelHexTest, ParseLineErrorDataNotPresent)
 {
   Line line{};
-  auto b = IntelHex::parseLine(":0000000000", line);
+  auto b = Intel2Bin::parseLine(":0000000000", line);
   EXPECT_EQ(0, b);
 }
 
 TEST(IntelHexTest, ParseLineErrorInvalidChecksum)
 {
   Line line{};
-  auto b = IntelHex::parseLine(":1000000000200020C5020008B9020008BB02000800", line);
+  auto b = Intel2Bin::parseLine(":1000000000200020C5020008B9020008BB02000800", line);
   EXPECT_EQ(0, b);
 }
 
 TEST(IntelHexTest, ParseLineErrorInvalidCode)
 {
   Line line{};
-  auto b = IntelHex::parseLine(":100000FF00200020C5020008B9020008BB02000800", line);
+  auto b = Intel2Bin::parseLine(":100000FF00200020C5020008B9020008BB02000800", line);
   EXPECT_EQ(0, b);
 }
 
@@ -346,12 +347,12 @@ TEST(IntelHexTest, ConvertLine)
   line.data.emplace_back(0xF4);
   line.data.emplace_back(0x00);
   line.length = static_cast<std::uint8_t>(line.data.size());
-  line.checksum = IntelHex::evalCRC(line);
-  auto convertData = IntelHex::convertLine(line);
+  line.checksum = Tools::evalCRC(line);
+  auto convertData = Tools::convertLine(line);
   line = {};
   line.type = RecordType::EndOfFile;
-  line.checksum = IntelHex::evalCRC(line);
-  auto convertEoF = IntelHex::convertLine(line);
+  line.checksum = Tools::evalCRC(line);
+  auto convertEoF = Tools::convertLine(line);
   EXPECT_EQ(1, convertData == ":0403AC000024F40035\n");
   EXPECT_EQ(1, convertEoF == ":00000001FF\n");
 }
@@ -374,15 +375,15 @@ static auto testIntelToBin(IntelHex& intelhex, std::string_view fileIn, std::str
 
 TEST(IntelHexTest, IntelToBin1)
 {
-  Files files{};
-  IntelHex intelhex{&files};
+  auto files = std::make_unique<Files>();
+  IntelHex intelhex{files};
   testIntelToBin(intelhex, SAMPLE1_HEX, SAMPLE_BIN_TEMP);
 }
 
 TEST(IntelHexTest, IntelToBin2)
 {
-  Files files{};
-  IntelHex intelhex{&files};
+  auto files = std::make_unique<Files>();
+  IntelHex intelhex{files};
   testIntelToBin(intelhex, SAMPLE2_HEX, SAMPLE_BIN_TEMP);
 }
 
@@ -404,14 +405,14 @@ static auto testBinToIntel(IntelHex& intelhex, std::string_view fileIn, std::str
 
 TEST(IntelHexTest, BinToIntel1)
 {
-  Files files{};
-  IntelHex intelhex{&files};
+  auto files = std::make_unique<Files>();
+  IntelHex intelhex{files};
   testBinToIntel(intelhex, SAMPLE1_BIN, SAMPLE_HEX_TEMP);
 }
 TEST(IntelHexTest, BinToIntel2)
 {
-  Files files{};
-  IntelHex intelhex{&files};
+  auto files = std::make_unique<Files>();
+  IntelHex intelhex{files};
   std::string what{};
   intelhex.offset("0x08000000", what);
   EXPECT_EQ(1, what.empty() == true);

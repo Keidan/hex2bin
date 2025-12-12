@@ -4,20 +4,23 @@
  * @copyright GNU GENERAL PUBLIC LICENSE Version 3
  */
 /* Includes -----------------------------------------------------------------*/
-#include "Hex2Bin.hpp"
-#include "Helper.hpp"
+#include <h2b/Hex2Bin.hpp>
+#include <h2b/utils/Helper.hpp>
 #include <iostream>
 #include <cctype>
 
 /* Usings -------------------------------------------------------------------*/
 using namespace h2b;
 
+using utils::Files;
+using utils::Helper;
+
 /* Constants ----------------------------------------------------------------*/
 static constexpr auto* HEX = "0123456789abcdef\0";
 
 /* Public functions ---------------------------------------------------------*/
 
-Hex2Bin::Hex2Bin(Files* files)
+Hex2Bin::Hex2Bin(const std::unique_ptr<utils::Files>& files)
   : m_files(files)
 {
 }
@@ -185,9 +188,9 @@ auto Hex2Bin::extractPrint() -> bool
 /**
  * @brief Gets the files pointer.
  * 
- * @retval Files*
+ * @retval const std::unique_ptr<utils::Files>&
  */
-auto Hex2Bin::files() const -> Files*
+auto Hex2Bin::files() const -> const std::unique_ptr<utils::Files>&
 {
   return m_files;
 }

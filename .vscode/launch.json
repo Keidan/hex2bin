@@ -85,8 +85,7 @@
       "program": "${workspaceFolder}/test.py",
       "cwd": "${workspaceFolder}",
       "args": [
-        "--file", "bin/hex2bin",
-        "--extra"
+        "--file", "bin/hex2bin"
       ],
       "console": "integratedTerminal",
     },
